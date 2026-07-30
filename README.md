@@ -79,7 +79,8 @@ The output should display the installed Maven version.
 
 Install the following extension:
 
-Spring Boot Extension Pack
+- Spring Boot Extension Pack
+- Java Extension Pack
 
 This extension provides support for:
 
@@ -101,12 +102,12 @@ Example:
 src/main/resources/static/
 
 
-templates/
+view/
 - Used for HTML pages rendered using Thymeleaf.
 
 Example:
 
-src/main/resources/templates/
+src/main/resources/view/
 
 
 ## 6. Recommended Development Order
