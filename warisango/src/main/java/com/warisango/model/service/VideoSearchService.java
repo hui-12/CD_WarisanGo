@@ -1,4 +1,4 @@
-package com.warisango.service;
+package com.warisango.model.service;
 
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;

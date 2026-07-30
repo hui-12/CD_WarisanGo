@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-WarisangoApplication<warisango>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.warisango.WarisangoApplication",
+            "projectName": "warisango",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}
