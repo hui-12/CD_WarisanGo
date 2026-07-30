@@ -8,6 +8,6 @@ public class HomeController {
 
     @GetMapping("/")
     public String home() {
-        return "home";
+        return "admin/ai_discovery";
     }
 }
