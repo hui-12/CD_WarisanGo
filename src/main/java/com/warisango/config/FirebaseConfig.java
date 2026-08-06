@@ -31,7 +31,7 @@ public class FirebaseConfig {
             }
         } catch (IOException e) {
             // Throwing an exception forces Spring to stop and show you the exact error
-            throw new RuntimeException("Failed to initialize Firebase! Please verify your serviceAccountKey.json file.", e);
+            throw new RuntimeException("Failed to initialize Firebase! Please verify your firebase-service-account.json file.", e);
         }
     }
 }
