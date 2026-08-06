@@ -1,1 +1,169 @@
-<!-- TODO -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>WarisanGo — Rewards Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;scrollbar-width:none;}
+*::-webkit-scrollbar{display:none;}
+body{background:#FAF6EE;color:#2A2118;font-family:'Inter',Arial,sans-serif;font-size:14px;line-height:1.6;-webkit-font-smoothing:antialiased;}
+button{font-family:'Inter',Arial,sans-serif;cursor:pointer;}
+input,textarea,select{font-family:'Inter',Arial,sans-serif;}
+.batik-divider{height:2px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='4'%3E%3Cpath d='M12 0L24 2L12 4L0 2Z' fill='none' stroke='%23C4522A' stroke-width='0.6' opacity='0.35'/%3E%3Ccircle cx='12' cy='2' r='0.8' fill='%23C4522A' opacity='0.3'/%3E%3Ccircle cx='0' cy='2' r='0.5' fill='%23C4522A' opacity='0.2'/%3E%3Ccircle cx='24' cy='2' r='0.5' fill='%23C4522A' opacity='0.2'/%3E%3C/svg%3E");background-repeat:repeat-x;background-position:center;border:none;}
+.batik-bg{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Cpath d='M12 2L22 12L12 22L2 12Z' fill='none' stroke='%23C4522A' stroke-width='0.6' opacity='0.15'/%3E%3Ccircle cx='12' cy='12' r='1' fill='%23C4522A' opacity='0.12'/%3E%3C/svg%3E");background-repeat:repeat;}
+nav{background:#2A2118;position:sticky;top:0;z-index:50;}
+.nav-inner{max-width:1100px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:60px;}
+.wordmark{display:flex;align-items:center;gap:10px;}
+.wordmark-text{font-family:'DM Serif Display',Georgia,serif;font-size:19px;color:#FAF6EE;letter-spacing:-0.01em;}
+.wordmark-badge{font-size:9px;font-family:'JetBrains Mono',monospace;color:#8A7D6E;border:1px solid #3A3028;border-radius:4px;padding:2px 6px;letter-spacing:0.08em;}
+.nav-links{display:flex;gap:4px;}
+.nav-btn{font-size:13px;padding:6px 14px;border-radius:8px;border:none;background:transparent;color:#D5CABF;transition:background 0.15s,color 0.15s;text-decoration:none;display:inline-block;}
+.nav-btn.active{background:#C4522A;color:#fff;font-weight:600;}
+.nav-btn.admin-btn{color:#D98A2E;}
+main{max-width:1100px;margin:0 auto;padding:48px 24px;}
+h1{font-family:'DM Serif Display',Georgia,serif;font-size:2.5rem;line-height:1.1;letter-spacing:-0.02em;margin-bottom:12px;}
+.muted{font-size:14px;color:#8A7D6E;}
+.mono{font-family:'JetBrains Mono',monospace;}
+.caption{font-size:11px;font-family:'JetBrains Mono',monospace;letter-spacing:0.06em;color:#8A7D6E;margin-bottom:4px;}
+.card{padding:20px;border:1px solid #D5CABF;border-radius:12px;background:#F3EDE0;}
+.btn-primary{padding:9px 20px;border-radius:10px;font-size:13px;font-weight:600;border:none;background:#C4522A;color:#fff;}
+.btn-secondary{padding:9px 20px;border-radius:10px;font-size:13px;font-weight:600;border:1px solid #D5CABF;background:transparent;color:#2A2118;}
+.btn-primary:hover{background:#A8421F;}
+.success-banner{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;background:#1E5C3A;color:#fff;border-radius:12px;margin-bottom:28px;font-size:13px;}
+.modal-overlay{position:fixed;inset:0;background:rgba(30,20,10,0.65);display:flex;align-items:center;justify-content:center;z-index:100;}
+.modal-box{background:#FAF6EE;padding:32px;border-radius:16px;max-width:400px;width:90%;}
+</style>
+</head>
+<body>
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <div class="wordmark">
+      <span style="font-size:20px">🍛</span>
+      <span class="wordmark-text">WarisanGo</span>
+      <span class="wordmark-badge">REWARDS</span>
+    </div>
+    <div class="nav-links">
+      <a class="nav-btn" href="checkin.html">Check In</a>
+      <a class="nav-btn" href="badges.html">Badges</a>
+      <a class="nav-btn active" href="rewards.html">Rewards</a>
+      <a class="nav-btn" href="challenges.html">Challenges</a>
+      <a class="nav-btn admin-btn" href="admin.html">Admin</a>
+    </div>
+  </div>
+  <div class="batik-divider" style="opacity:0.5"></div>
+</nav>
+
+<div id="page-rewards" class="page active">
+<main>
+  <h1>Farah Hani's Rewards Dashboard</h1>
+  <div class="batik-divider" style="margin:24px 0"></div>
+
+  <!-- Tier hero -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:32px">
+    <div class="batik-bg" style="padding:28px;background:#1E5C3A;border-radius:12px;color:#fff">
+      <div style="font-size:11px;font-family:'JetBrains Mono',monospace;letter-spacing:0.08em;color:rgba(255,255,255,0.5);margin-bottom:8px">CURRENT TIER</div>
+      <div style="font-family:'DM Serif Display',Georgia,serif;font-size:2.25rem;color:#C4762A;margin-bottom:4px">Bronze</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:24px;margin-bottom:20px">320 pts</div>
+      <div style="height:5px;background:rgba(255,255,255,0.12);border-radius:4px;margin-bottom:8px;overflow:hidden">
+        <div style="height:100%;width:64%;background:#C4762A;border-radius:4px"></div>
+      </div>
+      <div style="font-size:12px;color:rgba(255,255,255,0.6)">180 pts to <span style="color:#8A9BA8">Silver</span></div>
+    </div>
+    <div style="display:grid;grid-template-rows:1fr 1fr;gap:12px">
+      <div class="card"><div class="caption">LEADERBOARD RANK</div><div class="mono" style="font-size:28px;font-weight:700">#8</div><div style="font-size:12px;color:#8A7D6E">out of 10 active users</div></div>
+      <div class="card"><div class="caption">BADGES EARNED</div><div class="mono" style="font-size:28px;font-weight:700">2</div><div style="font-size:12px;color:#8A7D6E">of 8 available</div></div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div style="display:flex;border-bottom:1px solid #D5CABF;margin-bottom:24px">
+    <button class="rw-tab" onclick="showRwTab('overview',this)" style="padding:10px 20px;border:none;border-bottom:2px solid #C4522A;background:transparent;color:#C4522A;font-weight:700;font-size:13px;cursor:pointer;margin-bottom:-1px">Overview</button>
+    <button class="rw-tab" onclick="showRwTab('history',this)" style="padding:10px 20px;border:none;border-bottom:2px solid transparent;background:transparent;color:#8A7D6E;font-size:13px;cursor:pointer;margin-bottom:-1px">Points History</button>
+    <button class="rw-tab" onclick="showRwTab('leaderboard',this)" style="padding:10px 20px;border:none;border-bottom:2px solid transparent;background:transparent;color:#8A7D6E;font-size:13px;cursor:pointer;margin-bottom:-1px">Leaderboard</button>
+  </div>
+
+  <div id="rw-overview">
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">
+      <div class="card" style="border:2px solid #C4762A"><div class="caption">TIER</div><div style="font-size:18px;font-weight:700;color:#C4762A;margin-bottom:4px">Bronze</div><div style="font-size:12px;color:#8A7D6E;font-family:'JetBrains Mono',monospace">0–499 pts</div></div>
+      <div class="card" style="border:2px solid #8A9BA8"><div class="caption">TIER</div><div style="font-size:18px;font-weight:700;color:#8A9BA8;margin-bottom:4px">Silver</div><div style="font-size:12px;color:#8A7D6E;font-family:'JetBrains Mono',monospace">500–999 pts</div></div>
+      <div class="card" style="border:2px solid #D98A2E"><div class="caption">TIER</div><div style="font-size:18px;font-weight:700;color:#D98A2E;margin-bottom:4px">Gold</div><div style="font-size:12px;color:#8A7D6E;font-family:'JetBrains Mono',monospace">1,000–1,999 pts</div></div>
+      <div class="card" style="border:2px solid #5B7080"><div class="caption">TIER</div><div style="font-size:18px;font-weight:700;color:#5B7080;margin-bottom:4px">Platinum</div><div style="font-size:12px;color:#8A7D6E;font-family:'JetBrains Mono',monospace">2,000+ pts</div></div>
+    </div>
+  </div>
+
+  <div id="rw-history" style="display:none">
+    <div style="border:1px solid #D5CABF;border-radius:12px;overflow:hidden">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid #D5CABF;background:#FAF6EE"><div><div style="font-size:13px;font-weight:500;margin-bottom:2px">Check-in: Pak Ali's Nasi Lemak Corner</div><div style="font-size:11px;font-family:'JetBrains Mono',monospace;color:#8A7D6E">28 Jul 2026</div></div><div style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:#D98A2E">+50</div></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid #D5CABF;background:#F3EDE0"><div><div style="font-size:13px;font-weight:500;margin-bottom:2px">Challenge Bonus: Weekend Foodie Sprint</div><div style="font-size:11px;font-family:'JetBrains Mono',monospace;color:#8A7D6E">25 Jul 2026</div></div><div style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:#D98A2E">+150</div></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid #D5CABF;background:#FAF6EE"><div><div style="font-size:13px;font-weight:500;margin-bottom:2px">Check-in: Roti Canai Warisan</div><div style="font-size:11px;font-family:'JetBrains Mono',monospace;color:#8A7D6E">22 Jul 2026</div></div><div style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:#D98A2E">+35</div></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 20px;background:#F3EDE0"><div><div style="font-size:13px;font-weight:500;margin-bottom:2px">Check-in: Aunty Lim's Char Kway Teow</div><div style="font-size:11px;font-family:'JetBrains Mono',monospace;color:#8A7D6E">19 Jul 2026</div></div><div style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:#D98A2E">+40</div></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 20px;background:#FAF6EE"><div><div style="font-size:13px;font-weight:500;margin-bottom:2px">Badge Milestone: First Bite</div><div style="font-size:11px;font-family:'JetBrains Mono',monospace;color:#8A7D6E">14 Jul 2026</div></div><div style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:#D98A2E">+10</div></div>
+    </div>
+  </div>
+
+  <div id="rw-leaderboard" style="display:none">
+    <div style="border:1px solid #D5CABF;border-radius:12px;overflow:hidden">
+      <div style="display:grid;grid-template-columns:48px 1fr 120px 80px;padding:10px 20px;background:#2A2118;color:#fff;font-size:11px;font-family:'JetBrains Mono',monospace;letter-spacing:0.06em">
+        <span>#</span><span>TOURIST</span><span>TIER</span><span style="text-align:right">POINTS</span>
+      </div>
+      <div id="lb-rows"></div>
+    </div>
+  </div>
+</main>
+</div>
+<script>
+// ══════════════════════════════════════
+// PAGE 3: REWARDS PROFILE
+// ══════════════════════════════════════
+const LEADERBOARD = [
+  { rank:1,  name:'Ahmad Razif',      points:4820, tier:'Platinum' },
+  { rank:2,  name:'Mei Ling Tan',     points:3155, tier:'Platinum' },
+  { rank:3,  name:'Priya Nair',       points:2340, tier:'Platinum' },
+  { rank:4,  name:'Hafiz Ramli',      points:1880, tier:'Gold' },
+  { rank:5,  name:'Su-Ann Loh',       points:1440, tier:'Gold' },
+  { rank:6,  name:'Reza Ismail',      points:980,  tier:'Silver' },
+  { rank:7,  name:'Tan Wei Jie',      points:760,  tier:'Silver' },
+  { rank:8,  name:'You (Farah Hani)', points:320,  tier:'Bronze', isMe:true },
+  { rank:9,  name:'Kavitha Muru',     points:280,  tier:'Bronze' },
+  { rank:10, name:'Danial Azri',      points:115,  tier:'Bronze' },
+];
+const TC = { Bronze:'#C4762A', Silver:'#8A9BA8', Gold:'#D98A2E', Platinum:'#5B7080' };
+
+function renderLeaderboard() {
+  document.getElementById('lb-rows').innerHTML = LEADERBOARD.map((e, i) => `
+    <div style="display:grid;grid-template-columns:48px 1fr 120px 80px;padding:12px 20px;
+      border-bottom:${i < LEADERBOARD.length-1 ? '1px solid #D5CABF' : 'none'};
+      background:${e.isMe ? '#FEF8EC' : i % 2 === 0 ? '#FAF6EE' : '#F3EDE0'};align-items:center">
+      <span style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:${e.rank<=3?700:400};
+        color:${e.rank===1?'#D98A2E':e.rank===2?'#8A9BA8':e.rank===3?'#C4762A':'#8A7D6E'}">${e.rank}</span>
+      <span style="font-size:13px;font-weight:${e.isMe?700:400};display:flex;align-items:center;gap:8px">
+        ${e.name}${e.isMe ? '<span style="font-size:9px;font-family:\'JetBrains Mono\',monospace;letter-spacing:0.06em;color:#8A7D6E;border:1px solid #D5CABF;border-radius:4px;padding:1px 5px">YOU</span>' : ''}
+      </span>
+      <span style="font-size:12px;color:${TC[e.tier]};font-weight:700">${e.tier}</span>
+      <span style="text-align:right;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600">${e.points.toLocaleString()}</span>
+    </div>`).join('');
+}
+
+function showRwTab(tab, btn) {
+  ['overview','history','leaderboard'].forEach(t => {
+    document.getElementById('rw-' + t).style.display = 'none';
+  });
+  document.getElementById('rw-' + tab).style.display = 'block';
+  document.querySelectorAll('.rw-tab').forEach(b => {
+    b.style.borderBottom = '2px solid transparent';
+    b.style.color = '#8A7D6E';
+    b.style.fontWeight = '400';
+  });
+  btn.style.borderBottom = '2px solid #C4522A';
+  btn.style.color = '#C4522A';
+  btn.style.fontWeight = '700';
+}
+
+// ── Init ──────────────────────────────────────────────────────
+renderLeaderboard();
+</script>
+</body>
+</html>
