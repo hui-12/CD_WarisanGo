@@ -29,7 +29,7 @@ public class VideoSearchService {
                 + "/search"
                 + "?part=snippet"
                 + "&type=video"
-                + "&maxResults=10"
+                + "&maxResults=20"
                 + "&q=" + keyword.replace(" ", "%20")
                 + "&key=" + youtubeConfig.getApiKey();
 
