@@ -6,8 +6,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class HomeController {
 
-    @GetMapping("/")
+    // Serve the business directory as the application root page
+    @GetMapping({"/", "/business-directory"})
     public String home() {
-        return "admin/AIDiscoveryPage.html";
+        // Thymeleaf template located at src/main/resources/templates/view/business-directory.html
+        return "view/business-directory";
     }
 }
