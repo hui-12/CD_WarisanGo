@@ -186,7 +186,7 @@
 
         const actions = document.createElement('div'); actions.className='actions';
         const detailsBtn = document.createElement('button'); detailsBtn.className='btn'; detailsBtn.type='button'; detailsBtn.textContent='View Details';
-        detailsBtn.addEventListener('click', ()=>{ openDetails(b); });
+        detailsBtn.addEventListener('click', ()=>{ window.location.href = '/business/' + encodeURIComponent(b.id); });
         const galleryBtn = document.createElement('button'); galleryBtn.className='btn'; galleryBtn.type='button'; galleryBtn.textContent='View Gallery';
         galleryBtn.addEventListener('click', ()=>{ openGallery(b.photos || []); });
 
@@ -203,7 +203,8 @@
     }
 
     function openDetails(business){
-      alert(`${business.name}\n${business.address}\n\n${business.description}`);
+      // now navigate to details page instead of alert
+      window.location.href = '/business/' + encodeURIComponent(business.id);
     }
 
     function openGallery(photos){
