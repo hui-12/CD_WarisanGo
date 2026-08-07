@@ -57,7 +57,7 @@
     <section class="controls">
       <div class="search-wrap">
         <input id="searchInput" type="search" placeholder="Search by business name..." aria-label="Search business">
-        <button id="searchBtn">Search</button>
+        <button id="searchBtn" type="button">Search</button>
       </div>
 
       <div class="filters">
@@ -70,7 +70,7 @@
         <select id="cityFilter">
           <option value="">All Cities</option>
         </select>
-        <button id="clearFilters">Clear</button>
+        <button id="clearFilters" type="button">Clear</button>
       </div>
     </section>
 
@@ -88,12 +88,12 @@
 
   <!-- Gallery modal -->
   <div id="galleryModal" class="modal" hidden>
-    <div class="modal-content">
-      <button id="closeGallery" class="close">×</button>
+    <div class="modal-content" role="dialog" aria-modal="true" aria-label="Photo gallery">
+      <button id="closeGallery" class="close" type="button" aria-label="Close gallery">×</button>
       <div id="galleryBody" class="gallery-body"></div>
       <div class="gallery-controls">
-        <button id="prevPhoto">Prev</button>
-        <button id="nextPhoto">Next</button>
+        <button id="prevPhoto" type="button">Prev</button>
+        <button id="nextPhoto" type="button">Next</button>
       </div>
     </div>
   </div>
@@ -183,9 +183,9 @@
       const desc = document.createElement('p'); desc.textContent = b.description || '';
 
       const actions = document.createElement('div'); actions.className='actions';
-      const detailsBtn = document.createElement('button'); detailsBtn.className='btn'; detailsBtn.textContent='View Details';
+      const detailsBtn = document.createElement('button'); detailsBtn.className='btn'; detailsBtn.type='button'; detailsBtn.textContent='View Details';
       detailsBtn.addEventListener('click', ()=>{ openDetails(b); });
-      const galleryBtn = document.createElement('button'); galleryBtn.className='btn'; galleryBtn.textContent='View Gallery';
+      const galleryBtn = document.createElement('button'); galleryBtn.className='btn'; galleryBtn.type='button'; galleryBtn.textContent='View Gallery';
       galleryBtn.addEventListener('click', ()=>{ openGallery(b.photos || []); });
 
       actions.appendChild(detailsBtn); actions.appendChild(galleryBtn);
@@ -210,7 +210,13 @@
     currentPhotos = photos;
     currentPhotoIndex = 0;
     updateGallery();
-    galleryModal.hidden = false;
+    // show modal
+    if(galleryModal){
+      galleryModal.hidden = false;
+      // trap focus to modal (basic)
+      const focusable = galleryModal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+      if(focusable.length) focusable[0].focus();
+    }
   }
 
   function updateGallery(){
@@ -219,19 +225,42 @@
     galleryBody.appendChild(img);
   }
 
-  function closeModal(){ galleryModal.hidden = true; }
+  function closeModal(){
+    if(galleryModal){
+      galleryModal.hidden = true;
+      // return focus to search input
+      if(searchInput) searchInput.focus();
+    }
+  }
 
-  prevPhoto.addEventListener('click', ()=>{
+  // safe event binding: only add listeners if elements exist
+  if(prevPhoto) prevPhoto.addEventListener('click', ()=>{
     if(currentPhotos.length===0) return;
     currentPhotoIndex = (currentPhotoIndex - 1 + currentPhotos.length) % currentPhotos.length;
     updateGallery();
   });
-  nextPhoto.addEventListener('click', ()=>{
+  if(nextPhoto) nextPhoto.addEventListener('click', ()=>{
     if(currentPhotos.length===0) return;
     currentPhotoIndex = (currentPhotoIndex + 1) % currentPhotos.length;
     updateGallery();
   });
-  closeGallery.addEventListener('click', closeModal);
+  if(closeGallery) closeGallery.addEventListener('click', closeModal);
+
+  // Close when clicking outside modal-content (on the backdrop)
+  if(galleryModal){
+    galleryModal.addEventListener('click', (e)=>{
+      if(e.target === galleryModal){
+        closeModal();
+      }
+    });
+  }
+
+  // Close on Escape key
+  document.addEventListener('keydown', (e)=>{
+    if(e.key === 'Escape'){
+      if(galleryModal && !galleryModal.hidden) closeModal();
+    }
+  });
 
   // Filters and search
   function applyFilters(){
@@ -247,12 +276,12 @@
     renderCards(list);
   }
 
-  searchBtn.addEventListener('click', applyFilters);
-  searchInput.addEventListener('keyup', (e)=>{ if(e.key === 'Enter') applyFilters(); });
-  categoryFilter.addEventListener('change', applyFilters);
-  stateFilter.addEventListener('change', ()=>{ populateCityOptions(); applyFilters(); });
-  cityFilter.addEventListener('change', applyFilters);
-  clearBtn.addEventListener('click', ()=>{ categoryFilter.value=''; stateFilter.value=''; cityFilter.value=''; searchInput.value=''; populateCityOptions(); renderCards(businesses); });
+  if(searchBtn) searchBtn.addEventListener('click', applyFilters);
+  if(searchInput) searchInput.addEventListener('keyup', (e)=>{ if(e.key === 'Enter') applyFilters(); });
+  if(categoryFilter) categoryFilter.addEventListener('change', applyFilters);
+  if(stateFilter) stateFilter.addEventListener('change', ()=>{ populateCityOptions(); applyFilters(); });
+  if(cityFilter) cityFilter.addEventListener('change', applyFilters);
+  if(clearBtn) clearBtn.addEventListener('click', ()=>{ if(categoryFilter) categoryFilter.value=''; if(stateFilter) stateFilter.value=''; if(cityFilter) cityFilter.value=''; if(searchInput) searchInput.value=''; populateCityOptions(); renderCards(businesses); });
 
   function populateCityOptions(){
     const selectedState = stateFilter.value;
