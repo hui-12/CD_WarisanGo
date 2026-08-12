@@ -1,5 +1,6 @@
 package com.warisango.dto;
 
+// DTO class to hold video details
 public class VideoDTO {
 
     private String videoId;
