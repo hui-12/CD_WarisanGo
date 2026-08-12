@@ -549,14 +549,6 @@ Leaderboard sorted by total points.
 
 ---
 
-# Google Maps
-
-Only approved businesses appear.
-Current location is optional.
-Navigation opens Google Maps.
-
----
-
 # Google Sign-In
 
 Authentication uses Google OAuth.
@@ -576,60 +568,7 @@ One class should have one responsibility.
 
 # Documentation
 
-Every public class requires JavaDoc.
-Example
-/**
- * Handles business search operations.
- */
 Every complex method should include comments explaining the algorithm.
-
----
-
-# Git Standards
-
-Commit format
-feat:
-fix:
-
-refactor:
-
-docs:
-
-test:
-
-style:
-
-Example
-
-feat: implement AI extraction service
-
-fix: resolve Firebase authentication issue
-
-refactor: simplify reward calculation
-
----
-
-# Branch Strategy
-
-main
-
-Production-ready code.
-
-develop
-
-Integration branch.
-
-feature/module-name
-
-New feature.
-
-Example
-
-feature/ai-discovery
-
-feature/review-system
-
-feature/google-login
 
 ---
 
