@@ -1,17 +1,32 @@
 package com.warisango.dto;
 
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Carries review and rating data between the review pages and service layer.
+ */
 public class ReviewDTO {
 
     private String reviewId;
+
+    @NotBlank(message = "Business is required.")
     private String businessId;
+
     private String touristId;
+
+    @NotBlank(message = "Your name is required.")
     private String touristName;
 
+    @NotBlank(message = "Review text is required.")
     private String reviewText;
 
+    @Min(value = 1, message = "Please choose a rating.")
+    @Max(value = 5, message = "Rating cannot be more than 5.")
     private int rating;
 
     private List<String> photoUrls;
