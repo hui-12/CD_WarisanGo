@@ -25,6 +25,7 @@ public class VideoSearchService {
 
     public List<VideoDTO> searchVideos(String keyword) throws Exception {
 
+        // Build the YouTube API search URL
         String url = youtubeConfig.getBaseUrl()
                 + "/search"
                 + "?part=snippet"
@@ -41,6 +42,7 @@ public class VideoSearchService {
         return parseVideos(response);
     }
 
+    // Parse the JSON response and extract video details(no content)
     private List<VideoDTO> parseVideos(String json) throws Exception {
 
         List<VideoDTO> videos = new ArrayList<>();
