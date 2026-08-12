@@ -10,4 +10,9 @@ public class HomeController {
     public String home() {
         return "admin/AIDiscoveryPage.html";
     }
+
+    @GetMapping("/reviewandrating")
+    public String reviewAndRating() {
+        return "redirect:/reviews/BUS00";
+    }
 }

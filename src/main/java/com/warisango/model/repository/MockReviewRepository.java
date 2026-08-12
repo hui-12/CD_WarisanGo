@@ -5,8 +5,12 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Provides in-memory review data until Firestore review storage is connected.
+ */
 @Repository
 public class MockReviewRepository implements ReviewRepository {
 
@@ -14,30 +18,83 @@ public class MockReviewRepository implements ReviewRepository {
 
     public MockReviewRepository() {
 
-        List<String> photos = new ArrayList<>();
-        photos.add("/images/sample-review1.jpg");
-        photos.add("/images/sample-review2.jpg");
+        reviews.add(createReview(
+                "REV001",
+                "BUS00",
+                "USR001",
+                "Aina Rahman",
+                5,
+                "The laksa was rich and full of old Penang flavor. The owner explained the family recipe, "
+                        + "which made the visit feel personal.",
+                Arrays.asList(
+                        "https://images.unsplash.com/photo-1565299585323-38d6b0865b47?auto=format&fit=crop&w=600&q=80",
+                        "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&q=80"
+                ),
+                2
+        ));
+        reviews.add(createReview(
+                "REV002",
+                "BUS00",
+                "USR002",
+                "Daniel Tan",
+                4,
+                "Cozy place with friendly staff. The food was excellent, and the old shop interior gives a heritage "
+                        + "feeling.",
+                List.of("https://images.unsplash.com/photo-1551218808-94e220e084d2?auto=format&fit=crop&w=600&q=80"),
+                5
+        ));
+        reviews.add(createReview(
+                "REV003",
+                "BUS00",
+                "USR003",
+                "Nur Iman",
+                5,
+                "Worth bringing tourists here. The menu is simple, but every dish feels carefully prepared.",
+                new ArrayList<>(),
+                8
+        ));
+        reviews.add(createReview(
+                "REV004",
+                "BUS001",
+                "USR004",
+                "Dewi Anggraini",
+                5,
+                "An extraordinary experience. Doing batik with the artisan opened my eyes to cultural heritage.",
+                Arrays.asList(
+                        "https://images.unsplash.com/photo-1516550893923-42d28e5677af?auto=format&fit=crop&w=600&q=80",
+                        "https://images.unsplash.com/photo-1499696010180-025ef6e1a8f9?auto=format&fit=crop&w=600&q=80"
+                ),
+                3
+        ));
+    }
+
+    private ReviewDTO createReview(String reviewId,
+                                   String businessId,
+                                   String touristId,
+                                   String touristName,
+                                   int rating,
+                                   String reviewText,
+                                   List<String> photoUrls,
+                                   int daysAgo) {
 
         ReviewDTO review = new ReviewDTO();
 
-        review.setReviewId("REV001");
-        review.setBusinessId("BUS001");
-        review.setTouristId("USR001");
-        review.setTouristName("Dewi Anggraini");
-        review.setRating(5);
-        review.setReviewText(
-                "An extraordinary experience! Doing batik hands-on alongside the artisan truly opened my eyes to Indonesia's cultural heritage."
-        );
-        review.setPhotoUrls(photos);
-        review.setCreatedAt(LocalDate.now().minusDays(2).toString());
-        review.setUpdatedAt(LocalDate.now().minusDays(2).toString());
+        review.setReviewId(reviewId);
+        review.setBusinessId(businessId);
+        review.setTouristId(touristId);
+        review.setTouristName(touristName);
+        review.setRating(rating);
+        review.setReviewText(reviewText);
+        review.setPhotoUrls(photoUrls);
+        review.setCreatedAt(LocalDate.now().minusDays(daysAgo).toString());
+        review.setUpdatedAt(LocalDate.now().minusDays(daysAgo).toString());
 
-        reviews.add(review);
+        return review;
     }
 
     @Override
     public List<ReviewDTO> findAll() {
-        return reviews;
+        return new ArrayList<>(reviews);
     }
 
     @Override
