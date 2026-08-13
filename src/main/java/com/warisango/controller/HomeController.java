@@ -1,7 +1,7 @@
 package com.warisango.controller;
 
 import com.warisango.model.Business;
-import com.warisango.service.BusinessService;
+import com.warisango.model.service.BusinessService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;

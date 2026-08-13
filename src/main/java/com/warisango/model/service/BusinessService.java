@@ -1,4 +1,4 @@
-package com.warisango.service;
+package com.warisango.model.service;
 
 import com.warisango.model.Business;
 import org.springframework.stereotype.Service;
