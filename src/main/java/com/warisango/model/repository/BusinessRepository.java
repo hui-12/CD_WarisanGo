@@ -12,7 +12,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 
 @Repository
-public class HeritageBusinessRepository {
+public class BusinessRepository {
 
     private static final String COLLECTION_NAME = "HeritageBusinesses";
 

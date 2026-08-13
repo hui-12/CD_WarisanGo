@@ -1,11 +1,11 @@
-/* --- Expanded Main Layout --- */
+/* --- Interactive Map Page Layout --- */
 .main-layout {
     max-width: 1280px;
     margin: 0 auto;
     padding: 20px 32px;
 }
 
-/* --- Expanded Page Header --- */
+/* --- Page Header --- */
 .page-header {
     margin-bottom: 16px;
 }
@@ -32,7 +32,7 @@
     color: #6b6b68;
 }
 
-/* --- Expanded Filter Bar --- */
+/* --- Filter Bar --- */
 .filter-bar {
     display: flex;
     gap: 10px;
@@ -82,12 +82,12 @@
     outline: none;
 }
 
-/* --- Larger 2-Column Grid --- */
+/* --- Map Grid Container --- */
 .map-grid {
     display: grid;
     grid-template-columns: 1fr 320px;
     gap: 16px;
-    height: 580px; /* Increased height for a larger interactive space */
+    height: 580px;
 }
 
 .map-canvas-container {
@@ -163,7 +163,7 @@
     text-align: center;
 }
 
-/* --- Larger Sidebar --- */
+/* --- Map Sidebar --- */
 .map-sidebar {
     border: 1.5px solid #141413;
     border-radius: 12px;

@@ -1,12 +1,13 @@
-/* --- Homepage Logic --- */
-document.addEventListener("DOMContentLoaded", function () {
-    if (document.getElementById('visits-list-container')) {
+document.addEventListener('DOMContentLoaded', () => {
+    const container = document.getElementById('visits-list-container');
+    if (container) {
         renderVisits();
     }
 });
 
-async function renderVisits() {
+const renderVisits = async () => {
     const container = document.getElementById('visits-list-container');
+    if (!container) return;
     
     try {
         const response = await fetch('/api/visits/recent');
@@ -20,7 +21,7 @@ async function renderVisits() {
                 <img src="${v.image}" alt="${escapeHtml(v.businessName)}" class="visit-img">
                 <div>
                     <div class="visit-name">${escapeHtml(v.businessName)}</div>
-                    <div class="visit-date">${v.date}</div>
+                    <div class="visit-date">${escapeHtml(v.date)}</div>
                 </div>
                 <div class="points-tag">+${v.points}</div>
             `;
@@ -29,4 +30,4 @@ async function renderVisits() {
     } catch (error) {
         console.error('Error fetching database visits:', error);
     }
-}
+};

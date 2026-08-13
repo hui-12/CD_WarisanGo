@@ -1,24 +1,4 @@
-/* --- Global Reset & Fonts --- */
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    scrollbar-width: none;
-}
-
-*::-webkit-scrollbar {
-    display: none;
-}
-
-body {
-    background-color: #faf9f5;
-    color: #141413;
-    font-family: 'Inter', Arial, sans-serif;
-    font-size: 14px;
-    line-height: 1.5;
-}
-
-/* --- Navigation Header (Layout.tsx) --- */
+/* --- Navigation Header --- */
 .navbar {
     border-bottom: 1.5px solid #141413;
     background-color: #faf9f5;
@@ -146,6 +126,9 @@ body {
     color: #141413;
 }
 
-.hidden {
-    display: none !important;
+.footer-content {
+    text-align: center;
+    padding: 16px;
+    font-size: 11px;
+    color: #6b6b68;
 }

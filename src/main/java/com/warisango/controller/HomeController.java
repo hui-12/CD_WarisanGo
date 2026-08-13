@@ -1,21 +1,19 @@
 package com.warisango.controller;
 
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
 public class HomeController {
 
-    @GetMapping({"/", "/business-directory"})
+    @GetMapping({"/"})
     public String home() {
-        return "Homepage";
+        return "home";
     }
 
     // Route for the Map page template
     @GetMapping("/map")
-    public String mapPage(Model model) {
-        model.addAttribute("pageTitle", "WarisanGo - Interactive Map");
-        return "InteractiveMapPage";
+    public String mapPage() {
+        return "interactiveMap";
     }
 }

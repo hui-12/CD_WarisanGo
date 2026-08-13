@@ -1,3 +1,4 @@
+/* --- Main Dashboard Layout --- */
 .main-layout {
     max-width: 1280px;
     margin: 0 auto;
@@ -105,7 +106,7 @@
 
 .widget-label {
     font-size: 11px;
-    color: rgba(250, 249, 245, 0.5);
+    color: #B59410;
     text-transform: uppercase;
     letter-spacing: 0.8px;
     margin-bottom: 4px;
@@ -115,7 +116,7 @@
     font-family: 'Fraunces', Georgia, serif;
     font-size: 26px;
     font-weight: 700;
-    color: #c9a84c; /* Gold Tier */
+    color: #c9a84c;
     margin-bottom: 4px;
 }
 
@@ -153,7 +154,7 @@
     color: rgba(250, 249, 245, 0.4);
 }
 
-/* --- Main Dashboard Grid (1fr 340px) --- */
+/* --- Dashboard Grid --- */
 .dashboard-grid {
     display: grid;
     grid-template-columns: 1fr 340px;
@@ -161,7 +162,6 @@
     margin-bottom: 32px;
 }
 
-/* Cards with sharp 1.5px solid #141413 borders */
 .content-card {
     border: 1.5px solid #141413;
     border-radius: 12px;
@@ -236,14 +236,13 @@
     border-radius: 20px;
 }
 
-/* --- Right Column Sidebar --- */
+/* --- Sidebar Column --- */
 .sidebar-column {
     display: flex;
     flex-direction: column;
     gap: 16px;
 }
 
-/* Active Challenge Box */
 .challenge-widget {
     border: 1.5px solid #c9a84c;
     border-radius: 12px;
@@ -297,7 +296,6 @@
     font-weight: 500;
 }
 
-/* Quick Links Card */
 .card-header-sm {
     padding: 12px 16px;
     border-bottom: 1.5px solid #141413;

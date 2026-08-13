@@ -10,16 +10,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const markersMap = new Map();
     const listContainer = document.getElementById('locations-list');
+    const locationsCountEl = document.getElementById('locations-count');
 
     // 3. Render Markers & Sidebar Items dynamically
-    function renderLocations(items) {
+    const renderLocations = (items) => {
         markersMap.forEach(marker => map.removeLayer(marker));
         markersMap.clear();
         listContainer.innerHTML = '';
 
         if (!items || items.length === 0) {
-            listContainer.innerHTML = '<div style="padding: 16px; font-size: 12px; color: #6b6b68; text-align: center;">No approved heritage businesses found.</div>';
-            document.getElementById('locations-count').textContent = '0 locations';
+            listContainer.innerHTML = '<div class="empty-list-notice">No approved heritage businesses found.</div>';
+            if (locationsCountEl) locationsCountEl.textContent = '0 locations';
             return;
         }
 
@@ -28,11 +29,11 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const popupContent = `
                 <div class="custom-map-popup">
-                    <h4 class="popup-title">${loc.name}</h4>
-                    <p class="popup-meta">${loc.city || loc.state} · ★ ${ratingDisplay}</p>
+                    <h4 class="popup-title">${escapeHtml(loc.name)}</h4>
+                    <p class="popup-meta">${escapeHtml(loc.city || loc.state)} · ★ ${ratingDisplay}</p>
                     <div class="popup-actions">
-                        <button class="btn-popup-primary" onclick="alert('Viewing details for ${loc.name}')">View Details</button>
-                        <a href="https://maps.google.com/?q=${loc.latitude},${loc.longitude}" target="_blank" class="btn-popup-outlined">Google Maps</a>
+                        <button class="btn-popup-primary" onclick="alert('Viewing details for ${escapeHtml(loc.name)}')">View Details</button>
+                        <a href="https://maps.google.com/?q=${loc.latitude},${loc.longitude}" target="_blank" class="btn-popup-outlined" rel="noopener noreferrer">Google Maps</a>
                     </div>
                 </div>
             `;
@@ -45,8 +46,8 @@ document.addEventListener('DOMContentLoaded', () => {
             card.className = 'location-item-card';
             card.innerHTML = `
                 <div class="location-item-info">
-                    <div class="location-item-name">${loc.name}</div>
-                    <div class="location-item-meta">${loc.city || ''} · ${loc.description || loc.address || ''}</div>
+                    <div class="location-item-name">${escapeHtml(loc.name)}</div>
+                    <div class="location-item-meta">${escapeHtml(loc.city || '')} · ${escapeHtml(loc.description || loc.address || '')}</div>
                 </div>
                 <div class="location-item-rating">★ ${ratingDisplay}</div>
             `;
@@ -62,8 +63,10 @@ document.addEventListener('DOMContentLoaded', () => {
             listContainer.appendChild(card);
         });
 
-        document.getElementById('locations-count').textContent = `${items.length} locations`;
-    }
+        if (locationsCountEl) {
+            locationsCountEl.textContent = `${items.length} locations`;
+        }
+    };
 
     // 4. Connect to SSE Stream for Real-Time Database Updates
     const eventSource = new EventSource('/interactive-map/api/stream');

@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
-    <footer th:fragment="footer" class="site-footer">
-        <div class="footer-content" style="text-align: center; padding: 16px; font-size: 11px; color: #6b6b68;">
+    <footer th:fragment="global">
+        <div class="footer-content">
             <p>&copy; 2026 WarisanGo. All rights reserved.</p>
         </div>
 
         <!-- Global Scripts -->
         <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-        <script th:src="@{/js/app.js}"></script>
+        <script th:src="@{/js/global.js}"></script>
     </footer>
 </body>
 </html>

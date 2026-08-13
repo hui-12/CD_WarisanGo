@@ -1,14 +1,15 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 
-<!-- Include Head Fragment -->
-<head th:replace="~{fragments/_head :: head('WarisanGo - Interactive Map')}"></head>
-<link rel="stylesheet" th:href="@{/css/interactiveMap.css}">
+<!-- Include Head Metadata Fragment -->
+<head th:replace="~{fragments/fragments :: head('WarisanGo - Interactive Map')}"></head>
+<!-- Page-Specific Stylesheet -->
+<link rel="stylesheet" href="/css/interactive-map.css" th:src="@{/css/interactive-map.css}">
 
 <body>
 
   <!-- Include Sticky Navbar Fragment -->
-  <div th:replace="~{fragments/_head :: navbar('map')}"></div>
+  <div th:replace="~{fragments/fragments :: navbar('map')}"></div>
 
   <!-- Main Content -->
   <main class="main-layout">
@@ -58,10 +59,10 @@
     </div>
   </main>
 
-  <!-- Include Copyright Footer & Global Scripts Fragment -->
-  <div th:replace="~{fragments/_foot :: footer}"></div>
+  <!-- Include Footer & Global Scripts Fragment -->
+  <div th:replace="~{fragments/footer :: global}"></div>
   
-  <!-- Page-specific Map Script -->
-  <script th:src="@{/js/interactiveMap.js}"></script>
+  <!-- Page-Specific Script -->
+  <script src="/js/interactive-map.js" th:src="@{/js/interactive-map.js}"></script>
 </body>
 </html>
