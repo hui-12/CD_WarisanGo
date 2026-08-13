@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.function.Consumer;
 
 @Repository
 public class HeritageBusinessRepository {
@@ -43,5 +44,38 @@ public class HeritageBusinessRepository {
             list.add(dto);
         }
         return list;
+    }
+
+    // Real-time Firestore Snapshot Listener
+    public ListenerRegistration addApprovedBusinessesListener(Consumer<List<HeritageBusinessDTO>> callback) {
+        Firestore db = FirestoreClient.getFirestore();
+        return db.collection(COLLECTION_NAME)
+                .whereEqualTo("status", "APPROVED")
+                .addSnapshotListener((snapshots, e) -> {
+                    if (e != null || snapshots == null) {
+                        return;
+                    }
+
+                    List<HeritageBusinessDTO> list = new ArrayList<>();
+                    for (QueryDocumentSnapshot doc : snapshots) {
+                        GeoPoint geoPoint = doc.getGeoPoint("location");
+                        double lat = geoPoint != null ? geoPoint.getLatitude() : 0.0;
+                        double lng = geoPoint != null ? geoPoint.getLongitude() : 0.0;
+
+                        HeritageBusinessDTO dto = new HeritageBusinessDTO(
+                                doc.getId(),
+                                doc.getString("name"),
+                                doc.getString("address"),
+                                doc.getString("state"),
+                                doc.getString("city"),
+                                doc.getString("description"),
+                                lat,
+                                lng,
+                                doc.getDouble("averageRating")
+                        );
+                        list.add(dto);
+                    }
+                    callback.accept(list);
+                });
     }
 }

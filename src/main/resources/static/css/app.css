@@ -1,0 +1,151 @@
+/* --- Global Reset & Fonts --- */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    scrollbar-width: none;
+}
+
+*::-webkit-scrollbar {
+    display: none;
+}
+
+body {
+    background-color: #faf9f5;
+    color: #141413;
+    font-family: 'Inter', Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+/* --- Navigation Header (Layout.tsx) --- */
+.navbar {
+    border-bottom: 1.5px solid #141413;
+    background-color: #faf9f5;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    height: 56px;
+}
+
+.nav-container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    height: 100%;
+}
+
+.brand-logo {
+    display: flex;
+    align-items: baseline;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    margin-right: 36px;
+    flex-shrink: 0;
+}
+
+.brand-main {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: #141413;
+    letter-spacing: -0.5px;
+}
+
+.brand-accent {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 20px;
+    font-weight: 400;
+    font-style: italic;
+    color: #c9a84c;
+    letter-spacing: -0.5px;
+}
+
+.admin-badge {
+    font-size: 10px;
+    font-weight: 600;
+    color: #faf9f5;
+    background-color: #141413;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-left: 6px;
+    font-family: 'Inter', Arial, sans-serif;
+    letter-spacing: 0.5px;
+}
+
+.nav-links {
+    display: flex;
+    gap: 2px;
+    flex: 1;
+}
+
+.nav-item {
+    padding: 6px 11px;
+    background: none;
+    color: #141413;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 400;
+    font-family: 'Inter', Arial, sans-serif;
+    transition: all 100ms;
+    white-space: nowrap;
+}
+
+.nav-item.active {
+    background: #141413;
+    color: #faf9f5;
+    font-weight: 600;
+}
+
+.nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.btn-role-switch {
+    font-size: 12px;
+    padding: 5px 10px;
+    border: 1.5px solid #141413;
+    border-radius: 6px;
+    background: none;
+    cursor: pointer;
+    font-family: 'Inter', Arial, sans-serif;
+    color: #141413;
+    font-weight: 500;
+}
+
+.user-profile-btn {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+}
+
+.avatar-img {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 1.5px solid #141413;
+    object-fit: cover;
+}
+
+.user-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: #141413;
+}
+
+.hidden {
+    display: none !important;
+}

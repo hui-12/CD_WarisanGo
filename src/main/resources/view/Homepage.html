@@ -1,12 +1,176 @@
 <!DOCTYPE html>
-<html>
-<head>
-    <title>WarisanGo</title>
-</head>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<!-- Include Head Metadata Fragment -->
+<head th:replace="~{fragments/_head :: head('WarisanGo - Discover Malaysian Heritage Food')}"></head>
+<!-- Page-Specific Stylesheet -->
+<link rel="stylesheet" href="/css/home.css" th:href="@{/css/home.css}">
 
 <body>
 
-<h1>Welcome to WarisanGo</h1>
+  <!-- Include Sticky Navbar Fragment -->
+  <div th:replace="~{fragments/_head :: navbar('home')}"></div>
 
+  <!-- Main Container -->
+  <main class="main-layout">
+    
+    <!-- Hero Banner (Matching HomePage.tsx) -->
+    <section class="hero-card">
+      <img 
+        src="https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=1200&h=400&fit=crop&auto=format" 
+        alt="Hero Background" 
+        class="hero-bg-img"
+      />
+      
+      <div class="hero-left">
+        <p class="hero-subtitle">WELCOME BACK</p>
+        <h1 class="hero-title">
+          <span id="hero-user-firstname">Diddy</span>,<br>
+          <em class="italic-accent">good to see you.</em>
+        </h1>
+        <p class="hero-description">
+          Continue your journey through Malaysia's living heritage — century-old kopitiams, traditional restaurants, and street food stories passed down through generations.
+        </p>
+        <div class="hero-actions">
+          <button class="btn-amber" onclick="navigateTo('directory')">Browse Directory</button>
+          <button class="btn-hero-outlined" onclick="navigateTo('map')">Open Map</button>
+        </div>
+      </div>
+
+      <!-- Tier Status Card Widget (Matching HomePage.tsx) -->
+      <div class="tier-widget">
+        <p class="widget-label">YOUR TIER</p>
+        <p id="tier-name" class="tier-name">Gold</p>
+        <p class="tier-points">
+          <span id="user-points">1,250</span> <span class="points-unit">pts</span>
+        </p>
+        <div class="progress-bar-bg">
+          <div id="tier-progress-bar" class="progress-bar-fill" style="width: 25%;"></div>
+        </div>
+        <p id="tier-next-info" class="tier-next-text">750 pts to Platinum</p>
+      </div>
+    </section>
+
+    <!-- Main Content 2-Column Grid (1fr 340px) -->
+    <div class="dashboard-grid">
+      
+      <!-- Left Column: This Week's Visits -->
+      <section class="content-card">
+        <div class="card-header">
+          <h2 class="card-title">This Week's Visits</h2>
+          <span id="visit-count" class="badge-text">2 check-ins</span>
+        </div>
+        
+        <div id="visits-list-container" class="visits-container">
+          <!-- Dynamically populated via JS or pre-rendered -->
+          <div class="visit-row">
+            <img src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=200&h=200&fit=crop" alt="Yap Ah Loy Kopitiam" class="visit-img">
+            <div class="visit-info">
+              <div class="visit-name">Yap Ah Loy Kopitiam</div>
+              <div class="visit-date">2026-08-12</div>
+            </div>
+            <div class="points-pill">+50</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Column: Sidebar (340px) -->
+      <aside class="sidebar-column">
+        
+        <!-- Active Challenge Widget (Matching HomePage.tsx) -->
+        <div id="active-challenge-widget" class="challenge-widget">
+          <p class="widget-label">ACTIVE CHALLENGE</p>
+          <h3 id="challenge-title" class="challenge-title">Kopitiam Explorer</h3>
+          <div class="challenge-progress-header">
+            <span class="sub-label">Progress</span>
+            <span id="challenge-progress-count" class="challenge-count">2/3</span>
+          </div>
+          <div class="progress-bar-bg-dark mb-12">
+            <div id="challenge-progress-bar" class="progress-bar-fill gold-bg" style="width: 66%;"></div>
+          </div>
+          <button class="btn-outlined-full" onclick="navigateTo('challenges')">View All Challenges →</button>
+        </div>
+
+        <!-- Quick Links Panel -->
+        <div class="content-card quick-links-card">
+          <div class="card-header-sm">
+            <span class="card-title-sm">Quick Links</span>
+          </div>
+          <div class="quick-links-list">
+            <button class="quick-link-btn" onclick="navigateTo('badges')">
+              <span class="quick-link-icon">🏅</span>
+              <div class="quick-link-text">
+                <div class="link-label">My Badges</div>
+                <div class="link-sub">3 earned</div>
+              </div>
+              <span class="link-arrow">→</span>
+            </button>
+            <button class="quick-link-btn" onclick="navigateTo('rewards')">
+              <span class="quick-link-icon">🏆</span>
+              <div class="quick-link-text">
+                <div class="link-label">Leaderboard</div>
+                <div class="link-sub">You are #5</div>
+              </div>
+              <span class="link-arrow">→</span>
+            </button>
+            <button class="quick-link-btn" onclick="navigateTo('profile')">
+              <span class="quick-link-icon">👤</span>
+              <div class="quick-link-text">
+                <div class="link-label">My Profile</div>
+                <div class="link-sub">View & edit</div>
+              </div>
+              <span class="link-arrow">→</span>
+            </button>
+          </div>
+        </div>
+
+      </aside>
+    </div>
+
+    <!-- How It Works Section (3-Column Card Grid) -->
+    <section class="how-it-works-section">
+      <p class="section-tagline">EXPLORE WARISANGO</p>
+      <h2 class="section-title">How it works</h2>
+      <p class="section-subtitle">
+        Everything you need to discover, explore, and celebrate Malaysia's heritage food culture.
+      </p>
+
+      <div class="feature-cards-grid">
+        <div class="feature-card">
+          <div class="feature-icon">🔍</div>
+          <h3 class="feature-title">Discover Heritage Businesses</h3>
+          <p class="feature-desc">
+            Browse our curated directory of century-old kopitiams, traditional restaurants, and street food stalls — all verified and approved by our heritage team. Filter by state, city, or category.
+          </p>
+          <button class="btn-card-action" onclick="navigateTo('directory')">Browse Directory →</button>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">📍</div>
+          <h3 class="feature-title">Check In & Earn Points</h3>
+          <p class="feature-desc">
+            When you're physically within 50 metres of a heritage business, check in to earn reward points. Accumulate points to climb through Bronze, Silver, Gold, and Platinum tiers.
+          </p>
+          <button class="btn-card-action" onclick="navigateTo('map')">Open Map →</button>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">🏅</div>
+          <h3 class="feature-title">Badges & Challenges</h3>
+          <p class="feature-desc">
+            Unlock achievement badges by reaching milestones — visit 3 kopitiams, review 10 businesses, hit Gold tier. Join limited-time challenges for bonus points and exclusive badges.
+          </p>
+          <button class="btn-card-action" onclick="navigateTo('challenges')">View Challenges →</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Include Footer & Global Scripts Fragment -->
+  <div th:replace="~{fragments/_foot :: footer}"></div>
+
+  <!-- Page-Specific Script -->
+  <script src="/js/home.js" th:src="@{/js/home.js}"></script>
 </body>
 </html>

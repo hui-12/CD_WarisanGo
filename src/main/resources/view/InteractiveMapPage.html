@@ -1,101 +1,67 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WarisanGo - Interactive Map</title>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<!-- Include Head Fragment -->
+<head th:replace="~{fragments/_head :: head('WarisanGo - Interactive Map')}"></head>
+<link rel="stylesheet" th:href="@{/css/interactiveMap.css}">
 
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: Arial, sans-serif;
-        }
-        html, body {
-            height: 100%;
-            width: 100%;
-            overflow: hidden;
-        }
-        #map {
-            width: 100vw;
-            height: 100vh;
-            background-color: #e5e3df;
-        }
-        .popup-content h3 {
-            margin-bottom: 5px;
-            color: #8b0000;
-        }
-        .popup-content p {
-            margin-bottom: 4px;
-            font-size: 0.9rem;
-        }
-        .popup-rating {
-            color: #d97706;
-            font-weight: bold;
-        }
-    </style>
-</head>
 <body>
 
-    <div id="map"></div>
+  <!-- Include Sticky Navbar Fragment -->
+  <div th:replace="~{fragments/_head :: navbar('map')}"></div>
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- Main Content -->
+  <main class="main-layout">
+    <div class="page-header">
+      <p class="page-tagline">INTERACTIVE MAP</p>
+      <h1 class="page-title">Find Heritage Near You</h1>
+      <p class="page-subtitle">Explore approved heritage businesses across Peninsular Malaysia.</p>
+    </div>
 
-    <script>
-        document.addEventListener("DOMContentLoaded", async function () {
-            const map = L.map('map').setView([3.1390, 101.6869], 12);
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+      <div class="search-input-group">
+        <input type="text" id="map-search-input" placeholder="Search by name or city..." class="map-search-input" />
+        <button id="map-search-btn" class="btn-search-primary">Search</button>
+      </div>
 
-            L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                maxZoom: 19,
-                attribution: '&copy; OpenStreetMap'
-            }).addTo(map);
+      <select id="state-select" class="map-select">
+        <option value="All">All States</option>
+        <option value="Kuala Lumpur">Kuala Lumpur</option>
+        <option value="Penang">Penang</option>
+        <option value="Perak">Perak</option>
+      </select>
 
-            try {
-                const response = await fetch('/interactive-map/api/approved');
-                const businesses = await response.json();
+      <select id="radius-select" class="map-select">
+        <option value="0">Any Distance</option>
+        <option value="5">Within 5 km</option>
+        <option value="10">Within 10 km</option>
+      </select>
+    </div>
 
-                const bounds = [];
+    <!-- Map Grid Layout -->
+    <div class="map-grid">
+      <div class="map-canvas-container">
+        <div id="map-canvas"></div>
+      </div>
 
-                businesses.forEach(b => {
-                    if (b.latitude && b.longitude) {
-                        const marker = L.marker([b.latitude, b.longitude]).addTo(map);
-                        
-                        const popupHtml = `
-                            <div class="popup-content">
-                                <h3>${escapeHtml(b.name)}</h3>
-                                <p class="popup-rating">Rating: ${b.averageRating ? b.averageRating : 'N/A'} ⭐</p>
-                                <p><strong>Location:</strong> ${escapeHtml(b.city)}, ${escapeHtml(b.state)}</p>
-                                <p>${escapeHtml(b.description)}</p>
-                            </div>
-                        `;
-                        
-                        marker.bindPopup(popupHtml);
-                        bounds.push([b.latitude, b.longitude]);
-                    }
-                });
+      <div class="map-sidebar">
+        <div class="sidebar-header">
+          <span id="locations-count" class="locations-count-text">0 locations</span>
+          <select id="sort-select" class="sidebar-sort-select">
+            <option value="none">Default order</option>
+            <option value="rating-desc">Rating: High → Low</option>
+          </select>
+        </div>
+        <div id="locations-list" class="sidebar-list-container"></div>
+      </div>
+    </div>
+  </main>
 
-                // Auto-fit map zoom to encompass all loaded markers
-                if (bounds.length > 0) {
-                    map.fitBounds(bounds, { padding: [50, 50] });
-                }
-
-            } catch (error) {
-                console.error("Failed to fetch map markers:", error);
-            }
-        });
-
-        function escapeHtml(text) {
-            if (!text) return '';
-            return text
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/"/g, "&quot;")
-                .replace(/'/g, "&#039;");
-        }
-    </script>
+  <!-- Include Copyright Footer & Global Scripts Fragment -->
+  <div th:replace="~{fragments/_foot :: footer}"></div>
+  
+  <!-- Page-specific Map Script -->
+  <script th:src="@{/js/interactiveMap.js}"></script>
 </body>
 </html>

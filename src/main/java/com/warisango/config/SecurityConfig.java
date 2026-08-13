@@ -9,7 +9,7 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     @Bean
-    // allow all requests without authentication
+    // Allow all requests without authentication
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http
