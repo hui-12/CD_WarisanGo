@@ -3,7 +3,6 @@ package com.warisango.controller;
 import com.warisango.dto.VideoDTO;
 import com.warisango.service.VideoSearchService;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @RestController
