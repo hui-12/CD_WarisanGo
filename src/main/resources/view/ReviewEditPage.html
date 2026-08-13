@@ -1,124 +1,313 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Edit Review | WarisanGo</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<style>
-*{box-sizing:border-box}
-body{margin:0;background:#f8f1e7;color:#2f261d;font-family:'Poppins',Arial,sans-serif}
-a{text-decoration:none;color:inherit}
-.page{max-width:900px;margin:0 auto;padding:34px 22px 48px}
-.form-card{background:#fff;border:1px solid #ecdfcf;border-radius:8px;box-shadow:0 12px 34px rgba(111,73,37,.1);padding:26px}
-.context{display:flex;gap:16px;align-items:center;padding-bottom:20px;margin-bottom:22px;border-bottom:1px solid #ead9c4}
-.context img{width:96px;height:76px;object-fit:cover;border-radius:8px}
-.eyebrow{margin:0 0 6px;color:#b15f24;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.08em}
-h1{margin:0;font-size:28px;line-height:1.2}
-.muted{margin:6px 0 0;color:#725f4e}
-.field{margin-bottom:18px}
-label{display:block;margin-bottom:8px;font-weight:700;color:#3d3128}
-input[type="text"],textarea{width:100%;border:1px solid #e0cdb8;border-radius:8px;padding:12px 14px;font:inherit;background:#fffdf9;color:#2f261d}
-textarea{min-height:140px;resize:vertical}
-.rating-options{display:flex;flex-direction:row-reverse;justify-content:flex-end;gap:4px}
-.rating-options input{position:absolute;opacity:0}
-.rating-options label{margin:0;font-size:32px;color:#d9c8b4;cursor:pointer;line-height:1}
-.rating-options label:hover,.rating-options label:hover~label,.rating-options input:checked~label{color:#f3a51f}
-.counter{margin-top:6px;text-align:right;color:#806954;font-size:13px}
-.error{display:block;margin-top:6px;color:#b73830;font-size:13px}
-.preview{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
-.preview img{width:96px;height:80px;object-fit:cover;border-radius:8px;border:1px solid #ead9c4}
-.actions{display:flex;gap:10px;justify-content:flex-end;margin-top:22px}
-.primary-btn,.ghost-btn{display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:8px;padding:12px 18px;font-weight:700;cursor:pointer;font-family:inherit}
-.primary-btn{background:#c66b2e;color:#fff;box-shadow:0 10px 24px rgba(198,107,46,.22)}
-.ghost-btn{background:#fff;color:#6d5542;border:1px solid #e2d0bc}
-@media (max-width:680px){
-    .context{align-items:flex-start;flex-direction:column}
-    .context img{width:100%;height:180px}
-    .actions{flex-direction:column-reverse}
-    .primary-btn,.ghost-btn{width:100%}
-}
-</style>
-</head>
+
+<head th:replace="~{fragments/fragments :: head('Edit Review | WarisanGo')}"></head>
+
 <body>
-<main class="page">
-    <section class="form-card">
-        <div class="context">
-            <img th:src="${business.businessImage}" src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=900&q=80" alt="Heritage business">
-            <div>
-                <p class="eyebrow">Editing Review</p>
-                <h1 th:text="${business.businessName}">Kedai Warisan Laksa</h1>
-                <p class="muted" th:text="${business.businessAddress}">George Town, Penang, Malaysia</p>
-            </div>
+
+<header th:replace="~{fragments/fragments :: navbar('directory')}"></header>
+
+<link rel="stylesheet" th:href="@{/css/review.css}">
+
+<main class="review-form-page">
+
+    <section class="review-form-shell">
+
+        <!-- =========================
+             FORM HEADER
+             ========================= -->
+        <div class="review-form-header">
+
+            <p class="review-kicker">
+                Review & Rating
+            </p>
+
+            <h1 class="review-title">
+                Edit Review
+            </h1>
+
+            <p class="review-subtitle">
+                Update your experience with this heritage business.
+            </p>
+
         </div>
 
-        <form th:action="@{/reviews/update}" th:object="${review}" method="post">
-            <input type="hidden" th:field="*{reviewId}">
-            <input type="hidden" th:field="*{businessId}">
 
-            <div class="field">
-                <label for="touristName">Name</label>
-                <input id="touristName" type="text" th:field="*{touristName}">
-                <span class="error" th:if="${#fields.hasErrors('touristName')}" th:errors="*{touristName}">Name error</span>
-            </div>
+        <div class="review-form-body">
 
-            <div class="field">
-                <label>Rating</label>
-                <div class="rating-options">
-                    <input id="star5" type="radio" th:field="*{rating}" value="5"><label for="star5">&#9733;</label>
-                    <input id="star4" type="radio" th:field="*{rating}" value="4"><label for="star4">&#9733;</label>
-                    <input id="star3" type="radio" th:field="*{rating}" value="3"><label for="star3">&#9733;</label>
-                    <input id="star2" type="radio" th:field="*{rating}" value="2"><label for="star2">&#9733;</label>
-                    <input id="star1" type="radio" th:field="*{rating}" value="1"><label for="star1">&#9733;</label>
+            <!-- =========================
+                 BUSINESS INFORMATION
+                 ========================= -->
+            <div class="review-form-business">
+
+                <img
+                        th:src="${business.businessImage}"
+                        src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=900&q=80"
+                        alt="Heritage business">
+
+                <div>
+
+                    <h2
+                            class="review-form-business-name"
+                            th:text="${business.businessName}">
+                        Heritage Business
+                    </h2>
+
+                    <p
+                            class="review-form-business-address"
+                            th:text="${business.businessAddress}">
+                        Business Address
+                    </p>
+
                 </div>
-                <span class="error" th:if="${#fields.hasErrors('rating')}" th:errors="*{rating}">Rating error</span>
+
             </div>
 
-            <div class="field">
-                <label for="reviewText">Review</label>
-                <textarea id="reviewText" th:field="*{reviewText}" maxlength="500"></textarea>
-                <div class="counter"><span id="reviewCount">0</span>/500</div>
-                <span class="error" th:if="${#fields.hasErrors('reviewText')}" th:errors="*{reviewText}">Review error</span>
-            </div>
 
-            <div class="field">
-                <label for="photoUrls">Images</label>
-                <textarea id="photoUrls" name="photoUrls" rows="3" th:text="${photoUrlsText}"></textarea>
-                <div class="preview" id="photoPreview"></div>
-            </div>
+            <!-- =========================
+                 EDIT FORM
+                 ========================= -->
+            <form
+                    th:action="@{/reviews/update}"
+                    th:object="${review}"
+                    method="post"
+                    enctype="multipart/form-data">
 
-            <div class="actions">
-                <a class="ghost-btn" th:href="@{/reviews/{id}(id=${business.businessId})}">Cancel</a>
-                <button class="primary-btn" type="submit">Save Changes</button>
-            </div>
-        </form>
+                <!-- Keep review ID -->
+                <input
+                        type="hidden"
+                        th:field="*{reviewId}">
+
+                <!-- Keep business ID -->
+                <input
+                        type="hidden"
+                        th:field="*{businessId}">
+
+
+                <!-- =========================
+                     NAME
+                     ========================= -->
+                <div class="review-form-field">
+
+                    <label for="touristName">
+                        Name
+                    </label>
+
+                    <input
+                            class="review-input"
+                            id="touristName"
+                            type="text"
+                            th:field="*{touristName}"
+                            maxlength="80"
+                            placeholder="Your name">
+
+                    <span
+                            class="review-field-error"
+                            th:if="${#fields.hasErrors('touristName')}"
+                            th:errors="*{touristName}">
+                        Name is required.
+                    </span>
+
+                </div>
+
+
+                <!-- =========================
+                     RATING
+                     ========================= -->
+                <div class="review-form-field">
+
+                    <label>
+                        Rating
+                    </label>
+
+                    <div class="review-rating-input">
+
+                        <!-- 5 -->
+                        <input
+                                id="reviewStar5"
+                                type="radio"
+                                th:field="*{rating}"
+                                value="5">
+
+                        <label for="reviewStar5">
+                            ★
+                        </label>
+
+
+                        <!-- 4 -->
+                        <input
+                                id="reviewStar4"
+                                type="radio"
+                                th:field="*{rating}"
+                                value="4">
+
+                        <label for="reviewStar4">
+                            ★
+                        </label>
+
+
+                        <!-- 3 -->
+                        <input
+                                id="reviewStar3"
+                                type="radio"
+                                th:field="*{rating}"
+                                value="3">
+
+                        <label for="reviewStar3">
+                            ★
+                        </label>
+
+
+                        <!-- 2 -->
+                        <input
+                                id="reviewStar2"
+                                type="radio"
+                                th:field="*{rating}"
+                                value="2">
+
+                        <label for="reviewStar2">
+                            ★
+                        </label>
+
+
+                        <!-- 1 -->
+                        <input
+                                id="reviewStar1"
+                                type="radio"
+                                th:field="*{rating}"
+                                value="1">
+
+                        <label for="reviewStar1">
+                            ★
+                        </label>
+
+                    </div>
+
+                    <span
+                            class="review-field-error"
+                            th:if="${#fields.hasErrors('rating')}"
+                            th:errors="*{rating}">
+                        Please choose a rating.
+                    </span>
+
+                </div>
+
+
+                <!-- =========================
+                     REVIEW TEXT
+                     ========================= -->
+                <div class="review-form-field">
+
+                    <label for="reviewText">
+                        Review
+                    </label>
+
+                    <textarea
+                            class="review-textarea"
+                            id="reviewText"
+                            th:field="*{reviewText}"
+                            data-review-counter="reviewCharacterCount"
+                            maxlength="500"
+                            placeholder="Share your experience..."></textarea>
+
+                    <div class="review-counter">
+                        <span id="reviewCharacterCount">0</span>/500
+                    </div>
+
+                    <span
+                            class="review-field-error"
+                            th:if="${#fields.hasErrors('reviewText')}"
+                            th:errors="*{reviewText}">
+                        Review text is required.
+                    </span>
+
+                </div>
+
+
+                <!-- =========================
+                     PHOTO UPLOAD
+                     ========================= -->
+                <div class="review-form-field">
+
+                    <label>
+                        Photos
+                    </label>
+
+                    <div
+                            class="review-upload-area"
+                            id="reviewUploadArea"
+                            tabindex="0"
+                            role="button"
+                            aria-label="Upload review photos">
+
+                        <!-- Hidden file input -->
+                        <input
+                                id="reviewPhotos"
+                                name="photos"
+                                type="file"
+                                accept="image/jpeg,image/png,image/webp"
+                                multiple
+                                hidden>
+
+                        <div class="review-upload-icon">
+                            📷
+                        </div>
+
+                        <p class="review-upload-title">
+                            Drag & Drop your photos here
+                        </p>
+
+                        <p class="review-upload-subtitle">
+                            or click to browse
+                        </p>
+
+                        <p class="review-field-help">
+                            JPG / PNG / WebP · Maximum 10 photos
+                        </p>
+
+                    </div>
+
+
+                    <!-- New selected photos -->
+                    <div
+                            id="reviewUploadPreview"
+                            class="review-upload-preview">
+                    </div>
+
+                </div>
+
+
+                <!-- =========================
+                     ACTION BUTTONS
+                     ========================= -->
+                <div class="review-form-actions">
+
+                    <a
+                            class="review-btn-outline"
+                            th:href="@{/reviews/{id}(id=${business.businessId})}">
+                        Cancel
+                    </a>
+
+                    <button
+                            class="review-btn-primary"
+                            type="submit">
+                        Save Changes
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
     </section>
+
 </main>
 
-<script>
-const reviewText = document.getElementById('reviewText');
-const reviewCount = document.getElementById('reviewCount');
-const photoUrls = document.getElementById('photoUrls');
-const photoPreview = document.getElementById('photoPreview');
 
-function updateCount() {
-    reviewCount.textContent = reviewText.value.length;
-}
+<footer th:replace="~{fragments/footer :: global}"></footer>
 
-function updatePreview() {
-    photoPreview.innerHTML = '';
-    photoUrls.value.split('\n').map((url) => url.trim()).filter(Boolean).forEach((url) => {
-        const image = document.createElement('img');
-        image.src = url;
-        image.alt = 'Review image preview';
-        photoPreview.appendChild(image);
-    });
-}
+<script th:src="@{/js/review.js}"></script>
 
-reviewText.addEventListener('input', updateCount);
-photoUrls.addEventListener('input', updatePreview);
-updateCount();
-updatePreview();
-</script>
 </body>
 </html>

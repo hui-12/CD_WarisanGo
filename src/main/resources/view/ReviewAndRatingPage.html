@@ -1,209 +1,347 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Review & Rating | WarisanGo</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<style>
-*{box-sizing:border-box}
-body{margin:0;background:#f8f1e7;color:#2f261d;font-family:'Poppins',Arial,sans-serif}
-a{text-decoration:none;color:inherit}
-.topbar{position:sticky;top:0;z-index:5;background:rgba(255,252,247,.94);border-bottom:1px solid #eadccd;backdrop-filter:blur(10px)}
-.topbar-inner{max-width:1180px;margin:0 auto;padding:16px 22px;display:flex;justify-content:space-between;align-items:center}
-.brand{font-weight:700;color:#b15f24;letter-spacing:.2px}
-.back-link{color:#7d5d45;font-size:14px}
-.page{max-width:1180px;margin:0 auto;padding:26px 22px 48px}
-.hero{background:#fffaf3;border:1px solid #ead9c4;border-radius:8px;overflow:hidden;box-shadow:0 14px 40px rgba(111,73,37,.12)}
-.hero-image{position:relative;height:330px;background:#d7b98d}
-.hero-image img{width:100%;height:100%;display:block;object-fit:cover}
-.hero-image::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.08),rgba(0,0,0,.32))}
-.hero-content{padding:26px;display:grid;grid-template-columns:1fr auto;gap:24px;align-items:end}
-.eyebrow{margin:0 0 8px;color:#b15f24;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.08em}
-h1{margin:0 0 10px;font-size:36px;line-height:1.15}
-.muted{margin:0;color:#725f4e}
-.primary-btn,.secondary-btn,.danger-btn,.ghost-btn{display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:8px;padding:12px 18px;font-weight:700;cursor:pointer;font-family:inherit;transition:.18s ease}
-.primary-btn{background:#c66b2e;color:#fff;box-shadow:0 10px 24px rgba(198,107,46,.25)}
-.primary-btn:hover{background:#a95720;transform:translateY(-1px)}
-.secondary-btn{background:#fff3e5;color:#9f5422;border:1px solid #efcfad}
-.danger-btn{background:#ba3a32;color:#fff}
-.ghost-btn{background:#fff;color:#6d5542;border:1px solid #e2d0bc}
-.summary-grid{display:grid;grid-template-columns:minmax(240px,320px) 1fr;gap:20px;margin:22px 0}
-.card,.review-card,.empty-state{background:#fff;border:1px solid #ecdfcf;border-radius:8px;box-shadow:0 10px 28px rgba(111,73,37,.08)}
-.card{padding:22px}
-.card h2,.section-title{margin:0 0 16px;font-size:20px}
-.average-number{font-size:56px;line-height:1;font-weight:700;color:#bf672b}
-.stars{display:inline-flex;gap:2px;color:#d7c6b2;font-size:20px;letter-spacing:0}
-.stars.large{font-size:24px;margin:12px 0 8px}
-.stars .filled{color:#f3a51f}
-.rating-row{display:grid;grid-template-columns:46px 1fr 40px;gap:12px;align-items:center;margin:10px 0;color:#6c5947;font-size:14px}
-.bar{height:10px;overflow:hidden;background:#efe3d6;border-radius:999px}
-.fill{height:100%;background:#c66b2e;border-radius:999px}
-.review-toolbar{display:flex;justify-content:space-between;align-items:center;margin:28px 0 16px;gap:18px}
-.review-count{color:#735f4e}
-.review-list{display:grid;gap:16px}
-.review-card{padding:22px}
-.review-head{display:flex;justify-content:space-between;gap:18px}
-.user{display:flex;gap:14px;align-items:center}
-.avatar{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;background:#f2d5b5;color:#9f5422;font-weight:800}
-.review-card h3{margin:0 0 6px;font-size:17px}
-.review-date{color:#816a56;font-size:13px}
-.review-text{margin:16px 0 0;color:#3d3128;line-height:1.7}
-.photos{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
-.photos img{width:112px;height:92px;border-radius:8px;object-fit:cover;border:1px solid #ead9c4}
-.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
-.inline-form{display:inline}
-.empty-state{padding:34px;text-align:center;color:#705b48}
-.empty-state h3{margin:0 0 8px;color:#2f261d}
-.comment-slot{margin-top:16px;padding-top:14px;border-top:1px dashed #e4d4c1;color:#8a725e;font-size:13px}
-.modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(39,29,20,.48);padding:24px;z-index:10}
-.modal.is-open{display:flex}
-.modal-card{width:min(420px,100%);background:#fff;border-radius:8px;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,.24)}
-.modal-card h3{margin:0 0 8px}
-.modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:22px}
-@media (max-width:760px){
-    .hero-content,.summary-grid{grid-template-columns:1fr}
-    .hero-image{height:240px}
-    h1{font-size:28px}
-    .review-toolbar,.review-head{align-items:flex-start;flex-direction:column}
-    .primary-btn,.secondary-btn,.danger-btn,.ghost-btn{width:100%}
-}
-</style>
-</head>
+
+<head th:replace="~{fragments/fragments :: head('Reviews | WarisanGo')}"></head>
 <body>
-<header class="topbar">
-    <div class="topbar-inner">
-        <a class="brand" href="/">WarisanGo</a>
-        <a class="back-link" href="/">&#8592; Back to home</a>
-    </div>
-</header>
 
-<main class="page">
-    <section class="hero">
-        <div class="hero-image">
-            <img th:src="${business.businessImage}" src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1400&q=80" alt="Heritage business">
-        </div>
-        <div class="hero-content">
-            <div>
-                <p class="eyebrow" th:text="${business.category}">Heritage Food</p>
-                <h1 th:text="${business.businessName}">Kedai Warisan Laksa</h1>
-                <p class="muted" th:text="${business.businessAddress}">George Town, Penang, Malaysia</p>
+<header th:replace="~{fragments/fragments :: navbar('directory')}"></header>
+<link rel="stylesheet" th:href="@{/css/review.css}">
+
+<main class="review-page">
+
+    <section class="review-business">
+
+        <img class="review-business-image"
+             th:src="${business.businessImage}"
+             src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1200&q=80"
+             alt="Heritage business">
+
+        <div class="review-business-copy">
+
+            <p class="review-kicker" th:text="${business.category}">
+                Heritage Food
+            </p>
+
+            <h1 class="review-business-name" th:text="${business.businessName}">
+                Kedai Warisan Laksa
+            </h1>
+
+            <p class="review-business-address" th:text="${business.businessAddress}">
+                George Town, Penang, Malaysia
+            </p>
+
+            <div class="review-business-actions">
+                <a class="review-btn-primary"
+                   th:href="@{/reviews/create/{id}(id=${business.businessId})}">
+                    Write Review
+                </a>
+
+                <a class="review-btn-outline"
+                   th:href="@{/directory}">
+                    Back to Directory
+                </a>
             </div>
-            <a class="primary-btn" th:href="@{/reviews/create/{id}(id=${business.businessId})}">Write Review</a>
+
         </div>
     </section>
 
-    <section class="summary-grid" aria-label="Rating summary">
-        <article class="card">
-            <h2>Average Rating</h2>
-            <div class="average-number" th:text="${averageRating}">4.7</div>
-            <div class="stars large" aria-label="Average stars">
-                <span th:each="star : ${#numbers.sequence(1,5)}"
-                      th:classappend="${star <= averageRatingRounded} ? ' filled' : ''">&#9733;</span>
-            </div>
-            <p class="muted"><span th:text="${totalReviews}">0</span> visitor reviews</p>
-        </article>
 
-        <article class="card">
-            <h2>Rating Distribution</h2>
-            <div class="rating-row" th:each="row : ${ratingRows}">
-                <span><span th:text="${row.rating}">5</span> &#9733;</span>
-                <div class="bar">
-                    <div class="fill" th:style="'width:' + ${row.percentage} + '%'"></div>
+    <section class="review-summary-grid">
+
+        <article class="review-panel">
+
+            <div class="review-panel-heading">
+                Average Rating
+            </div>
+
+            <div class="review-average-body">
+
+                <p class="review-average-number" th:text="${averageRating}">
+                    4.7
+                </p>
+
+                <div class="review-stars">
+                    <span th:each="star : ${#numbers.sequence(1,5)}"
+                          th:classappend="${star <= averageRatingRounded} ? ' filled' : ''">
+                        ★
+                    </span>
                 </div>
-                <span th:text="${row.count}">0</span>
+
+                <p class="review-rating-meta">
+                    <span th:text="${totalReviews}">0</span> visitor reviews
+                </p>
+
             </div>
+            
         </article>
-    </section>
 
-    <section>
-        <div class="review-toolbar">
-            <div>
-                <h2 class="section-title">Visitor Reviews</h2>
-                <p class="review-count" th:text="${totalReviews + ' reviews shared by visitors'}">0 reviews shared by visitors</p>
+
+        <article class="review-panel">
+
+            <div class="review-panel-heading">
+                Rating Distribution
             </div>
-            <a class="secondary-btn" th:href="@{/reviews/create/{id}(id=${business.businessId})}">Add your experience</a>
-        </div>
 
-        <div class="empty-state" th:if="${#lists.isEmpty(reviews)}">
-            <h3>No reviews yet</h3>
-            <p>Be the first visitor to share a rating for this heritage business.</p>
-        </div>
+            <div class="review-rating-body">
 
-        <div class="review-list" th:if="${!#lists.isEmpty(reviews)}">
-            <article class="review-card" th:each="review : ${reviews}">
-                <div class="review-head">
-                    <div class="user">
-                        <div class="avatar" th:text="${#strings.substring(review.touristName,0,1)}">A</div>
-                        <div>
-                            <h3 th:text="${review.touristName}">Visitor Name</h3>
-                            <div class="stars" aria-label="Review stars">
-                                <span th:each="star : ${#numbers.sequence(1,5)}"
-                                      th:classappend="${star <= review.rating} ? ' filled' : ''">&#9733;</span>
-                            </div>
-                            <div class="review-date" th:text="${review.createdAt}">2026-08-07</div>
+                <div class="review-rating-row"
+                     th:each="row : ${ratingRows}">
+
+                    <span class="review-rating-label">
+                        <span th:text="${row.rating}">5</span> ★
+                    </span>
+
+                    <div class="review-rating-track">
+                        <div class="review-rating-fill"
+                             th:style="'width:' + ${row.percentage} + '%'">
                         </div>
                     </div>
-                    <a class="ghost-btn" th:href="@{/reviews/detail/{id}(id=${review.reviewId})}">View Detail</a>
+
+                    <span class="review-rating-count" th:text="${row.count}">
+                        0
+                    </span>
+
                 </div>
 
-                <p class="review-text" th:text="${review.reviewText}">Review content.</p>
+            </div>
+        </article>
 
-                <div class="photos" th:if="${review.photoUrls != null and !#lists.isEmpty(review.photoUrls)}">
-                    <img th:each="photo : ${review.photoUrls}" th:src="${photo}" src="" alt="Review photo">
-                </div>
-
-                <div class="comment-slot">Comments and replies can be connected here later.</div>
-
-                <div class="actions">
-                    <a class="secondary-btn" th:href="@{/reviews/edit/{id}(id=${review.reviewId})}">Edit</a>
-                    <form class="inline-form delete-form" method="post"
-                          th:action="@{/reviews/delete/{id}(id=${review.reviewId})}">
-                        <input type="hidden" name="businessId" th:value="${business.businessId}">
-                        <button class="danger-btn" type="button" data-open-delete>Delete</button>
-                    </form>
-                </div>
-            </article>
-        </div>
     </section>
+
+
+    <section>
+
+        <div class="review-section-head">
+
+            <div>
+                <h2>Visitor Reviews</h2>
+
+                <p class="review-section-count">
+                    <span th:text="${totalReviews}">0</span>
+                    reviews shared by visitors
+                </p>
+            </div>
+
+            <a class="review-btn-primary"
+               th:href="@{/reviews/create/{id}(id=${business.businessId})}">
+                Add Your Experience
+            </a>
+
+        </div>
+
+
+        <div class="review-empty"
+             th:if="${#lists.isEmpty(reviews)}">
+
+            <h3 class="review-empty-title">No reviews yet</h3>
+
+            <p class="review-empty-text">
+                Be the first visitor to share an experience with this heritage business.
+            </p>
+
+            <a class="review-btn-primary"
+               th:href="@{/reviews/create/{id}(id=${business.businessId})}">
+                Write the First Review
+            </a>
+        </div>
+
+
+        <div class="review-list"
+             th:if="${!#lists.isEmpty(reviews)}">
+
+            <article class="review-item"
+                     th:each="review : ${reviews}">
+
+                <a class="review-item-main"
+                   th:href="@{/reviews/detail/{id}(id=${review.reviewId})}">
+
+                    <div class="review-user">
+
+                        <div class="review-avatar"
+                             th:text="${review.touristName != null and !review.touristName.isEmpty()
+                             ? #strings.substring(review.touristName,0,1).toUpperCase()
+                             : 'U'}">
+                            U
+                        </div>
+
+                        <div>
+
+                            <h3 class="review-user-name"
+                                th:text="${review.touristName}">
+                                Visitor Name
+                            </h3>
+
+                            <div class="review-meta">
+
+                                <span class="review-stars">
+
+                                    <span th:each="star : ${#numbers.sequence(1,5)}"
+                                          th:classappend="${star <= review.rating} ? ' filled' : ''">
+                                        ★
+                                    </span>
+
+                                </span>
+
+                                <span class="review-date"
+                                      th:text="${review.createdAt}">
+                                    2026-08-14
+                                </span>
+
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <p class="review-text"
+                       th:text="${review.reviewText}">
+                        Review content.
+                    </p>
+
+                    <div class="review-photo-grid"
+                         th:if="${review.photoUrls != null and !#lists.isEmpty(review.photoUrls)}">
+
+                        <img th:each="photo : ${review.photoUrls}"
+                             th:src="${photo}"
+                             alt="Review photo">
+                    </div>
+
+                </a>
+
+
+                <div class="review-item-actions">
+
+                    <button type="button"
+                            class="review-like"
+                            data-review-like>
+                        ♡ Like <span>0</span>
+                    </button>
+
+                    <a class="review-comment-link"
+                       th:href="@{/reviews/detail/{id}(id=${review.reviewId})}">
+                        💬 Comments
+                    </a>
+
+                </div>
+
+
+                <div class="review-owner-actions"
+                     th:if="${currentUserId != null and review.touristId == currentUserId}">
+
+                    <a class="review-icon-btn"
+                       th:href="@{/reviews/edit/{id}(id=${review.reviewId})}"
+                       title="Edit review"
+                       aria-label="Edit review">
+                        ✎
+                    </a>
+
+                    <button type="button"
+                            class="review-icon-btn delete"
+                            data-review-delete
+                            th:attr="data-review-id=${review.reviewId}"
+                            title="Delete review"
+                            aria-label="Delete review">
+                        🗑
+                    </button>
+
+                </div>
+
+
+                <div class="review-comment-preview"
+                     th:if="${commentsByReview != null
+                     and commentsByReview[review.reviewId] != null
+                     and !#lists.isEmpty(commentsByReview[review.reviewId])}">
+
+                    <details>
+
+                        <summary>
+                            <span>Recent comments</span>
+                            <span>Expand</span>
+                        </summary>
+
+                        <div class="review-comment-list">
+
+                            <article class="review-comment"
+                                     th:each="comment, stat : ${commentsByReview[review.reviewId]}"
+                                     th:if="${stat.index < 2}">
+
+                                <p class="review-comment-user"
+                                   th:text="${comment.touristName}">
+                                    Visitor
+                                </p>
+
+                                <p class="review-comment-text"
+                                   th:text="${comment.commentText}">
+                                    Comment
+                                </p>
+
+                            </article>
+
+                        </div>
+
+                        <a class="review-comment-more"
+                           th:href="@{/reviews/detail/{id}(id=${review.reviewId})}">
+                            View all comments →
+                        </a>
+
+                    </details>
+
+                </div>
+
+            </article>
+
+        </div>
+
+    </section>
+
 </main>
 
-<div class="modal" id="deleteModal" aria-hidden="true">
-    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="deleteTitle">
-        <h3 id="deleteTitle">Delete Review?</h3>
-        <p class="muted">This review will be removed from the mock review list.</p>
-        <div class="modal-actions">
-            <button class="ghost-btn" type="button" id="cancelDelete">Cancel</button>
-            <button class="danger-btn" type="button" id="confirmDelete">Delete</button>
+
+<div id="reviewDeleteModal" class="review-modal" aria-hidden="true">
+
+    <div class="review-modal-card">
+
+        <button type="button"
+                class="review-modal-close"
+                data-cancel-delete
+                aria-label="Close">
+            ×
+        </button>
+
+        <h3 class="review-modal-title">Delete Review?</h3>
+
+        <p class="review-modal-text">
+            Are you sure you want to delete this review? This action cannot be undone.
+        </p>
+
+        <div class="review-modal-actions">
+
+            <button type="button"
+                    class="review-btn-outline"
+                    data-cancel-delete>
+                Cancel
+            </button>
+
+            <form id="reviewDeleteForm" method="post">
+
+                <input type="hidden"
+                       name="businessId"
+                       th:value="${business.businessId}">
+
+                <button type="submit"
+                        class="review-btn-primary">
+                    Delete
+                </button>
+
+            </form>
+
         </div>
+
     </div>
 </div>
 
-<script>
-const modal = document.getElementById('deleteModal');
-const cancelDelete = document.getElementById('cancelDelete');
-const confirmDelete = document.getElementById('confirmDelete');
-let pendingDeleteForm = null;
 
-document.querySelectorAll('[data-open-delete]').forEach((button) => {
-    button.addEventListener('click', () => {
-        pendingDeleteForm = button.closest('form');
-        modal.classList.add('is-open');
-        modal.setAttribute('aria-hidden', 'false');
-    });
-});
+<footer th:replace="~{fragments/footer :: global}"></footer>
+<script th:src="@{/js/review.js}"></script>
 
-cancelDelete.addEventListener('click', () => {
-    pendingDeleteForm = null;
-    modal.classList.remove('is-open');
-    modal.setAttribute('aria-hidden', 'true');
-});
-
-confirmDelete.addEventListener('click', () => {
-    if (pendingDeleteForm) {
-        pendingDeleteForm.submit();
-    }
-});
-</script>
 </body>
 </html>

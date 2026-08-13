@@ -130,21 +130,30 @@ public class ReviewController {
     }
 
     @GetMapping("/detail/{reviewId}")
-    public String reviewDetailPage(@PathVariable String reviewId,
-                                   Model model) {
+        public String reviewDetailPage(@PathVariable String reviewId,
+                                Model model) {
 
         ReviewDTO review = reviewService.getReview(reviewId);
 
         if (review == null) {
-            return "redirect:/reviews/BUS00";
+                return "redirect:/reviews/BUS00";
         }
 
         model.addAttribute("review", review);
-        model.addAttribute("business",
-                reviewService.getBusinessInformation(review.getBusinessId()));
+
+        model.addAttribute(
+                "business",
+                reviewService.getBusinessInformation(review.getBusinessId())
+        );
+
+        // Temporary empty list until Comment module is connected.
+        model.addAttribute("comments", java.util.Collections.emptyList());
+
+        // Temporary until current-user authentication is connected.
+        model.addAttribute("currentUserId", null);
 
         return "ReviewDetailPage";
-    }
+        }
 
     @PostMapping("/delete/{reviewId}")
     public String deleteReview(@PathVariable String reviewId,
