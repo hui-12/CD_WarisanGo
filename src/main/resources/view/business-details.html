@@ -44,7 +44,7 @@
         <p th:text="${business.description}">Business description</p>
       </section>
 
-      <section style="margin-top:16px">
+      <section style="margin-top:16px" id="photos">
         <h3>Photos</h3>
         <div th:if="${business.photos == null or #lists.isEmpty(business.photos)}">No photos available for this business.</div>
         <div class="photos" th:if="${business.photos != null}">

@@ -68,10 +68,22 @@
     </section>
 
     <section id="results" class="results" aria-live="polite">
-      <!-- cards inserted by JS -->
+      <!-- Server-side rendered cards -->
+      <div th:if="${businesses == null or #lists.isEmpty(businesses)}" class="no-results">No businesses found at the moment.</div>
+
+      <article th:each="b : ${businesses}" class="card">
+        <div class="thumb"><img th:src="${b.photos[0]}" th:alt="${b.name} + ' photo'" src="/images/business-default.jpg"/></div>
+        <h3 th:text="${b.name}">Business Name</h3>
+        <div class="meta" th:text="${b.category} + ' • ' + ${b.city} + ', ' + ${b.state} + ' • ★ ' + ${b.rating}"></div>
+        <div class="desc" th:text="${b.description}">Description</div>
+        <div class="card-actions">
+          <a th:href="@{'/business/' + ${b.id}}" class="link-btn">View Details</a>
+          <a th:href="@{'/business/' + ${b.id} + '#photos'}" class="link-btn">View Photos</a>
+        </div>
+      </article>
+
     </section>
 
-    <div id="noResults" class="no-results" hidden>No businesses found at the moment.</div>
   </main>
 
   <footer class="site-footer">
@@ -80,88 +92,51 @@
 
   <script>
   (function(){
-    // Sample data (fallback) — server may inject window.__BUSINESSES__
-    const sampleData = window.__BUSINESSES__ && Array.isArray(window.__BUSINESSES__) ? window.__BUSINESSES__ : [
-      {id:'b1', name:'Kedai Nasi Lemak Warisan', category:'Street Food', state:'Selangor', city:'Kuala Lumpur', rating:4.6, photos:['/images/business-default.jpg','/images/hero-banner.jpg'], address:'No 12, Jalan Heritage, KL', description:'Traditional nasi lemak served with family sambal recipe.'},
-      {id:'b2', name:'Melaka Satay House', category:'Grill', state:'Melaka', city:'Melaka City', rating:4.4, photos:['/images/business-default.jpg'], address:'Lot 5, Jonker Street', description:'Famous local satay using charcoal grill.'}
-    ];
-
-    const resultsEl = document.getElementById('results');
+    // Basic client-side filtering working on server-rendered DOM
+    const searchInput = document.getElementById('searchInput');
+    const searchBtn = document.getElementById('searchBtn');
     const categoryFilter = document.getElementById('categoryFilter');
     const stateFilter = document.getElementById('stateFilter');
     const cityFilter = document.getElementById('cityFilter');
-    const searchInput = document.getElementById('searchInput');
-    const searchBtn = document.getElementById('searchBtn');
     const clearBtn = document.getElementById('clearFilters');
-    const noResultsEl = document.getElementById('noResults');
-
-    let businesses = sampleData.slice();
-
-    function uniqueValues(list,key){ return [...new Set(list.map(i=>i[key]||'').filter(Boolean))].sort(); }
-
-    function populateFilters(){
-      const cats = uniqueValues(businesses,'category');
-      const states = uniqueValues(businesses,'state');
-      const cities = uniqueValues(businesses,'city');
-      cats.forEach(c=>{ const o=document.createElement('option'); o.value=c; o.textContent=c; categoryFilter.appendChild(o); });
-      states.forEach(s=>{ const o=document.createElement('option'); o.value=s; o.textContent=s; stateFilter.appendChild(o); });
-      cities.forEach(c=>{ const o=document.createElement('option'); o.value=c; o.textContent=c; cityFilter.appendChild(o); });
-    }
-
-    function renderCards(list){
-      resultsEl.innerHTML='';
-      if(!list || list.length===0){ noResultsEl.hidden = false; return; }
-      noResultsEl.hidden = true;
-      list.forEach(b=>{
-        const card = document.createElement('article'); card.className='card';
-        const thumb = document.createElement('div'); thumb.className='thumb';
-        const img = document.createElement('img'); img.alt = b.name + ' photo'; img.src = b.photos && b.photos.length ? b.photos[0] : '/images/business-default.jpg';
-        thumb.appendChild(img);
-
-        const title = document.createElement('h3'); title.textContent = b.name;
-        const meta = document.createElement('div'); meta.className='meta'; meta.textContent = `${b.category} • ${b.city}, ${b.state} • ★ ${b.rating}`;
-        const desc = document.createElement('div'); desc.className='desc'; desc.textContent = b.description || '';
-
-        const actions = document.createElement('div'); actions.className='card-actions';
-        const detailsLink = document.createElement('a'); detailsLink.href = '/business/' + encodeURIComponent(b.id); detailsLink.className='link-btn'; detailsLink.textContent='View Details';
-        const galleryBtn = document.createElement('button'); galleryBtn.className='link-btn'; galleryBtn.type='button'; galleryBtn.textContent='View Gallery';
-        galleryBtn.addEventListener('click', ()=>{ openGallery(b.photos || []); });
-
-        actions.appendChild(detailsLink); actions.appendChild(galleryBtn);
-
-        card.appendChild(thumb);
-        card.appendChild(title);
-        card.appendChild(meta);
-        card.appendChild(desc);
-        card.appendChild(actions);
-        resultsEl.appendChild(card);
-      });
-    }
-
-    // simple gallery (modal) --- keep minimal
-    function openGallery(photos){ if(!photos || photos.length===0){ alert('No photos available'); return; } alert('Gallery open — implement later or use details page for full gallery'); }
 
     function applyFilters(){
       const q = (searchInput.value || '').trim().toLowerCase();
       const cat = categoryFilter.value; const st = stateFilter.value; const ct = cityFilter.value;
-      let list = businesses.filter(b=> b.name.toLowerCase().includes(q));
-      if(cat) list = list.filter(b=> b.category === cat);
-      if(st) list = list.filter(b=> b.state === st);
-      if(ct) list = list.filter(b=> b.city === ct);
-      renderCards(list);
+      const cards = Array.from(document.querySelectorAll('.results .card'));
+      let any=false;
+      cards.forEach(card=>{
+        const name = (card.querySelector('h3')?.textContent || '').toLowerCase();
+        const meta = (card.querySelector('.meta')?.textContent || '').toLowerCase();
+        const matches = name.includes(q) && (!cat || meta.includes(cat.toLowerCase())) && (!st || meta.includes(st.toLowerCase())) && (!ct || meta.includes(ct.toLowerCase()));
+        card.style.display = matches ? '' : 'none';
+        if(matches) any=true;
+      });
+      document.querySelector('.no-results').style.display = any ? 'none' : '';
     }
 
     searchBtn.addEventListener('click', applyFilters);
     searchInput.addEventListener('keyup', e=>{ if(e.key==='Enter') applyFilters(); });
-    categoryFilter.addEventListener('change', applyFilters);
-    stateFilter.addEventListener('change', ()=>{ populateCityOptions(); applyFilters(); });
-    cityFilter.addEventListener('change', applyFilters);
-    clearBtn.addEventListener('click', ()=>{ categoryFilter.value=''; stateFilter.value=''; cityFilter.value=''; searchInput.value=''; populateCityOptions(); renderCards(businesses); });
+    clearBtn.addEventListener('click', ()=>{ searchInput.value=''; categoryFilter.value=''; stateFilter.value=''; cityFilter.value=''; applyFilters(); });
 
-    function populateCityOptions(){ const selectedState = stateFilter.value; const cities = selectedState ? uniqueValues(businesses.filter(b=>b.state===selectedState),'city') : uniqueValues(businesses,'city'); cityFilter.innerHTML = '<option value="">All Cities</option>'; cities.forEach(c=>{ const o=document.createElement('option'); o.value=c; o.textContent=c; cityFilter.appendChild(o); }); }
-
-    // init
-    window.addEventListener('DOMContentLoaded', ()=>{ if(window.__BUSINESSES__ && Array.isArray(window.__BUSINESSES__)) businesses = window.__BUSINESSES__; populateFilters(); populateCityOptions(); renderCards(businesses); });
+    // populate filters from rendered cards
+    function populateFilters(){
+      const cards = Array.from(document.querySelectorAll('.results .card'));
+      const cats = new Set(); const states = new Set(); const cities = new Set();
+      cards.forEach(card=>{
+        const meta = card.querySelector('.meta')?.textContent || '';
+        const parts = meta.split('•').map(s=>s.trim());
+        if(parts[0]) cats.add(parts[0]);
+        if(parts[1]){
+          const loc = parts[1].split(',')[0]?.trim(); if(loc) cities.add(loc);
+          const state = parts[1].split(',')[1]?.trim(); if(state) states.add(state);
+        }
+      });
+      cats.forEach(c=>{ const o=document.createElement('option'); o.value=c; o.textContent=c; categoryFilter.appendChild(o); });
+      states.forEach(s=>{ const o=document.createElement('option'); o.value=s; o.textContent=s; stateFilter.appendChild(o); });
+      cities.forEach(c=>{ const o=document.createElement('option'); o.value=c; o.textContent=c; cityFilter.appendChild(o); });
+    }
+    window.addEventListener('DOMContentLoaded', ()=>{ populateFilters(); });
   })();
   </script>
 </body>
