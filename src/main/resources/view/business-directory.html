@@ -3,137 +3,89 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Heritage Business Directory - WarisanGo</title>
-
-  <!-- Inlined CSS for easier single-file management -->
+  <title>Heritage Business Directory — WarisanGo</title>
   <style>
-  :root{
-    --accent:#2c6fb2;
-    --muted:#666;
-    --card-bg:#fff;
-    --page-bg:#f5f7fb;
-  }
-  *{box-sizing:border-box}
-  body{font-family:Inter, system-ui, Arial, sans-serif;background:var(--page-bg);color:#222;margin:0}
-  .container{max-width:1100px;margin:0 auto;padding:20px}
-  .site-header{background:var(--card-bg);border-bottom:1px solid #e6e9ef;padding:18px 0}
-  .site-header h1{margin:0;font-size:1.4rem}
-  .subtitle{color:var(--muted);margin-top:6px}
-  .controls{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin:18px 0}
-  .search-wrap{display:flex;gap:8px}
-  .search-wrap input{padding:10px 12px;border:1px solid #d7dbe3;border-radius:6px;width:320px}
-  .search-wrap button{background:var(--accent);color:#fff;border:none;padding:10px 14px;border-radius:6px;cursor:pointer}
-  .filters{display:flex;gap:8px;align-items:center}
-  .filters select{padding:8px;border:1px solid #d7dbe3;border-radius:6px}
-  .results{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
-  .card{background:var(--card-bg);padding:12px;border-radius:8px;border:1px solid #e6e9ef;display:flex;flex-direction:column;gap:10px}
-  .card .thumb{height:160px;background:#ddd;border-radius:6px;display:block;overflow:hidden}
-  .card .thumb img{width:100%;height:100%;object-fit:cover;display:block}
-  .card h3{margin:0;font-size:1.05rem}
-  .card .meta{color:var(--muted);font-size:0.9rem}
-  .card .actions{margin-top:auto;display:flex;justify-content:space-between;gap:8px}
-  .card .btn{background:#fff;border:1px solid #d7dbe3;padding:8px 10px;border-radius:6px;cursor:pointer}
-  .badge{background:#f0f5ff;color:var(--accent);padding:4px 8px;border-radius:12px;font-size:0.8rem}
-  .no-results{padding:30px;text-align:center;color:var(--muted)}
-  /* Modal styles */
-  .modal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.5);z-index:50}
-  .modal[hidden]{display:none}
-  .modal-content{background:#fff;border-radius:8px;padding:16px;max-width:900px;width:95%;position:relative}
-  .close{position:absolute;right:10px;top:6px;background:transparent;border:none;font-size:1.2rem;cursor:pointer}
-  .gallery-body{display:flex;align-items:center;justify-content:center;min-height:320px}
-  .gallery-body img{max-width:100%;max-height:70vh;border-radius:6px}
-  .gallery-controls{display:flex;gap:8px;justify-content:center;margin-top:12px}
-  @media (max-width:640px){.search-wrap input{width:160px}.controls{flex-direction:column;align-items:stretch}}
-  </style>
+    :root{--bg:#f6f8fb;--card:#ffffff;--muted:#6b7280;--accent:#1f6feb;--accent-weak:#e6f0ff}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,system-ui,Arial,sans-serif;background:var(--bg);color:#0f172a}
+    .site-header{background:var(--card);border-bottom:1px solid #e6e9ef}
+    .container{max-width:1100px;margin:0 auto;padding:20px}
+    .branding{display:flex;align-items:center;gap:14px}
+    .branding h1{font-size:1.25rem;margin:0}
+    .subtitle{color:var(--muted);margin-top:6px;font-size:0.95rem}
 
+    .controls{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:18px 0}
+    .search{display:flex;gap:8px;align-items:center}
+    .search input{padding:10px 12px;border-radius:8px;border:1px solid #dbe3f0;min-width:320px}
+    .btn{background:var(--accent);color:#fff;border:none;padding:10px 14px;border-radius:8px;cursor:pointer}
+
+    .filters{display:flex;gap:8px;align-items:center}
+    .filters select{padding:8px;border-radius:8px;border:1px solid #dbe3f0;background:#fff}
+
+    .results{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px}
+    .card{background:var(--card);padding:14px;border-radius:12px;border:1px solid #e6e9ef;display:flex;flex-direction:column;gap:10px;box-shadow:0 1px 2px rgba(15,23,42,0.03)}
+    .thumb{height:160px;border-radius:8px;overflow:hidden;background:#f0f2f6}
+    .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+    .meta{color:var(--muted);font-size:0.9rem}
+    .card h3{margin:0;font-size:1.05rem}
+    .desc{color:#334155;font-size:0.95rem}
+
+    .card-actions{display:flex;gap:8px;margin-top:auto}
+    .link-btn{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;border:1px solid #e6e9ef;background:#fff;color:#0f172a;text-decoration:none}
+
+    .no-results{padding:36px;text-align:center;color:var(--muted)}
+
+    footer.site-footer{padding:28px 0;color:var(--muted)}
+
+    @media (max-width:640px){.controls{flex-direction:column;align-items:stretch}.search input{min-width:140px}}
+  </style>
 </head>
 <body>
   <header class="site-header">
     <div class="container">
-      <h1>Heritage Business Directory</h1>
-      <p class="subtitle">Discover heritage food businesses approved by admins</p>
+      <div class="branding">
+        <div>
+          <h1>WarisanGo</h1>
+          <div class="subtitle">Heritage Business Directory</div>
+        </div>
+      </div>
     </div>
   </header>
 
   <main class="container">
     <section class="controls">
-      <div class="search-wrap">
+      <div class="search">
         <input id="searchInput" type="search" placeholder="Search by business name..." aria-label="Search business">
-        <button id="searchBtn" type="button">Search</button>
+        <button id="searchBtn" class="btn" type="button">Search</button>
       </div>
 
       <div class="filters">
-        <select id="categoryFilter">
-          <option value="">All Categories</option>
-        </select>
-        <select id="stateFilter">
-          <option value="">All States</option>
-        </select>
-        <select id="cityFilter">
-          <option value="">All Cities</option>
-        </select>
-        <button id="clearFilters" type="button">Clear</button>
+        <select id="categoryFilter"><option value="">All Categories</option></select>
+        <select id="stateFilter"><option value="">All States</option></select>
+        <select id="cityFilter"><option value="">All Cities</option></select>
+        <button id="clearFilters" type="button" class="link-btn">Clear</button>
       </div>
     </section>
 
-    <section id="results" class="results">
-      <!-- Cards will be inserted here -->
-
-      <!-- Thymeleaf fallback: render server-side if provided (optional) -->
-      <div th:if="${businesses == null}"></div>
+    <section id="results" class="results" aria-live="polite">
+      <!-- cards inserted by JS -->
     </section>
 
-    <div id="noResults" class="no-results" hidden>
-      No businesses found at the moment.
-    </div>
+    <div id="noResults" class="no-results" hidden>No businesses found at the moment.</div>
   </main>
-
-  <!-- Gallery modal -->
-  <div id="galleryModal" class="modal" hidden>
-    <div class="modal-content" role="dialog" aria-modal="true" aria-label="Photo gallery">
-      <button id="closeGallery" class="close" type="button" aria-label="Close gallery">×</button>
-      <div id="galleryBody" class="gallery-body"></div>
-      <div class="gallery-controls">
-        <button id="prevPhoto" type="button">Prev</button>
-        <button id="nextPhoto" type="button">Next</button>
-      </div>
-    </div>
-  </div>
 
   <footer class="site-footer">
     <div class="container">WarisanGo © VM2026</div>
   </footer>
 
-  <!-- Inlined JS for easier single-file management -->
   <script>
   (function(){
-    // Sample data for demo; replace by server-injected window.__BUSINESSES__ if available
-    const sampleData = [
-      {
-        id: 'b1',
-        name: 'Kedai Nasi Lemak Warisan',
-        category: 'Street Food',
-        state: 'Selangor',
-        city: 'Kuala Lumpur',
-        rating: 4.6,
-        photos: ['/images/business-default.jpg','/images/hero-banner.jpg'],
-        address: 'No 12, Jalan Heritage, KL',
-        description: 'Traditional nasi lemak served with family sambal recipe.'
-      },
-      {
-        id: 'b2',
-        name: 'Melaka Satay House',
-        category: 'Grill',
-        state: 'Melaka',
-        city: 'Melaka City',
-        rating: 4.4,
-        photos: ['/images/business-default.jpg'],
-        address: 'Lot 5, Jonker Street',
-        description: 'Famous local satay using charcoal grill.'
-      }
+    // Sample data (fallback) — server may inject window.__BUSINESSES__
+    const sampleData = window.__BUSINESSES__ && Array.isArray(window.__BUSINESSES__) ? window.__BUSINESSES__ : [
+      {id:'b1', name:'Kedai Nasi Lemak Warisan', category:'Street Food', state:'Selangor', city:'Kuala Lumpur', rating:4.6, photos:['/images/business-default.jpg','/images/hero-banner.jpg'], address:'No 12, Jalan Heritage, KL', description:'Traditional nasi lemak served with family sambal recipe.'},
+      {id:'b2', name:'Melaka Satay House', category:'Grill', state:'Melaka', city:'Melaka City', rating:4.4, photos:['/images/business-default.jpg'], address:'Lot 5, Jonker Street', description:'Famous local satay using charcoal grill.'}
     ];
 
-    // DOM refs (will be null if not present yet)
     const resultsEl = document.getElementById('results');
     const categoryFilter = document.getElementById('categoryFilter');
     const stateFilter = document.getElementById('stateFilter');
@@ -142,132 +94,56 @@
     const searchBtn = document.getElementById('searchBtn');
     const clearBtn = document.getElementById('clearFilters');
     const noResultsEl = document.getElementById('noResults');
-    const galleryModal = document.getElementById('galleryModal');
-    const galleryBody = document.getElementById('galleryBody');
-    const closeGallery = document.getElementById('closeGallery');
-    const prevPhoto = document.getElementById('prevPhoto');
-    const nextPhoto = document.getElementById('nextPhoto');
 
     let businesses = sampleData.slice();
-    let currentPhotos = [];
-    let currentPhotoIndex = 0;
 
-    function uniqueValues(list, key){
-      return [...new Set(list.map(i=>i[key] || '').filter(Boolean))].sort();
-    }
+    function uniqueValues(list,key){ return [...new Set(list.map(i=>i[key]||'').filter(Boolean))].sort(); }
 
     function populateFilters(){
-      if(!categoryFilter || !stateFilter || !cityFilter) return;
       const cats = uniqueValues(businesses,'category');
       const states = uniqueValues(businesses,'state');
       const cities = uniqueValues(businesses,'city');
-
-      cats.forEach(c=>{
-        const o = document.createElement('option'); o.value=c; o.textContent=c; categoryFilter.appendChild(o);
-      });
-      states.forEach(s=>{ const o = document.createElement('option'); o.value=s; o.textContent=s; stateFilter.appendChild(o); });
-      cities.forEach(c=>{ const o = document.createElement('option'); o.value=c; o.textContent=c; cityFilter.appendChild(o); });
+      cats.forEach(c=>{ const o=document.createElement('option'); o.value=c; o.textContent=c; categoryFilter.appendChild(o); });
+      states.forEach(s=>{ const o=document.createElement('option'); o.value=s; o.textContent=s; stateFilter.appendChild(o); });
+      cities.forEach(c=>{ const o=document.createElement('option'); o.value=c; o.textContent=c; cityFilter.appendChild(o); });
     }
 
     function renderCards(list){
-      if(!resultsEl) return;
       resultsEl.innerHTML='';
-      if(!list || list.length===0){ if(noResultsEl) noResultsEl.hidden = false; return; }
-      if(noResultsEl) noResultsEl.hidden = true;
+      if(!list || list.length===0){ noResultsEl.hidden = false; return; }
+      noResultsEl.hidden = true;
       list.forEach(b=>{
         const card = document.createElement('article'); card.className='card';
         const thumb = document.createElement('div'); thumb.className='thumb';
-        const img = document.createElement('img'); img.alt = b.name + ' photo'; img.src = b.photos && b.photos.length? b.photos[0] : '/images/business-default.jpg';
+        const img = document.createElement('img'); img.alt = b.name + ' photo'; img.src = b.photos && b.photos.length ? b.photos[0] : '/images/business-default.jpg';
         thumb.appendChild(img);
 
-        const h3 = document.createElement('h3'); h3.textContent = b.name;
+        const title = document.createElement('h3'); title.textContent = b.name;
         const meta = document.createElement('div'); meta.className='meta'; meta.textContent = `${b.category} • ${b.city}, ${b.state} • ★ ${b.rating}`;
-        const desc = document.createElement('p'); desc.textContent = b.description || '';
+        const desc = document.createElement('div'); desc.className='desc'; desc.textContent = b.description || '';
 
-        const actions = document.createElement('div'); actions.className='actions';
-        const detailsBtn = document.createElement('button'); detailsBtn.className='btn'; detailsBtn.type='button'; detailsBtn.textContent='View Details';
-        detailsBtn.addEventListener('click', ()=>{ window.location.href = '/business/' + encodeURIComponent(b.id); });
-        const galleryBtn = document.createElement('button'); galleryBtn.className='btn'; galleryBtn.type='button'; galleryBtn.textContent='View Gallery';
+        const actions = document.createElement('div'); actions.className='card-actions';
+        const detailsLink = document.createElement('a'); detailsLink.href = '/business/' + encodeURIComponent(b.id); detailsLink.className='link-btn'; detailsLink.textContent='View Details';
+        const galleryBtn = document.createElement('button'); galleryBtn.className='link-btn'; galleryBtn.type='button'; galleryBtn.textContent='View Gallery';
         galleryBtn.addEventListener('click', ()=>{ openGallery(b.photos || []); });
 
-        actions.appendChild(detailsBtn); actions.appendChild(galleryBtn);
+        actions.appendChild(detailsLink); actions.appendChild(galleryBtn);
 
         card.appendChild(thumb);
-        card.appendChild(h3);
+        card.appendChild(title);
         card.appendChild(meta);
         card.appendChild(desc);
         card.appendChild(actions);
-
         resultsEl.appendChild(card);
       });
     }
 
-    function openDetails(business){
-      // now navigate to details page instead of alert
-      window.location.href = '/business/' + encodeURIComponent(business.id);
-    }
+    // simple gallery (modal) --- keep minimal
+    function openGallery(photos){ if(!photos || photos.length===0){ alert('No photos available'); return; } alert('Gallery open — implement later or use details page for full gallery'); }
 
-    function openGallery(photos){
-      if(!photos || photos.length===0){ alert('No photos available for this business.'); return; }
-      currentPhotos = photos;
-      currentPhotoIndex = 0;
-      updateGallery();
-      if(galleryModal){
-        galleryModal.hidden = false;
-        // focus first focusable for accessibility
-        const focusable = galleryModal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
-        if(focusable.length) focusable[0].focus();
-      }
-    }
-
-    function updateGallery(){
-      if(!galleryBody) return;
-      galleryBody.innerHTML = '';
-      const img = document.createElement('img'); img.src = currentPhotos[currentPhotoIndex];
-      galleryBody.appendChild(img);
-    }
-
-    function closeModal(){
-      if(galleryModal){
-        galleryModal.hidden = true;
-        if(searchInput) searchInput.focus();
-      }
-    }
-
-    // event bindings
-    if(prevPhoto) prevPhoto.addEventListener('click', ()=>{
-      if(currentPhotos.length===0) return;
-      currentPhotoIndex = (currentPhotoIndex - 1 + currentPhotos.length) % currentPhotos.length;
-      updateGallery();
-    });
-    if(nextPhoto) nextPhoto.addEventListener('click', ()=>{
-      if(currentPhotos.length===0) return;
-      currentPhotoIndex = (currentPhotoIndex + 1) % currentPhotos.length;
-      updateGallery();
-    });
-    if(closeGallery) closeGallery.addEventListener('click', (e)=>{ e.stopPropagation(); closeModal(); });
-
-    // backdrop click closes modal
-    if(galleryModal){
-      galleryModal.addEventListener('click', (e)=>{
-        if(e.target === galleryModal) closeModal();
-      });
-    }
-
-    // Escape key closes modal
-    document.addEventListener('keydown', (e)=>{
-      if(e.key === 'Escape'){
-        if(galleryModal && !galleryModal.hidden) closeModal();
-      }
-    });
-
-    // Filters and search
     function applyFilters(){
-      const q = (searchInput && searchInput.value ? searchInput.value.trim().toLowerCase() : '');
-      const cat = (categoryFilter && categoryFilter.value) || '';
-      const st = (stateFilter && stateFilter.value) || '';
-      const ct = (cityFilter && cityFilter.value) || '';
-
+      const q = (searchInput.value || '').trim().toLowerCase();
+      const cat = categoryFilter.value; const st = stateFilter.value; const ct = cityFilter.value;
       let list = businesses.filter(b=> b.name.toLowerCase().includes(q));
       if(cat) list = list.filter(b=> b.category === cat);
       if(st) list = list.filter(b=> b.state === st);
@@ -275,40 +151,18 @@
       renderCards(list);
     }
 
-    if(searchBtn) searchBtn.addEventListener('click', applyFilters);
-    if(searchInput) searchInput.addEventListener('keyup', (e)=>{ if(e.key === 'Enter') applyFilters(); });
-    if(categoryFilter) categoryFilter.addEventListener('change', applyFilters);
-    if(stateFilter) stateFilter.addEventListener('change', ()=>{ populateCityOptions(); applyFilters(); });
-    if(cityFilter) cityFilter.addEventListener('change', applyFilters);
-    if(clearBtn) clearBtn.addEventListener('click', ()=>{
-      if(categoryFilter) categoryFilter.value = '';
-      if(stateFilter) stateFilter.value = '';
-      if(cityFilter) cityFilter.value = '';
-      if(searchInput) searchInput.value = '';
-      populateCityOptions();
-      renderCards(businesses);
-    });
+    searchBtn.addEventListener('click', applyFilters);
+    searchInput.addEventListener('keyup', e=>{ if(e.key==='Enter') applyFilters(); });
+    categoryFilter.addEventListener('change', applyFilters);
+    stateFilter.addEventListener('change', ()=>{ populateCityOptions(); applyFilters(); });
+    cityFilter.addEventListener('change', applyFilters);
+    clearBtn.addEventListener('click', ()=>{ categoryFilter.value=''; stateFilter.value=''; cityFilter.value=''; searchInput.value=''; populateCityOptions(); renderCards(businesses); });
 
-    function populateCityOptions(){
-      if(!cityFilter) return;
-      const selectedState = (stateFilter && stateFilter.value) || '';
-      const cities = selectedState ? uniqueValues(businesses.filter(b=>b.state===selectedState),'city') : uniqueValues(businesses,'city');
-      cityFilter.innerHTML = '<option value="">All Cities</option>';
-      cities.forEach(c=>{ const o=document.createElement('option'); o.value=c; o.textContent=c; cityFilter.appendChild(o); });
-    }
+    function populateCityOptions(){ const selectedState = stateFilter.value; const cities = selectedState ? uniqueValues(businesses.filter(b=>b.state===selectedState),'city') : uniqueValues(businesses,'city'); cityFilter.innerHTML = '<option value="">All Cities</option>'; cities.forEach(c=>{ const o=document.createElement('option'); o.value=c; o.textContent=c; cityFilter.appendChild(o); }); }
 
-    // On load
-    window.addEventListener('DOMContentLoaded', ()=>{
-      if(window.__BUSINESSES__ && Array.isArray(window.__BUSINESSES__)){
-        businesses = window.__BUSINESSES__;
-      }
-      populateFilters();
-      populateCityOptions();
-      renderCards(businesses);
-    });
-
+    // init
+    window.addEventListener('DOMContentLoaded', ()=>{ if(window.__BUSINESSES__ && Array.isArray(window.__BUSINESSES__)) businesses = window.__BUSINESSES__; populateFilters(); populateCityOptions(); renderCards(businesses); });
   })();
   </script>
-
 </body>
 </html>
