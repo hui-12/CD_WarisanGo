@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -13,7 +13,7 @@ button{font-family:'Inter',Arial,sans-serif;cursor:pointer;}
 input,textarea,select{font-family:'Inter',Arial,sans-serif;}
 .batik-divider{height:2px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='4'%3E%3Cpath d='M12 0L24 2L12 4L0 2Z' fill='none' stroke='%23C4522A' stroke-width='0.6' opacity='0.35'/%3E%3Ccircle cx='12' cy='2' r='0.8' fill='%23C4522A' opacity='0.3'/%3E%3Ccircle cx='0' cy='2' r='0.5' fill='%23C4522A' opacity='0.2'/%3E%3Ccircle cx='24' cy='2' r='0.5' fill='%23C4522A' opacity='0.2'/%3E%3C/svg%3E");background-repeat:repeat-x;background-position:center;border:none;}
 .batik-bg{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Cpath d='M12 2L22 12L12 22L2 12Z' fill='none' stroke='%23C4522A' stroke-width='0.6' opacity='0.15'/%3E%3Ccircle cx='12' cy='12' r='1' fill='%23C4522A' opacity='0.12'/%3E%3C/svg%3E");background-repeat:repeat;}
-nav{background:#2A2118;position:sticky;top:0;z-index:50;}
+#site-header{background:#2A2118;position:sticky;top:0;z-index:50;}
 .nav-inner{max-width:1100px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:60px;}
 .wordmark{display:flex;align-items:center;gap:10px;}
 .wordmark-text{font-family:'DM Serif Display',Georgia,serif;font-size:19px;color:#FAF6EE;letter-spacing:-0.01em;}
@@ -38,23 +38,23 @@ h1{font-family:'DM Serif Display',Georgia,serif;font-size:2.5rem;line-height:1.1
 </head>
 <body>
 <!-- NAV -->
-<nav>
+<header id="site-header">
   <div class="nav-inner">
     <div class="wordmark">
       <span style="font-size:20px">🍛</span>
       <span class="wordmark-text">WarisanGo</span>
       <span class="wordmark-badge">REWARDS</span>
     </div>
-    <div class="nav-links">
-      <a class="nav-btn" href="/CheckInPage">Check In</a>
-      <a class="nav-btn" href="/BadgePage">Badges</a>
-      <a class="nav-btn" href="/RewardPage">Rewards</a>
-      <a class="nav-btn" href="/ChallengePage">Challenges</a>
-      <a class="nav-btn admin-btn active" href="/AdminChallengePage">Admin</a>
-    </div>
+    <nav class="nav-links" id="nav-menu">
+      <button type="button" class="nav-btn" th:classappend="${activePage == 'checkin'} ? ' active'" data-navigate="checkin">Check In</button>
+      <button type="button" class="nav-btn" th:classappend="${activePage == 'badges'} ? ' active'" data-navigate="badges">Badges</button>
+      <button type="button" class="nav-btn" th:classappend="${activePage == 'rewards'} ? ' active'" data-navigate="rewards">Rewards</button>
+      <button type="button" class="nav-btn" th:classappend="${activePage == 'challenges'} ? ' active'" data-navigate="challenges">Challenges</button>
+      <button type="button" class="nav-btn admin-btn" th:classappend="${activePage == 'admin'} ? ' active'" data-navigate="admin">Admin</button>
+    </nav>
   </div>
   <div class="batik-divider" style="opacity:0.5"></div>
-</nav>
+</header>
 
 <div id="page-admin" class="page active">
 <main>
@@ -242,6 +242,24 @@ function showAdminSuccess(msg) {
 
 // ── Init ──────────────────────────────────────────────────────
 renderAdminRows();
+</script>
+<script>
+// Nav routing: maps data-navigate keys to Spring routes
+(function () {
+  var ROUTES = {
+    checkin: '/CheckInPage',
+    badges: '/BadgePage',
+    rewards: '/RewardPage',
+    challenges: '/ChallengePage',
+    admin: '/AdminChallengePage'
+  };
+  document.getElementById('nav-menu').addEventListener('click', function (e) {
+    var btn = e.target.closest('[data-navigate]');
+    if (!btn) return;
+    var key = btn.getAttribute('data-navigate');
+    if (ROUTES[key]) window.location.href = ROUTES[key];
+  });
+})();
 </script>
 </body>
 </html>
