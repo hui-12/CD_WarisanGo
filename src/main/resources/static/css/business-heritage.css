@@ -1,0 +1,53 @@
+/* Business Heritage CSS — derived from global.css and tailored for business-directory and details pages */
+:root{
+  --bg:#faf9f5;
+  --ink:#141413;
+  --amber:#c9a84c;
+  --muted:#6b6b68;
+  --surface:#ffffff;
+  --border:#e6e9ef;
+  --accent:#1f6feb;
+  --radius:12px;
+}
+
+/* Page layout */
+.container{max-width:1100px;margin:0 auto;padding:20px}
+
+/* Controls */
+.controls{display:flex;gap:16px;align-items:center;justify-content:space-between;padding:18px 0}
+.search{display:flex;gap:8px;align-items:center}
+.search input{padding:10px 12px;border-radius:10px;border:1px solid var(--border);min-width:260px;background:#fff;color:var(--ink)}
+.btn{background:var(--accent);color:#fff;border:none;padding:10px 14px;border-radius:10px;cursor:pointer}
+
+.filters{display:flex;gap:10px;align-items:center}
+.filters select{padding:8px;border-radius:8px;border:1px solid var(--border);background:#fff}
+.link-btn{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:10px;border:1px solid var(--border);background:#fff;color:var(--ink);text-decoration:none}
+
+/* Results list */
+.results{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;margin-top:14px}
+.card{background:var(--surface);padding:14px;border-radius:var(--radius);border:1px solid var(--border);display:flex;flex-direction:column;gap:10px;box-shadow:0 1px 2px rgba(20,20,20,0.04)}
+.thumb{height:160px;border-radius:10px;overflow:hidden;background:#f0f2f6}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.card h3{margin:0;font-family:'Fraunces', Georgia, serif;font-size:1.05rem}
+.meta{color:var(--muted);font-size:0.9rem}
+.desc{color:#334155;font-size:0.95rem}
+.card-actions{display:flex;gap:8px;margin-top:auto}
+.no-results{padding:36px;text-align:center;color:var(--muted)}
+
+/* Detail view */
+.container--detail{max-width:1000px;margin:24px auto;padding:20px}
+.card--detail{background:var(--surface);padding:20px;border-radius:var(--radius);border:1px solid var(--border)}
+.hero{display:grid;grid-template-columns:1fr 320px;gap:18px}
+.hero img{width:100%;height:360px;object-fit:cover;border-radius:10px}
+.info h1{margin:0 0 8px 0;font-family:'Fraunces', Georgia, serif}
+.address{margin-bottom:12px;color:var(--muted)}
+.photos{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-top:16px}
+.photos img{width:100%;height:120px;object-fit:cover;border-radius:8px}
+.back{display:inline-block;margin-bottom:12px;text-decoration:none;color:var(--accent)}
+
+/* Responsive */
+@media (max-width:900px){
+  .hero{grid-template-columns:1fr}
+  .hero img{height:220px}
+  .search input{min-width:160px}
+}
