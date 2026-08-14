@@ -1,12 +1,26 @@
 <!doctype html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="fragments :: head(${business.name} + ' - Details — WarisanGo')"></head>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title th:text="${business.name} + ' - Details — WarisanGo'">Business Details — WarisanGo</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Global Styles (With static href fallback) -->
+  <link rel="stylesheet" href="/css/global.css" th:href="@{/css/global.css}">
+  <!-- Assignment + Tailwind compiled styles -->
+  <link rel="stylesheet" th:href="@{/css/bundle.css}" href="/css/bundle.css">
+  <link rel="stylesheet" th:href="@{/css/assignment.css}" href="/css/assignment.css">
+  <!-- Page-specific stylesheet -->
+  <link rel="stylesheet" th:href="@{/css/business-heritage.css}" href="/css/business-heritage.css">
+</head>
 <body>
   <!-- Navbar fragment -->
   <div th:replace="fragments :: navbar('directory')"></div>
-
-  <!-- Page-specific stylesheet -->
-  <link rel="stylesheet" th:href="@{/css/business-heritage.css}" href="/css/business-heritage.css">
 
   <main class="container container--detail">
     <a class="back" href="/">← Back to directory</a>
