@@ -106,7 +106,7 @@
 
 .widget-label {
     font-size: 11px;
-    color: #B59410;
+    color: rgba(250, 249, 245, 0.5);
     text-transform: uppercase;
     letter-spacing: 0.8px;
     margin-bottom: 4px;
@@ -227,7 +227,7 @@
     color: #6b6b68;
 }
 
-.points-pill {
+.points-tag {
     font-size: 13px;
     font-weight: 700;
     color: #2d7a4f;

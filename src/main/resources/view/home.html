@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 
-<!-- Include Head Metadata Fragment -->
-<head th:replace="~{fragments/fragments :: head('WarisanGo - Discover Malaysian Heritage Food')}"></head>
-<!-- Page-Specific Stylesheet -->
-<link rel="stylesheet" href="/css/home.css" th:href="@{/css/home.css}">
+<head>
+  <!-- Include Head Metadata Fragment -->
+  <th:block th:replace="~{fragments/fragments :: head('WarisanGo - Discover Malaysian Heritage Food')}"></th:block>
+  <!-- Page-Specific Stylesheet (Inside <head>) -->
+  <link rel="stylesheet" href="/css/home.css" th:href="@{/css/home.css}">
+</head>
 
 <body>
 
@@ -45,7 +47,7 @@
           <span id="user-points">1,250</span> <span class="points-unit">pts</span>
         </p>
         <div class="progress-bar-bg">
-          <div id="tier-progress-bar" class="progress-bar-fill" style="width: 25%;"></div>
+          <div id="tier-progress-bar" class="progress-bar-fill"></div>
         </div>
         <p id="tier-next-info" class="tier-next-text">750 pts to Platinum</p>
       </div>
@@ -76,8 +78,8 @@
             <span class="sub-label">Progress</span>
             <span id="challenge-progress-count" class="challenge-count">2/3</span>
           </div>
-          <div class="progress-bar-bg-dark mb-12">
-            <div id="challenge-progress-bar" class="progress-bar-fill gold-bg" style="width: 66%;"></div>
+          <div class="progress-bar-bg-dark">
+            <div id="challenge-progress-bar" class="progress-bar-fill gold-bg"></div>
           </div>
           <button class="btn-outlined-full" data-navigate="challenges">View All Challenges →</button>
         </div>

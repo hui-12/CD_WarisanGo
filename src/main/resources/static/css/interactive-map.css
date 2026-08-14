@@ -155,7 +155,7 @@
 .btn-popup-outlined {
     flex: 1;
     padding: 6px;
-    border: 1px solid #141413;
+    border: 1.5px solid #141413;
     border-radius: 6px;
     color: #141413;
     font-size: 11px;
@@ -191,7 +191,7 @@
 .sidebar-sort-select {
     font-size: 11px;
     padding: 4px 8px;
-    border: 1px solid #141413;
+    border: 1.5px solid #141413;
     border-radius: 6px;
     background-color: #faf9f5;
     color: #141413;
@@ -251,4 +251,42 @@
     font-size: 12px;
     font-weight: 600;
     color: #c9a84c;
+}
+
+/* --- User Location Marker --- */
+.user-location-marker {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.user-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background-color: #4a90d9;
+    border: 2.5px solid #ffffff;
+    box-shadow: 0 0 0 5px rgba(74, 144, 217, 0.25);
+    transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* --- Locate Me Button --- */
+.btn-locate-me {
+    background-color: #faf9f5;
+    border: 1.5px solid #141413;
+    border-radius: 6px;
+    width: 36px;
+    height: 36px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: #141413;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    transition: background-color 100ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-locate-me:hover {
+    background-color: #e8e6e0;
 }

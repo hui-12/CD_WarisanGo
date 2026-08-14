@@ -1,11 +1,11 @@
 /* --- Global Application Logic --- */
 
 // Shared navigation handler
-document.addEventListener("click", function (event) {
+document.addEventListener("click", (event) => {
     const navigateBtn = event.target.closest("[data-navigate]");
     if (navigateBtn) {
         const target = navigateBtn.getAttribute("data-navigate");
-        // Map the data-navigate values to your actual URL endpoints
+        
         const routes = {
             "home": "/",
             "directory": "/directory",
