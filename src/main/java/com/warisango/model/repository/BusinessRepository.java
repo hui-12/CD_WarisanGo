@@ -34,17 +34,7 @@ public class BusinessRepository {
             double lat = geoPoint != null ? geoPoint.getLatitude() : 0.0;
             double lng = geoPoint != null ? geoPoint.getLongitude() : 0.0;
 
-            HeritageBusinessDTO dto = new HeritageBusinessDTO(
-                    doc.getId(),
-                    doc.getString("name"),
-                    doc.getString("address"),
-                    doc.getString("state"),
-                    doc.getString("city"),
-                    doc.getString("description"),
-                    lat,
-                    lng,
-                    doc.getDouble("averageRating")
-            );
+            HeritageBusinessDTO dto = toDto(doc, lat, lng);
             list.add(dto);
         }
         return list;
@@ -66,17 +56,7 @@ public class BusinessRepository {
                         double lat = geoPoint != null ? geoPoint.getLatitude() : 0.0;
                         double lng = geoPoint != null ? geoPoint.getLongitude() : 0.0;
 
-                        HeritageBusinessDTO dto = new HeritageBusinessDTO(
-                                doc.getId(),
-                                doc.getString("name"),
-                                doc.getString("address"),
-                                doc.getString("state"),
-                                doc.getString("city"),
-                                doc.getString("description"),
-                                lat,
-                                lng,
-                                doc.getDouble("averageRating")
-                        );
+                        HeritageBusinessDTO dto = toDto(doc, lat, lng);
                         list.add(dto);
                     }
                     callback.accept(list);
@@ -96,22 +76,36 @@ public class BusinessRepository {
             double lat = geoPoint != null ? geoPoint.getLatitude() : 0.0;
             double lng = geoPoint != null ? geoPoint.getLongitude() : 0.0;
 
-            HeritageBusinessDTO dto = new HeritageBusinessDTO(
-                    doc.getId(),
-                    doc.getString("name"),
-                    doc.getString("address"),
-                    doc.getString("state"),
-                    doc.getString("city"),
-                    doc.getString("description"),
-                    lat,
-                    lng,
-                    doc.getDouble("averageRating")
-            );
+            HeritageBusinessDTO dto = toDto(doc, lat, lng);
 
             return Optional.of(dto);
         } catch (Exception e) {
             logger.error("Error fetching business by id: {}", id, e);
             return Optional.empty();
         }
+    }
+
+    private HeritageBusinessDTO toDto(DocumentSnapshot doc, double latitude, double longitude) {
+        HeritageBusinessDTO dto = new HeritageBusinessDTO(
+                doc.getId(),
+                doc.getString("name"),
+                doc.getString("address"),
+                doc.getString("state"),
+                doc.getString("city"),
+                doc.getString("description"),
+                latitude,
+                longitude,
+                doc.getDouble("averageRating")
+        );
+        dto.setCategory(doc.getString("category"));
+
+        Object photos = doc.get("photos");
+        if (photos instanceof List<?> photoList) {
+            dto.setPhotos(photoList.stream()
+                    .filter(String.class::isInstance)
+                    .map(String.class::cast)
+                    .toList());
+        }
+        return dto;
     }
 }

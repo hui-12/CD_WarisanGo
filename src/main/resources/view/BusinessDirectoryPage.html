@@ -20,7 +20,7 @@
 </head>
 <body>
   <!-- Navbar fragment -->
-  <div th:replace="fragments :: navbar('directory')"></div>
+  <div th:replace="~{fragments/fragments :: navbar('directory')}"></div>
 
   <main class="container">
     <section class="controls">
@@ -42,14 +42,17 @@
 
       <article th:each="b : ${businesses}" class="card">
         <div class="thumb">
-          <img th:src="${b.photos[0]}" th:alt="${b.name} + ' photo'" th:title="${b.name}" alt="${b.name} photo" title="${b.name}" src="/images/business-default.jpg"/>
+          <img th:if="${not #lists.isEmpty(b.photos)}" th:src="${b.photos[0]}"
+               th:alt="${b.name} + ' photo'" th:title="${b.name}" alt="Business photo"/>
+          <img th:if="${#lists.isEmpty(b.photos)}" th:src="@{/images/business-default.jpg}"
+               th:alt="${b.name} + ' photo'" th:title="${b.name}" alt="Business photo"/>
         </div>
         <h3 th:text="${b.name}">Business Name</h3>
-        <div class="meta" th:text="${b.category} + ' • ' + ${b.city} + ', ' + ${b.state} + ' • ★ ' + ${b.rating}"></div>
+        <div class="meta" th:text="${b.category} + ' • ' + ${b.city} + ', ' + ${b.state} + ' • ★ ' + ${b.averageRating}"></div>
         <div class="desc" th:text="${b.description}">Description</div>
         <div class="card-actions">
-          <a th:href="@{'/business/' + ${b.id}}" class="link-btn">View Details</a>
-          <a th:href="@{'/business/' + ${b.id} + '#photos'}" class="link-btn">View Photos</a>
+          <a th:href="@{'/business/' + ${b.businessId}}" class="link-btn">View Details</a>
+          <a th:href="@{'/business/' + ${b.businessId} + '#photos'}" class="link-btn">View Photos</a>
         </div>
       </article>
 
@@ -58,7 +61,7 @@
   </main>
 
   <!-- Footer fragment -->
-  <div th:replace="footer :: global"></div>
+  <div th:replace="~{fragments/footer :: global}"></div>
 
   <!-- Page-specific script -->
   <script src="/js/business-heritage.js" th:src="@{/js/business-heritage.js}"></script>
