@@ -22,7 +22,7 @@ public class BusinessDirectoryController {
     }
 
     // Directory page (list)
-    @GetMapping({"/", "/directory", "/business-directory"})
+    @GetMapping({"/directory", "/business-directory"})
     public String showBusinessDirectory(Model model) {
         List<HeritageBusinessDTO> businesses = businessService.getApprovedBusinesses();
         model.addAttribute("businesses", businesses);

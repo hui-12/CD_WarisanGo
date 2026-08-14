@@ -23,7 +23,7 @@
   <div th:replace="fragments :: navbar('directory')"></div>
 
   <main class="container container--detail">
-    <a class="back" href="/">← Back to directory</a>
+    <a class="back" href="/directory" th:href="@{/directory}">← Back to directory</a>
 
     <div class="card card--detail">
       <div class="hero">
@@ -35,7 +35,7 @@
           <div class="meta" th:text="${business.category} + ' • ' + ${business.city} + ', ' + ${business.state} + ' • ★ ' + ${business.rating}"></div>
           <div class="address" th:text="${business.address}"></div>
           <div>
-            <a th:href="@{'/'}" class="link">Back</a>
+            <a th:href="@{/directory}" class="link">Back</a>
           </div>
         </aside>
       </div>
