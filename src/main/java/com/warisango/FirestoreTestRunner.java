@@ -9,6 +9,8 @@ import com.google.cloud.firestore.WriteResult;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.google.firebase.cloud.FirestoreClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
@@ -20,53 +22,55 @@ import java.util.Map;
 @Component
 public class FirestoreTestRunner implements CommandLineRunner {
 
+    private static final Logger log = LoggerFactory.getLogger(FirestoreTestRunner.class);
+
     @Override
     public void run(String... args) {
-        System.out.println(">>> Starting Firestore Connection Test...");
+        log.info(">>> Starting Firestore Connection Test...");
 
         try {
-            // 1. Initialize Firebase directly here to ensure the code actually executes
+            // 1. Initialize Firebase directly here to ensure the code actually executes[cite: 20]
             if (FirebaseApp.getApps().isEmpty()) {
-                System.out.println(">>> Initializing FirebaseApp...");
+                log.info(">>> Initializing FirebaseApp...");
                 ClassPathResource resource = new ClassPathResource("firebase-service-account.json");
-                InputStream serviceAccount = resource.getInputStream();
+                
+                try (InputStream serviceAccount = resource.getInputStream()) {
+                    FirebaseOptions options = FirebaseOptions.builder()
+                        .setCredentials(GoogleCredentials.fromStream(serviceAccount))
+                        .setProjectId("warisango")
+                        .build();
 
-                FirebaseOptions options = FirebaseOptions.builder()
-                    .setCredentials(GoogleCredentials.fromStream(serviceAccount))
-                    .setProjectId("warisango")
-                    .build();
-
-                FirebaseApp.initializeApp(options);
-                System.out.println(">>> FirebaseApp successfully initialized!");
+                    FirebaseApp.initializeApp(options);
+                    log.info(">>> FirebaseApp successfully initialized!");
+                }
             }
 
-            // 2. Get the Firestore instance
+            // 2. Get the Firestore instance[cite: 20]
             Firestore db = FirestoreClient.getFirestore();
 
-            // 3. Prepare test data
+            // 3. Prepare test data[cite: 20]
             Map<String, Object> data = new HashMap<>();
             data.put("status", "Success!");
             data.put("message", "Hello from self-contained runner!");
             data.put("timestamp", System.currentTimeMillis());
 
-            // 4. Write data
+            // 4. Write data[cite: 20]
             DocumentReference docRef = db.collection("test_connection").document("test_doc");
             ApiFuture<WriteResult> writeResult = docRef.set(data);
-            System.out.println(">>> Write completed at: " + writeResult.get().getUpdateTime());
+            log.info(">>> Write completed at: {}", writeResult.get().getUpdateTime());
 
-            // 5. Read data
+            // 5. Read data[cite: 20]
             ApiFuture<DocumentSnapshot> readResult = docRef.get();
             DocumentSnapshot document = readResult.get();
 
             if (document.exists()) {
-                System.out.println(">>> Read successful! Retrieved data: " + document.getData());
+                log.info(">>> Read successful! Retrieved data: {}", document.getData());
             } else {
-                System.out.println(">>> Error: Test document was not found.");
+                log.warn(">>> Error: Test document was not found.");
             }
 
         } catch (Exception e) {
-            System.err.println(">>> Firestore Connection Test FAILED!");
-            e.printStackTrace();
+            log.error(">>> Firestore Connection Test FAILED!", e);
         }
     }
 }
