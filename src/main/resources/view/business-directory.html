@@ -4,41 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Heritage Business Directory — WarisanGo</title>
-  <style>
-    :root{--bg:#f6f8fb;--card:#ffffff;--muted:#6b7280;--accent:#1f6feb;--accent-weak:#e6f0ff}
-    *{box-sizing:border-box}
-    body{margin:0;font-family:Inter,system-ui,Arial,sans-serif;background:var(--bg);color:#0f172a}
-    .site-header{background:var(--card);border-bottom:1px solid #e6e9ef}
-    .container{max-width:1100px;margin:0 auto;padding:20px}
-    .branding{display:flex;align-items:center;gap:14px}
-    .branding h1{font-size:1.25rem;margin:0}
-    .subtitle{color:var(--muted);margin-top:6px;font-size:0.95rem}
-
-    .controls{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:18px 0}
-    .search{display:flex;gap:8px;align-items:center}
-    .search input{padding:10px 12px;border-radius:8px;border:1px solid #dbe3f0;min-width:320px}
-    .btn{background:var(--accent);color:#fff;border:none;padding:10px 14px;border-radius:8px;cursor:pointer}
-
-    .filters{display:flex;gap:8px;align-items:center}
-    .filters select{padding:8px;border-radius:8px;border:1px solid #dbe3f0;background:#fff}
-
-    .results{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px}
-    .card{background:var(--card);padding:14px;border-radius:12px;border:1px solid #e6e9ef;display:flex;flex-direction:column;gap:10px;box-shadow:0 1px 2px rgba(15,23,42,0.03)}
-    .thumb{height:160px;border-radius:8px;overflow:hidden;background:#f0f2f6}
-    .thumb img{width:100%;height:100%;object-fit:cover;display:block}
-    .meta{color:var(--muted);font-size:0.9rem}
-    .card h3{margin:0;font-size:1.05rem}
-    .desc{color:#334155;font-size:0.95rem}
-
-    .card-actions{display:flex;gap:8px;margin-top:auto}
-    .link-btn{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;border:1px solid #e6e9ef;background:#fff;color:#0f172a;text-decoration:none}
-
-    .no-results{padding:36px;text-align:center;color:var(--muted)}
-
-    footer.site-footer{padding:28px 0;color:var(--muted)}
-
-    @media (max-width:640px){.controls{flex-direction:column;align-items:stretch}.search input{min-width:140px}}
-  </style>
+  <link rel="stylesheet" th:href="@{/css/assignment.css}" href="/css/assignment.css">
 </head>
 <body>
   <header class="site-header">
