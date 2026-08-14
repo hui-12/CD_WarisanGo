@@ -1,20 +1,20 @@
 <!doctype html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title th:text="${business.name} + ' — WarisanGo'">Business Details</title>
-  <link rel="stylesheet" th:href="@{/css/bundle.css}" href="/css/bundle.css">
-  <link rel="stylesheet" th:href="@{/css/assignment.css}" href="/css/assignment.css">
-</head>
+<head th:replace="fragments :: head(${business.name} + ' - Details — WarisanGo')"></head>
 <body>
-  <div class="container container--detail">
+  <!-- Navbar fragment -->
+  <div th:replace="fragments :: navbar('directory')"></div>
+
+  <!-- Page-specific stylesheet -->
+  <link rel="stylesheet" th:href="@{/css/business-heritage.css}" href="/css/business-heritage.css">
+
+  <main class="container container--detail">
     <a class="back" href="/">← Back to directory</a>
 
     <div class="card card--detail">
       <div class="hero">
         <div>
-          <img th:src="${business.photos[0]}" th:alt="${business.name} + ' photo'" th:title="${business.name}" alt="Business photo" title="Business" src="/images/business-default.jpg"/>
+          <img th:src="${business.photos[0]}" th:alt="${business.name} + ' photo'" th:title="${business.name}" alt="${business.name} photo" title="${business.name}" src="/images/business-default.jpg"/>
         </div>
         <aside class="info">
           <h1 th:text="${business.name}">Business Name</h1>
@@ -35,10 +35,16 @@
         <h3>Photos</h3>
         <div th:if="${business.photos == null or #lists.isEmpty(business.photos)}">No photos available for this business.</div>
         <div class="photos" th:if="${business.photos != null}">
-          <img th:each="p : ${business.photos}" th:src="${p}" th:alt="${business.name} + ' photo'" th:title="${business.name}" alt="Business photo" title="Business" />
+          <img th:each="p : ${business.photos}" th:src="${p}" th:alt="${business.name} + ' photo'" th:title="${business.name}" alt="${business.name} photo" title="${business.name}" />
         </div>
       </section>
     </div>
-  </div>
+  </main>
+
+  <!-- Footer fragment -->
+  <div th:replace="footer :: global"></div>
+
+  <!-- Page-specific script -->
+  <script src="/js/business-heritage.js" th:src="@{/js/business-heritage.js}"></script>
 </body>
 </html>
