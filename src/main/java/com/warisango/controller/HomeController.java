@@ -18,29 +18,33 @@ public class HomeController {
         return "interactiveMap";
     }
 
-    @GetMapping("/CheckInPage")
-    public String checkIn() {
+    @GetMapping({"/CheckInPage"})
+    public String checkIn(Model model) {
+        model.addAttribute("activePage", "checkin");
         return "CheckInPage";
     }
-
+ 
     @GetMapping("/BadgePage")
     public String badges(Model model) {
         model.addAttribute("activePage", "badges");
         return "BadgePage";
     }
-
+ 
     @GetMapping("/RewardPage")
-    public String rewards() {
+    public String rewards(Model model) {
+        model.addAttribute("activePage", "rewards");
         return "RewardPage";
     }
-
+ 
     @GetMapping("/ChallengePage")
-    public String challenges() {
+    public String challenges(Model model) {
+        model.addAttribute("activePage", "challenges");
         return "ChallengePage";
     }
-
+ 
     @GetMapping("/AdminChallengePage")
-    public String adminChallenges() {
+    public String adminChallenges(Model model) {
+        model.addAttribute("activePage", "admin");
         return "admin/AdminChallengePage";
     }
 }
