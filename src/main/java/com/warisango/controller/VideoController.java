@@ -17,6 +17,7 @@ public class VideoController {
         this.videoSearchService = videoSearchService;
     }
 
+    // Endpoint to search for videos based on a keyword
     @GetMapping("/search")
     public List<VideoDTO> search(
             @RequestParam String keyword) throws Exception {

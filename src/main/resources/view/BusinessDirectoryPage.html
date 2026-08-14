@@ -1,13 +1,13 @@
 <!doctype html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <th:block th:replace="~{fragments/fragments :: head('WarisanGo - Business Directory')}"></th:block>
   <title>Heritage Business Directory — WarisanGo</title>
   <link rel="stylesheet" th:href="@{/css/bundle.css}" href="/css/bundle.css">
   <link rel="stylesheet" th:href="@{/css/assignment.css}" href="/css/assignment.css">
 </head>
 <body>
+  <div th:replace="~{fragments/fragments :: navbar('directory')}"></div>
   <header class="site-header">
     <div class="container">
       <div class="branding">
@@ -53,9 +53,7 @@
 
   </main>
 
-  <footer class="site-footer">
-    <div class="container">WarisanGo © VM2026</div>
-  </footer>
+  <div th:replace="~{fragments/footer :: global}"></div>
 
   <script>
   (function(){

@@ -18,19 +18,15 @@ public class HomeController {
         this.businessService = businessService;
     }
 
-    @GetMapping({"/", "/business-directory"})
-    public String home(Model model) {
-        model.addAttribute("businesses", businessService.findAll());
-        return "business-directory";
+    @GetMapping({"/"})
+    public String home() {
+        return "home";
     }
 
-    @GetMapping("/business/{id}")
-    public String businessDetails(@PathVariable String id, Model model) {
-        Optional<Business> found = businessService.findById(id);
-        if (found.isEmpty()) {
-            return "redirect:/";
-        }
-        model.addAttribute("business", found.get());
-        return "business-details";
+    // Route for the Map page template
+    @GetMapping("/map")
+    public String mapPage() {
+        return "interactiveMap";
     }
+
 }
