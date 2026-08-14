@@ -1,20 +1,12 @@
 <!doctype html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head>
-  <th:block th:replace="~{fragments/fragments :: head('WarisanGo - Business Directory')}"></th:block>
-</head>
+<head th:replace="fragments :: head('Business Directory - WarisanGo')"></head>
 <body>
-  <div th:replace="~{fragments/fragments :: navbar('directory')}"></div>
-  <header class="site-header">
-    <div class="container">
-      <div class="branding">
-        <div>
-          <h1>WarisanGo</h1>
-          <div class="subtitle">Heritage Business Directory</div>
-        </div>
-      </div>
-    </div>
-  </header>
+  <!-- Navbar fragment -->
+  <div th:replace="fragments :: navbar('directory')"></div>
+
+  <!-- Page-specific stylesheet -->
+  <link rel="stylesheet" th:href="@{/css/business-heritage.css}" href="/css/business-heritage.css">
 
   <main class="container">
     <section class="controls">
@@ -32,11 +24,12 @@
     </section>
 
     <section id="results" class="results" aria-live="polite">
-      <!-- Server-side rendered cards -->
       <div th:if="${businesses == null or #lists.isEmpty(businesses)}" class="no-results">No businesses found at the moment.</div>
 
       <article th:each="b : ${businesses}" class="card">
-        <div class="thumb"><img th:src="${b.photos[0]}" th:alt="${b.name} + ' photo'" th:title="${b.name}" alt="Business photo" title="Business" src="/images/business-default.jpg"/></div>
+        <div class="thumb">
+          <img th:src="${b.photos[0]}" th:alt="${b.name} + ' photo'" th:title="${b.name}" alt="${b.name} photo" title="${b.name}" src="/images/business-default.jpg"/>
+        </div>
         <h3 th:text="${b.name}">Business Name</h3>
         <div class="meta" th:text="${b.category} + ' • ' + ${b.city} + ', ' + ${b.state} + ' • ★ ' + ${b.rating}"></div>
         <div class="desc" th:text="${b.description}">Description</div>
@@ -50,56 +43,10 @@
 
   </main>
 
-  <div th:replace="~{fragments/footer :: global}"></div>
+  <!-- Footer fragment -->
+  <div th:replace="footer :: global"></div>
 
-  <script>
-  (function(){
-    // Basic client-side filtering working on server-rendered DOM
-    const searchInput = document.getElementById('searchInput');
-    const searchBtn = document.getElementById('searchBtn');
-    const categoryFilter = document.getElementById('categoryFilter');
-    const stateFilter = document.getElementById('stateFilter');
-    const cityFilter = document.getElementById('cityFilter');
-    const clearBtn = document.getElementById('clearFilters');
-
-    function applyFilters(){
-      const q = (searchInput.value || '').trim().toLowerCase();
-      const cat = categoryFilter.value; const st = stateFilter.value; const ct = cityFilter.value;
-      const cards = Array.from(document.querySelectorAll('.results .card'));
-      let any=false;
-      cards.forEach(card=>{
-        const name = (card.querySelector('h3')?.textContent || '').toLowerCase();
-        const meta = (card.querySelector('.meta')?.textContent || '').toLowerCase();
-        const matches = name.includes(q) && (!cat || meta.includes(cat.toLowerCase())) && (!st || meta.includes(st.toLowerCase())) && (!ct || meta.includes(ct.toLowerCase()));
-        card.style.display = matches ? '' : 'none';
-        if(matches) any=true;
-      });
-      document.querySelector('.no-results').style.display = any ? 'none' : '';
-    }
-
-    searchBtn.addEventListener('click', applyFilters);
-    searchInput.addEventListener('keyup', e=>{ if(e.key==='Enter') applyFilters(); });
-    clearBtn.addEventListener('click', ()=>{ searchInput.value=''; categoryFilter.value=''; stateFilter.value=''; cityFilter.value=''; applyFilters(); });
-
-    // populate filters from rendered cards
-    function populateFilters(){
-      const cards = Array.from(document.querySelectorAll('.results .card'));
-      const cats = new Set(); const states = new Set(); const cities = new Set();
-      cards.forEach(card=>{
-        const meta = card.querySelector('.meta')?.textContent || '';
-        const parts = meta.split('•').map(s=>s.trim());
-        if(parts[0]) cats.add(parts[0]);
-        if(parts[1]){
-          const loc = parts[1].split(',')[0]?.trim(); if(loc) cities.add(loc);
-          const state = parts[1].split(',')[1]?.trim(); if(state) states.add(state);
-        }
-      });
-      cats.forEach(c=>{ const o=document.createElement('option'); o.value=c; o.textContent=c; categoryFilter.appendChild(o); });
-      states.forEach(s=>{ const o=document.createElement('option'); o.value=s; o.textContent=s; stateFilter.appendChild(o); });
-      cities.forEach(c=>{ const o=document.createElement('option'); o.value=c; o.textContent=c; cityFilter.appendChild(o); });
-    }
-    window.addEventListener('DOMContentLoaded', ()=>{ populateFilters(); });
-  })();
-  </script>
+  <!-- Page-specific script -->
+  <script src="/js/business-heritage.js" th:src="@{/js/business-heritage.js}"></script>
 </body>
 </html>
