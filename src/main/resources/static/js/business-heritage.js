@@ -54,8 +54,7 @@
   }
 
   function ensureImageAccessibility(){
-    if(!resultsContainer) return;
-    resultsContainer.querySelectorAll('img').forEach(img=>{
+    document.querySelectorAll('img').forEach(img=>{
       if(!img.getAttribute('alt') || img.getAttribute('alt').trim()===''){
         const title = img.getAttribute('title') || img.getAttribute('data-title') || 'Business image';
         img.setAttribute('alt', title);
@@ -65,7 +64,7 @@
         img.setAttribute('title', alt);
       }
     });
-    resultsContainer.querySelectorAll('img[data-fallback-image]').forEach(img => {
+    document.querySelectorAll('img[data-fallback-image]').forEach(img => {
       img.addEventListener('error', () => { img.src = img.dataset.fallbackImage; }, { once: true });
     });
   }

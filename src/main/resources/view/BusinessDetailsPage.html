@@ -22,40 +22,76 @@
   <!-- Navbar fragment -->
   <div th:replace="~{fragments/fragments :: navbar('directory')}"></div>
 
-  <main class="container container--detail">
-    <a class="back" href="/directory" th:href="@{/directory}">← Back to directory</a>
+  <main class="detail-page">
+    <a class="detail-back" th:href="@{/directory}">← Back to Directory</a>
 
-    <div class="card card--detail">
-      <div class="hero">
-        <div>
+    <section class="detail-layout" aria-labelledby="business-title">
+      <div class="detail-main">
+        <div class="gallery" id="photos">
           <img th:if="${not #lists.isEmpty(business.photos)}" th:src="${business.photos[0]}"
-               th:alt="${business.name} + ' photo'" th:title="${business.name}" alt="Business photo"/>
-          <img th:if="${#lists.isEmpty(business.photos)}" th:src="@{/images/business-default.jpg}"
-               th:alt="${business.name} + ' photo'" th:title="${business.name}" alt="Business photo"/>
-        </div>
-        <aside class="info">
-          <h1 th:text="${business.name}">Business Name</h1>
-          <div class="meta" th:text="${business.category} + ' • ' + ${business.city} + ', ' + ${business.state} + ' • ★ ' + ${business.averageRating}"></div>
-          <div class="address" th:text="${business.address}"></div>
-          <div>
-            <a th:href="@{/directory}" class="link">Back</a>
+               th:alt="${business.name} + ' photo'" th:title="${business.name}" class="gallery-featured"
+               data-fallback-image="https://images.unsplash.com/photo-1559925393-8be0ec4767c8?auto=format&amp;fit=crop&amp;w=1200&amp;q=85">
+          <img th:if="${#lists.isEmpty(business.photos)}"
+               src="https://images.unsplash.com/photo-1559925393-8be0ec4767c8?auto=format&amp;fit=crop&amp;w=1200&amp;q=85"
+               th:alt="${business.name} + ' photo'" th:title="${business.name}" class="gallery-featured">
+          <div class="gallery-thumbnails" th:if="${not #lists.isEmpty(business.photos)}">
+            <img th:each="photo, stat : ${business.photos}" th:if="${stat.index < 4}" th:src="${photo}"
+                 th:alt="${business.name} + ' gallery photo'" class="gallery-thumb"
+                 data-fallback-image="https://images.unsplash.com/photo-1559925393-8be0ec4767c8?auto=format&amp;fit=crop&amp;w=240&amp;q=80">
           </div>
-        </aside>
+        </div>
+
+        <header class="business-title-block">
+          <p class="detail-kicker" th:text="${(business.category ?: 'Heritage food') + ' · ' + business.city + ', ' + business.state}">Heritage food · City, State</p>
+          <h1 id="business-title" th:text="${business.name}">Business Name</h1>
+          <p class="detail-rating">
+            <span aria-hidden="true">★★★★★</span>
+            <strong th:text="${business.averageRating != null ? #numbers.formatDecimal(business.averageRating, 1, 1) : 'New'}">4.8</strong>
+            <span>Approved heritage listing</span>
+          </p>
+          <p class="business-summary" th:text="${business.description}">Business description</p>
+        </header>
+
+        <section class="detail-section">
+          <h2>Our Story</h2>
+          <p th:text="${business.description}">Business story</p>
+        </section>
+
+        <section class="detail-section business-information">
+          <h2>Business Information</h2>
+          <dl>
+            <div><dt>Category</dt><dd th:text="${business.category ?: 'Heritage food'}">Heritage food</dd></div>
+            <div><dt>Rating</dt><dd th:text="${business.averageRating != null ? #numbers.formatDecimal(business.averageRating, 1, 1) + ' / 5' : 'New listing'}">4.8 / 5</dd></div>
+            <div class="information-wide"><dt>Address</dt><dd th:text="${business.address}">Business address</dd></div>
+          </dl>
+        </section>
+
+        <section class="check-in-panel" aria-labelledby="check-in-title">
+          <div>
+            <h2 id="check-in-title">Check In</h2>
+            <p>Earn reward points when you check in near this heritage business.</p>
+          </div>
+          <a class="check-in-button" th:href="@{/map}">⌖ Check In Here</a>
+        </section>
       </div>
 
-      <section style="margin-top:16px">
-        <h3>Description</h3>
-        <p th:text="${business.description}">Business description</p>
-      </section>
-
-      <section style="margin-top:16px" id="photos">
-        <h3>Photos</h3>
-        <div th:if="${business.photos == null or #lists.isEmpty(business.photos)}">No photos available for this business.</div>
-        <div class="photos" th:if="${business.photos != null}">
-          <img th:each="p : ${business.photos}" th:src="${p}" th:alt="${business.name} + ' photo'" th:title="${business.name}" alt="${business.name} photo" title="${business.name}" />
-        </div>
-      </section>
-    </div>
+      <aside class="detail-sidebar" aria-label="Business details">
+        <section class="sidebar-card">
+          <h2>Heritage Details</h2>
+          <dl class="sidebar-list">
+            <div><dt>Category</dt><dd th:text="${business.category ?: 'Heritage food'}">Heritage food</dd></div>
+            <div><dt>Status</dt><dd>Approved</dd></div>
+            <div><dt>Rating</dt><dd th:text="${business.averageRating != null ? #numbers.formatDecimal(business.averageRating, 1, 1) + ' / 5' : 'New'}">4.8 / 5</dd></div>
+            <div><dt>State</dt><dd th:text="${business.state}">State</dd></div>
+          </dl>
+        </section>
+        <section class="sidebar-card">
+          <h2>Location</h2>
+          <p class="sidebar-address" th:text="${business.address}">Business address</p>
+          <a class="map-link" th:href="@{/map}">View on map →</a>
+        </section>
+      </aside>
+    </section>
   </main>
 
   <!-- Footer fragment -->
