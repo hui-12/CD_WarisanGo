@@ -1,7 +1,6 @@
 // Business Heritage JS — handles search, filters and accessibility tweaks
 (function(){
   const searchInput = document.getElementById('searchInput');
-  const searchBtn = document.getElementById('searchBtn');
   const categoryFilter = document.getElementById('categoryFilter');
   const stateFilter = document.getElementById('stateFilter');
   const cityFilter = document.getElementById('cityFilter');
@@ -15,32 +14,31 @@
     const cat = sanitizeText(categoryFilter?.value || '');
     const st = sanitizeText(stateFilter?.value || '');
     const ct = sanitizeText(cityFilter?.value || '');
-    const cards = resultsContainer ? Array.from(resultsContainer.querySelectorAll('.card')) : [];
+    const cards = resultsContainer ? Array.from(resultsContainer.querySelectorAll('.business-card')) : [];
     let any=false;
     cards.forEach(card=>{
       const name = sanitizeText(card.querySelector('h3')?.textContent || '');
-      const meta = sanitizeText(card.querySelector('.meta')?.textContent || '');
-      const matches = (q ? name.includes(q) : true) && (!cat || meta.includes(cat)) && (!st || meta.includes(st)) && (!ct || meta.includes(ct));
+      const matches = (q ? name.includes(q) : true)
+        && (!cat || sanitizeText(card.dataset.category).includes(cat))
+        && (!st || sanitizeText(card.dataset.state).includes(st))
+        && (!ct || sanitizeText(card.dataset.city).includes(ct));
       card.style.display = matches ? '' : 'none';
       if(matches) any=true;
     });
     const nr = resultsContainer ? resultsContainer.querySelector('.no-results') : null;
     if(nr) nr.style.display = any ? 'none' : '';
+    const resultCount = document.getElementById('resultCount');
+    if (resultCount) resultCount.textContent = `${cards.filter(card => card.style.display !== 'none').length} heritage businesses found`;
   }
 
   function populateFilters(){
     if(!resultsContainer) return;
-    const cards = Array.from(resultsContainer.querySelectorAll('.card'));
+    const cards = Array.from(resultsContainer.querySelectorAll('.business-card'));
     const cats = new Set(), states = new Set(), cities = new Set();
     cards.forEach(card=>{
-      const meta = (card.querySelector('.meta')?.textContent || '');
-      const parts = meta.split('•').map(s=>s.trim());
-      if(parts[0]) cats.add(parts[0]);
-      if(parts[1]){
-        const locPart = parts[1].split(',').map(s=>s.trim());
-        if(locPart[0]) cities.add(locPart[0]);
-        if(locPart[1]) states.add(locPart[1]);
-      }
+      if(card.dataset.category) cats.add(card.dataset.category);
+      if(card.dataset.state) states.add(card.dataset.state);
+      if(card.dataset.city) cities.add(card.dataset.city);
     });
     function fill(selectEl, items){
       if(!selectEl) return;
@@ -67,11 +65,13 @@
         img.setAttribute('title', alt);
       }
     });
+    resultsContainer.querySelectorAll('img[data-fallback-image]').forEach(img => {
+      img.addEventListener('error', () => { img.src = img.dataset.fallbackImage; }, { once: true });
+    });
   }
 
   // Event wiring
-  if(searchBtn) searchBtn.addEventListener('click', applyFilters);
-  if(searchInput) searchInput.addEventListener('keyup', function(e){ if(e.key==='Enter') applyFilters(); });
+  if(searchInput) searchInput.addEventListener('input', applyFilters);
   if(clearBtn) clearBtn.addEventListener('click', ()=>{ if(searchInput) searchInput.value=''; if(categoryFilter) categoryFilter.value=''; if(stateFilter) stateFilter.value=''; if(cityFilter) cityFilter.value=''; applyFilters(); });
   [categoryFilter, stateFilter, cityFilter].forEach(el=>{ if(el) el.addEventListener('change', applyFilters); });
 
@@ -79,6 +79,7 @@
   document.addEventListener('DOMContentLoaded', ()=>{
     populateFilters();
     ensureImageAccessibility();
+    applyFilters();
   });
 
 })();

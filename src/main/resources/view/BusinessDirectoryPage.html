@@ -22,42 +22,62 @@
   <!-- Navbar fragment -->
   <div th:replace="~{fragments/fragments :: navbar('directory')}"></div>
 
-  <main class="container">
-    <section class="controls">
-      <div class="search">
-        <input id="searchInput" type="search" placeholder="Search by business name..." aria-label="Search business">
-        <button id="searchBtn" class="btn" type="button">Search</button>
-      </div>
+  <main class="directory-page">
+    <section class="directory-intro" aria-labelledby="directory-title">
+      <p class="eyebrow">Heritage food directory</p>
+      <h1 id="directory-title">Discover Malaysia's <em>living heritage</em></h1>
+      <p class="intro-copy">
+        Every listing has been reviewed and approved — century-old recipes, unchanged atmospheres, and stories
+        passed down through generations.
+      </p>
+    </section>
 
+    <section class="directory-toolbar" aria-label="Search and filter businesses">
+      <label class="search-field" for="searchInput">
+        <span class="sr-only">Search businesses</span>
+        <input id="searchInput" type="search" placeholder="Search businesses..." autocomplete="off">
+      </label>
       <div class="filters">
-        <select id="categoryFilter"><option value="">All Categories</option></select>
-        <select id="stateFilter"><option value="">All States</option></select>
-        <select id="cityFilter"><option value="">All Cities</option></select>
-        <button id="clearFilters" type="button" class="link-btn">Clear</button>
+        <select id="stateFilter" aria-label="Filter by state"><option value="">All States</option></select>
+        <select id="categoryFilter" aria-label="Filter by category"><option value="">All Categories</option></select>
+        <select id="cityFilter" aria-label="Filter by city" class="visually-hidden"><option value="">All Cities</option></select>
+        <button id="clearFilters" class="clear-filters" type="button">Clear filters</button>
       </div>
     </section>
 
-    <section id="results" class="results" aria-live="polite">
-      <div th:if="${businesses == null or #lists.isEmpty(businesses)}" class="no-results">No businesses found at the moment.</div>
+    <p id="resultCount" class="result-count" aria-live="polite"></p>
 
-      <article th:each="b : ${businesses}" class="card">
-        <div class="thumb">
+    <section id="results" class="business-grid" aria-live="polite">
+      <div th:if="${businesses == null or #lists.isEmpty(businesses)}" class="no-results">
+        No heritage businesses found at the moment.
+      </div>
+
+      <article th:each="b : ${businesses}" class="business-card"
+               th:attr="data-category=${b.category},data-state=${b.state},data-city=${b.city}">
+        <div class="business-image-wrap">
           <img th:if="${not #lists.isEmpty(b.photos)}" th:src="${b.photos[0]}"
-               th:alt="${b.name} + ' photo'" th:title="${b.name}" alt="Business photo"/>
-          <img th:if="${#lists.isEmpty(b.photos)}" th:src="@{/images/business-default.jpg}"
-               th:alt="${b.name} + ' photo'" th:title="${b.name}" alt="Business photo"/>
+               th:alt="${b.name} + ' photo'" th:title="${b.name}" class="business-image"
+               data-fallback-image="https://images.unsplash.com/photo-1559925393-8be0ec4767c8?auto=format&amp;fit=crop&amp;w=900&amp;q=85">
+          <img th:if="${#lists.isEmpty(b.photos)}"
+               src="https://images.unsplash.com/photo-1559925393-8be0ec4767c8?auto=format&amp;fit=crop&amp;w=900&amp;q=85"
+               th:alt="${b.name} + ' photo'" th:title="${b.name}" class="business-image">
         </div>
-        <h3 th:text="${b.name}">Business Name</h3>
-        <div class="meta" th:text="${b.category} + ' • ' + ${b.city} + ', ' + ${b.state} + ' • ★ ' + ${b.averageRating}"></div>
-        <div class="desc" th:text="${b.description}">Description</div>
-        <div class="card-actions">
-          <a th:href="@{'/business/' + ${b.businessId}}" class="link-btn">View Details</a>
-          <a th:href="@{'/business/' + ${b.businessId} + '#photos'}" class="link-btn">View Photos</a>
+        <div class="business-content">
+          <div class="business-heading">
+            <div>
+              <p class="business-kicker" th:text="${(b.category ?: 'Heritage food') + ' · Approved'}">Heritage food · Approved</p>
+              <h2 th:text="${b.name}">Business Name</h2>
+            </div>
+            <span class="rating" th:text="${b.averageRating != null ? #numbers.formatDecimal(b.averageRating, 1, 1) : 'New'}">4.8</span>
+          </div>
+          <p class="business-description" th:text="${b.description}">Business description</p>
+          <div class="business-footer">
+            <span class="business-location" th:text="${b.city} + ', ' + ${b.state}">City, State</span>
+            <a th:href="@{'/business/' + ${b.businessId}}" class="details-link">View details <span aria-hidden="true">→</span></a>
+          </div>
         </div>
       </article>
-
     </section>
-
   </main>
 
   <!-- Footer fragment -->
