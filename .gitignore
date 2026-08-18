@@ -34,3 +34,6 @@ build/
 
 ### Firebase Firestore Private Key ###
 src/main/resources/firebase-service-account.json
+
+### Local review photo uploads ###
+uploads/reviews/

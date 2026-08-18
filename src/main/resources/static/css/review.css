@@ -362,6 +362,18 @@
     color: #141413;
 }
 
+.review-like.liked,
+.review-detail-action.liked {
+    color: #c9a84c;
+    font-weight: 600;
+}
+
+.review-like:disabled,
+.review-detail-action:disabled {
+    cursor: wait;
+    opacity: .65;
+}
+
 .review-owner-actions {
     position: absolute;
     top: 10px;
@@ -619,6 +631,108 @@
     color: #4f4f4b;
     font-size: 11px;
     line-height: 1.55;
+    white-space: pre-line;
+}
+
+.review-comment-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.review-comment-owner-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.review-comment-owner-actions form {
+    display: inline-flex;
+    margin: 0;
+}
+
+.review-comment-icon-btn {
+    width: 27px;
+    height: 27px;
+    display: grid;
+    place-items: center;
+    border: 1px solid #d8d5cf;
+    border-radius: 5px;
+    background: #fff;
+    color: #141413;
+    font-size: 12px;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.review-comment-icon-btn:hover {
+    border-color: #141413;
+}
+
+.review-comment-icon-btn.delete:hover {
+    border-color: #b83232;
+    color: #b83232;
+}
+
+.review-comment-form,
+.review-comment-edit-form {
+    display: grid;
+    gap: 8px;
+    margin-top: 18px;
+    padding: 15px;
+    border: 1px solid #e8e6e0;
+    border-radius: 8px;
+    background: #faf9f5;
+}
+
+.review-comment-form label {
+    margin: 0;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.review-comment-textarea {
+    width: 100%;
+    min-height: 82px;
+    padding: 9px 10px;
+    border: 1px solid #141413;
+    border-radius: 6px;
+    background: #fff;
+    color: #141413;
+    font: 12px/1.55 'Inter', Arial, sans-serif;
+    resize: vertical;
+}
+
+.review-comment-textarea:focus {
+    outline: 2px solid rgba(201,168,76,.4);
+    outline-offset: 1px;
+}
+
+.review-comment-form-meta {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.review-comment-form-meta .review-field-error {
+    margin: 0;
+}
+
+.review-comment-form .review-btn-primary,
+.review-comment-edit-actions .review-btn-primary,
+.review-comment-edit-actions .review-btn-outline {
+    width: fit-content;
+    min-height: 32px;
+    padding: 6px 11px;
+    font-size: 11px;
+}
+
+.review-comment-edit-actions {
+    display: flex;
+    gap: 7px;
 }
 
 .review-bottom-actions {
@@ -1036,6 +1150,54 @@
 
     border: 1px solid #e8e6e0;
     border-radius: 7px;
+}
+
+/* ---------- Existing photos on edit ---------- */
+
+.review-existing-photos {
+    margin-bottom: 12px;
+}
+
+.review-existing-photos-title {
+    margin: 0 0 8px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.review-existing-photo-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px;
+}
+
+.review-existing-photo {
+    position: relative;
+    display: block;
+    width: 104px;
+    padding-bottom: 5px;
+    cursor: pointer;
+}
+
+.review-existing-photo img {
+    width: 104px;
+    height: 90px;
+    display: block;
+    object-fit: cover;
+    border: 1px solid #e8e6e0;
+    border-radius: 7px;
+}
+
+.review-existing-photo-remove {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 4px;
+    color: #6b6b68;
+    font-size: 9px;
+}
+
+.review-existing-photo-remove input {
+    accent-color: #b83232;
 }
 
 

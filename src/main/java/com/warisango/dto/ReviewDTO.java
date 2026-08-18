@@ -31,12 +31,26 @@ public class ReviewDTO {
 
     private List<String> photoUrls;
 
+    /**
+     * Existing ReviewPhotos records used by the edit form.
+     * This is not stored inside the Reviews document.
+     */
+    private List<ReviewPhotoDTO> photos;
+
+    /**
+     * Display-only like state loaded from the root-level ReviewLikes collection.
+     */
+    private int likeCount;
+
+    private boolean likedByCurrentUser;
+
     private String createdAt;
 
     private String updatedAt;
 
     public ReviewDTO() {
         this.photoUrls = new ArrayList<>();
+        this.photos = new ArrayList<>();
     }
 
     public ReviewDTO(String reviewId,
@@ -56,6 +70,7 @@ public class ReviewDTO {
         this.reviewText = reviewText;
         this.rating = rating;
         this.photoUrls = photoUrls;
+        this.photos = new ArrayList<>();
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
@@ -114,6 +129,30 @@ public class ReviewDTO {
 
     public void setPhotoUrls(List<String> photoUrls) {
         this.photoUrls = photoUrls;
+    }
+
+    public List<ReviewPhotoDTO> getPhotos() {
+        return photos;
+    }
+
+    public void setPhotos(List<ReviewPhotoDTO> photos) {
+        this.photos = photos;
+    }
+
+    public int getLikeCount() {
+        return likeCount;
+    }
+
+    public void setLikeCount(int likeCount) {
+        this.likeCount = likeCount;
+    }
+
+    public boolean isLikedByCurrentUser() {
+        return likedByCurrentUser;
+    }
+
+    public void setLikedByCurrentUser(boolean likedByCurrentUser) {
+        this.likedByCurrentUser = likedByCurrentUser;
     }
 
     public String getCreatedAt() {

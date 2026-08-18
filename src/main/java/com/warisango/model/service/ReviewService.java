@@ -2,15 +2,16 @@ package com.warisango.model.service;
 
 import com.warisango.dto.ReviewDTO;
 import com.warisango.model.repository.ReviewRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
-import java.util.stream.Collectors;
+import java.util.Objects;
 
 /**
  * Handles review business logic before delegating persistence to the repository.
@@ -19,73 +20,162 @@ import java.util.stream.Collectors;
 public class ReviewService {
 
     private final ReviewRepository reviewRepository;
+    private final ReviewPhotoService reviewPhotoService;
+    private final String currentTouristId;
 
-    public ReviewService(ReviewRepository reviewRepository) {
+    public ReviewService(
+            ReviewRepository reviewRepository,
+            ReviewPhotoService reviewPhotoService,
+            @Value("${warisango.review.current-tourist-id:tourist_002}") String currentTouristId) {
         this.reviewRepository = reviewRepository;
+        this.reviewPhotoService = reviewPhotoService;
+        this.currentTouristId = currentTouristId;
     }
 
     /**
      * Display all reviews.
      */
     public List<ReviewDTO> getAllReviews() {
-        return reviewRepository.findAll();
+        List<ReviewDTO> reviews = reviewRepository.findAll();
+        reviewPhotoService.populatePhotos(reviews);
+        return reviews;
     }
 
     /**
      * Display reviews by business.
      */
     public List<ReviewDTO> getReviewsByBusiness(String businessId) {
-        return reviewRepository.findByBusinessId(businessId);
+        List<ReviewDTO> reviews = reviewRepository.findByBusinessId(businessId);
+        reviewPhotoService.populatePhotos(reviews);
+        return reviews;
     }
 
     /**
      * Display one review.
      */
     public ReviewDTO getReview(String reviewId) {
-        return reviewRepository.findByReviewId(reviewId);
+        ReviewDTO review = reviewRepository.findByReviewId(reviewId);
+        reviewPhotoService.populatePhotos(review);
+        return review;
     }
 
     /**
-     * Create a review with temporary mock-user data until authentication is connected.
+     * Create a review without photos. Kept for callers that do not use multipart forms.
      */
     public void createReview(ReviewDTO review) {
+        createReview(review, null);
+    }
 
-        review.setReviewId(UUID.randomUUID().toString());
-        review.setTouristId("MOCK_USER");
-        review.setCreatedAt(LocalDateTime.now().toLocalDate().toString());
-        review.setUpdatedAt(LocalDateTime.now().toLocalDate().toString());
+    /**
+     * Create a review and persist each uploaded image as a separate ReviewPhotos document.
+     */
+    public void createReview(ReviewDTO review, MultipartFile[] photos) {
+
+        reviewPhotoService.validateNewPhotos(photos);
+
+        review.setTouristId(currentTouristId);
+
+        String reviewId = reviewRepository.generateNextReviewId();
+
+        review.setReviewId(reviewId);
+
+        review.setCreatedAt(
+                LocalDateTime.now()
+                        .toLocalDate()
+                        .toString()
+        );
+
+        review.setUpdatedAt(
+                LocalDateTime.now()
+                        .toLocalDate()
+                        .toString()
+        );
 
         reviewRepository.save(review);
 
+        try {
+            reviewPhotoService.savePhotos(review.getReviewId(), photos);
+        } catch (RuntimeException e) {
+            reviewRepository.delete(review.getReviewId());
+            throw e;
+        }
     }
 
     /**
      * Update an existing review without losing immutable mock fields.
      */
-    public void updateReview(ReviewDTO review) {
+    public boolean updateReview(ReviewDTO review, String currentUserId) {
+        return updateReview(review, currentUserId, List.of(), null);
+    }
 
-        ReviewDTO existingReview = reviewRepository.findByReviewId(review.getReviewId());
+    /**
+     * Update review fields and apply existing-photo removals/new uploads after ownership validation.
+     */
+    public boolean updateReview(
+            ReviewDTO review,
+            String currentUserId,
+            List<String> removePhotoIds,
+            MultipartFile[] photos) {
+
+        ReviewDTO existingReview =
+                reviewRepository.findByReviewId(
+                        review.getReviewId()
+                );
 
         if (existingReview == null) {
-            return;
+            return false;
         }
 
+        // Only the review owner can edit.
+        if (!Objects.equals(existingReview.getTouristId(), currentUserId)) {
+            return false;
+        }
+
+        reviewPhotoService.validatePhotoChange(review.getReviewId(), removePhotoIds, photos);
+
+        // Keep immutable fields from the existing review.
+        review.setReviewId(existingReview.getReviewId());
         review.setBusinessId(existingReview.getBusinessId());
         review.setTouristId(existingReview.getTouristId());
         review.setCreatedAt(existingReview.getCreatedAt());
-        review.setUpdatedAt(LocalDateTime.now().toLocalDate().toString());
+
+        review.setUpdatedAt(
+                LocalDateTime.now()
+                        .toLocalDate()
+                        .toString()
+        );
 
         reviewRepository.update(review);
 
+        reviewPhotoService.replacePhotos(review.getReviewId(), removePhotoIds, photos);
+
+        return true;
     }
 
     /**
      * Delete one review.
      */
-    public void deleteReview(String reviewId) {
+    public boolean deleteReview(
+            String reviewId,
+            String currentUserId
+    ) {
 
+        ReviewDTO existingReview =
+                reviewRepository.findByReviewId(reviewId);
+
+        if (existingReview == null) {
+            return false;
+        }
+
+        // Only the review owner can delete.
+        if (!Objects.equals(existingReview.getTouristId(), currentUserId)) {
+            return false;
+        }
+
+        reviewPhotoService.deletePhotos(reviewId);
         reviewRepository.delete(reviewId);
 
+        return true;
     }
 
     /**
@@ -148,32 +238,12 @@ public class ReviewService {
         return rows;
     }
 
-    /**
-     * Convert the form photo URL textarea into DTO photo URLs.
-     */
-    public void applyPhotoUrls(ReviewDTO review, String photoUrls) {
-
-        if (photoUrls == null || photoUrls.isBlank()) {
-            review.setPhotoUrls(new ArrayList<>());
-            return;
-        }
-
-        review.setPhotoUrls(photoUrls.lines()
-                .map(String::trim)
-                .filter(url -> !url.isBlank())
-                .collect(Collectors.toList()));
+    public String getCurrentTouristId() {
+        return currentTouristId;
     }
 
-    /**
-     * Convert DTO photo URLs into textarea-friendly text.
-     */
-    public String getPhotoUrlsText(ReviewDTO review) {
-
-        if (review == null || review.getPhotoUrls() == null || review.getPhotoUrls().isEmpty()) {
-            return "";
-        }
-
-        return String.join(System.lineSeparator(), review.getPhotoUrls());
+    public boolean isReviewOwner(ReviewDTO review, String currentUserId) {
+        return review != null && Objects.equals(review.getTouristId(), currentUserId);
     }
 
     public Map<String, Object> getBusinessInformation(String businessId) {

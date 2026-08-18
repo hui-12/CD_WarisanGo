@@ -212,8 +212,13 @@
 
                     <button type="button"
                             class="review-like"
-                            data-review-like>
-                        ♡ Like <span>0</span>
+                            data-review-like
+                            th:attr="data-like-url=@{/reviews/like/{id}(id=${review.reviewId})},data-liked=${review.likedByCurrentUser},aria-pressed=${review.likedByCurrentUser}"
+                            th:classappend="${review.likedByCurrentUser} ? ' liked' : ''"
+                            >
+                        <span data-like-icon
+                              th:text="${review.likedByCurrentUser ? '♥' : '♡'}">♡</span>
+                        Like <span data-like-count th:text="${review.likeCount}">0</span>
                     </button>
 
                     <a class="review-comment-link"

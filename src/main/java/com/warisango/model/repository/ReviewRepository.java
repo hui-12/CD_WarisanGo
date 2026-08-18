@@ -18,4 +18,5 @@ public interface ReviewRepository {
 
     void delete(String reviewId);
 
+    String generateNextReviewId();
 }

@@ -234,8 +234,45 @@
                     </label>
 
                     <div
+                            class="review-existing-photos"
+                            th:if="${review.photos != null and !#lists.isEmpty(review.photos)}">
+
+                        <p class="review-existing-photos-title">
+                            Existing photos
+                        </p>
+
+                        <div class="review-existing-photo-grid">
+
+                            <label
+                                    class="review-existing-photo"
+                                    th:each="photo : ${review.photos}">
+
+                                <img
+                                        th:src="${photo.photoUrl}"
+                                        alt="Existing review photo">
+
+                                <span class="review-existing-photo-remove">
+                                    <input
+                                            type="checkbox"
+                                            name="removePhotoIds"
+                                            th:value="${photo.photoId}">
+                                    Remove
+                                </span>
+
+                            </label>
+
+                        </div>
+
+                        <p class="review-field-help">
+                            Leave a photo unchecked to keep it.
+                        </p>
+
+                    </div>
+
+                    <div
                             class="review-upload-area"
                             id="reviewUploadArea"
+                            th:attr="data-existing-photo-count=${review.photos == null ? 0 : #lists.size(review.photos)}"
                             tabindex="0"
                             role="button"
                             aria-label="Upload review photos">
@@ -267,6 +304,14 @@
 
                     </div>
 
+                    <span
+                            id="reviewPhotoError"
+                            class="review-field-error"
+                            th:if="${photoError != null}"
+                            th:text="${photoError}">
+                        Please select valid image files.
+                    </span>
+
 
                     <!-- New selected photos -->
                     <div
@@ -281,6 +326,13 @@
                      ACTION BUTTONS
                      ========================= -->
                 <div class="review-form-actions">
+
+                    <span
+                            class="review-field-error"
+                            th:if="${reviewError != null}"
+                            th:text="${reviewError}">
+                        The review could not be updated.
+                    </span>
 
                     <a
                             class="review-btn-outline"

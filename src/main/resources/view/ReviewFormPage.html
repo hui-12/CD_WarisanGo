@@ -231,6 +231,7 @@
                     <div
                             class="review-upload-area"
                             id="reviewUploadArea"
+                            data-existing-photo-count="0"
                             tabindex="0"
                             role="button"
                             aria-label="Upload review photos">
@@ -262,6 +263,14 @@
 
                     </div>
 
+                    <span
+                            id="reviewPhotoError"
+                            class="review-field-error"
+                            th:if="${photoError != null}"
+                            th:text="${photoError}">
+                        Please select valid image files.
+                    </span>
+
 
                     <!-- Selected photo preview -->
                     <div
@@ -276,6 +285,13 @@
                      ACTION BUTTONS
                      ========================= -->
                 <div class="review-form-actions">
+
+                    <span
+                            class="review-field-error"
+                            th:if="${reviewError != null}"
+                            th:text="${reviewError}">
+                        The review could not be saved.
+                    </span>
 
                     <a
                             class="review-btn-outline"

@@ -94,8 +94,13 @@
 
                 <button class="review-detail-action"
                         type="button"
-                        data-review-like>
-                    ♡ Like <span>0</span>
+                        data-review-like
+                        th:attr="data-like-url=@{/reviews/like/{id}(id=${review.reviewId})},data-liked=${review.likedByCurrentUser},aria-pressed=${review.likedByCurrentUser}"
+                        th:classappend="${review.likedByCurrentUser} ? ' liked' : ''"
+                        >
+                    <span data-like-icon
+                          th:text="${review.likedByCurrentUser ? '♥' : '♡'}">♡</span>
+                    Like <span data-like-count th:text="${review.likeCount}">0</span>
                 </button>
 
                 <a class="review-detail-action"
@@ -109,6 +114,12 @@
             <h2 id="comments" class="review-comments-title">
                 Comments
             </h2>
+
+            <p class="review-field-error"
+               th:if="${commentError != null}"
+               th:text="${commentError}">
+                The comment could not be saved.
+            </p>
 
             <div class="review-comment-feed"
                  th:if="${comments != null and !#lists.isEmpty(comments)}">
@@ -126,16 +137,88 @@
                         2026-08-14
                     </span>
 
+                    <form class="review-comment-edit-form"
+                          th:if="${editingCommentId == comment.commentId}"
+                          th:action="@{/reviews/comments/update}"
+                          th:object="${commentEdit}"
+                          method="post">
+
+                        <input type="hidden" th:field="*{commentId}">
+                        <input type="hidden" th:field="*{reviewId}">
+
+                        <textarea class="review-comment-textarea"
+                                  th:field="*{commentText}"
+                                  data-review-counter="commentEditCharacterCount"
+                                  maxlength="500"></textarea>
+
+                        <div class="review-comment-form-meta">
+                            <span class="review-field-error"
+                                  th:if="${#fields.hasErrors('commentText')}"
+                                  th:errors="*{commentText}">
+                                Comment cannot be empty.
+                            </span>
+                            <span class="review-counter">
+                                <span id="commentEditCharacterCount">0</span>/500
+                            </span>
+                        </div>
+
+                        <div class="review-comment-edit-actions">
+                            <button class="review-btn-primary" type="submit">
+                                Save
+                            </button>
+                            <a class="review-btn-outline"
+                               th:href="@{/reviews/detail/{id}(id=${review.reviewId})}">
+                                Cancel
+                            </a>
+                        </div>
+                    </form>
+
                     <p class="review-comment-full-text"
+                       th:unless="${editingCommentId == comment.commentId}"
                        th:text="${comment.commentText}">
                         Comment text.
                     </p>
 
-                    <button type="button"
-                            class="review-detail-action"
-                            data-comment-like>
-                        ♡ Like <span>0</span>
-                    </button>
+                    <div class="review-comment-actions"
+                         th:unless="${editingCommentId == comment.commentId}">
+
+                        <button type="button"
+                                class="review-detail-action"
+                                data-comment-like
+                                th:attr="data-like-url=@{/reviews/comments/like/{id}(id=${comment.commentId})},data-liked=${comment.likedByCurrentUser},aria-pressed=${comment.likedByCurrentUser}"
+                                th:classappend="${comment.likedByCurrentUser} ? ' liked' : ''"
+                                >
+                            <span data-like-icon
+                                  th:text="${comment.likedByCurrentUser ? '♥' : '♡'}">♡</span>
+                            Like <span data-like-count th:text="${comment.likeCount}">0</span>
+                        </button>
+
+                        <div class="review-comment-owner-actions"
+                             th:if="${currentUserId != null and comment.touristId == currentUserId}">
+
+                            <a class="review-comment-icon-btn"
+                               th:href="@{/reviews/detail/{id}(id=${review.reviewId},editComment=${comment.commentId})}"
+                               title="Edit comment"
+                               aria-label="Edit comment">
+                                ✎
+                            </a>
+
+                            <form th:action="@{/reviews/comments/delete/{id}(id=${comment.commentId})}"
+                                  method="post">
+
+                                <input type="hidden"
+                                       name="reviewId"
+                                       th:value="${review.reviewId}">
+
+                                <button type="submit"
+                                        class="review-comment-icon-btn delete"
+                                        title="Delete comment"
+                                        aria-label="Delete comment">
+                                    🗑
+                                </button>
+                            </form>
+                        </div>
+                    </div>
 
                 </article>
 
@@ -149,6 +232,40 @@
                 </p>
 
             </div>
+
+            <form class="review-comment-form"
+                  th:action="@{/reviews/comments/create}"
+                  th:object="${comment}"
+                  method="post">
+
+                <input type="hidden" th:field="*{reviewId}">
+
+                <label for="commentText">
+                    Add a comment
+                </label>
+
+                <textarea id="commentText"
+                          class="review-comment-textarea"
+                          th:field="*{commentText}"
+                          data-review-counter="commentCharacterCount"
+                          maxlength="500"
+                          placeholder="Join the discussion..."></textarea>
+
+                <div class="review-comment-form-meta">
+                    <span class="review-field-error"
+                          th:if="${#fields.hasErrors('commentText')}"
+                          th:errors="*{commentText}">
+                        Comment cannot be empty.
+                    </span>
+                    <span class="review-counter">
+                        <span id="commentCharacterCount">0</span>/500
+                    </span>
+                </div>
+
+                <button class="review-btn-primary" type="submit">
+                    Post Comment
+                </button>
+            </form>
 
 
             <div class="review-bottom-actions">
