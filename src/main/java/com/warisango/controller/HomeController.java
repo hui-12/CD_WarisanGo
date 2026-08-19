@@ -24,19 +24,19 @@ public class HomeController {
         return "CheckInPage";
     }
  
-    @GetMapping("/BadgePage")
+    @GetMapping("/badges")
     public String badges(Model model) {
         model.addAttribute("activePage", "badges");
         return "BadgePage";
     }
  
-    @GetMapping("/RewardPage")
+    @GetMapping("/rewards")
     public String rewards(Model model) {
         model.addAttribute("activePage", "rewards");
         return "RewardPage";
     }
  
-    @GetMapping("/ChallengePage")
+    @GetMapping("/challenges")
     public String challenges(Model model) {
         model.addAttribute("activePage", "challenges");
         return "ChallengePage";
