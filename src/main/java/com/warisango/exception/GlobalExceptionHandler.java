@@ -3,7 +3,6 @@ package com.warisango.exception;
 import com.warisango.dto.ErrorResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -36,15 +35,6 @@ public class GlobalExceptionHandler {
         logger.warn("AI processing request failed: {}", exception.getMessage());
         return ResponseEntity.badRequest()
                 .body(new ErrorResponse(exception.getMessage()));
-    }
-
-    @ExceptionHandler(FirebasePersistenceException.class)
-    public ResponseEntity<ErrorResponse> handleFirebasePersistence(
-            FirebasePersistenceException exception) {
-
-        logger.error("Firestore persistence failed.", exception);
-        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
-                .body(new ErrorResponse("Unable to save the discovery record."));
     }
 
     @ExceptionHandler(Exception.class)

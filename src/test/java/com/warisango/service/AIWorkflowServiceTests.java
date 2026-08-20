@@ -11,7 +11,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.nio.file.Path;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -26,9 +25,6 @@ class AIWorkflowServiceTests {
     @Mock
     private AIExtractionService aiExtractionService;
 
-    @Mock
-    private AIRecordService aiRecordService;
-
     @InjectMocks
     private AIWorkflowService aiWorkflowService;
 
@@ -42,14 +38,9 @@ class AIWorkflowServiceTests {
         when(videoAudioService.downloadAudio(videoUrl)).thenReturn(audioFile);
         when(speechToTextService.transcribe(audioFile)).thenReturn(transcript);
         when(aiExtractionService.extract(transcript)).thenReturn(extraction);
-        when(aiRecordService.save(extraction, transcript, videoUrl))
-                .thenReturn("record-123");
-
         DiscoveryProcessResponse response = aiWorkflowService.process(videoUrl);
 
         assertThat(response.transcript()).isEqualTo(transcript);
         assertThat(response.extraction()).isSameAs(extraction);
-        assertThat(response.recordId()).isEqualTo("record-123");
-        verify(aiRecordService).save(extraction, transcript, videoUrl);
     }
 }

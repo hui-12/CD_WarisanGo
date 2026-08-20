@@ -320,7 +320,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 "Waiting for server-side transcription...";
 
             extractionStatus.innerText =
-                "Waiting for Gemini extraction and Firestore save...";
+                "Waiting for Gemini extraction...";
 
             // STEP 2 Audio → AssemblyAI
             processingStatus.innerText =

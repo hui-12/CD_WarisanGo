@@ -113,6 +113,9 @@ public class AIExtractionService {
                 - Do not guess coordinates.
                 - Output JSON only.
                 - Allow to do research if needed to find the business information.
+                - Never return an empty array. If no businesses are found, return 
+                an array with a single object with all fields set to null.
+                - Do not invent information.
 
                 Required JSON format:
 
