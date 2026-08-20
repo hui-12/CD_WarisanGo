@@ -5,36 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>WarisanGo — Challenges</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
-<style>
-*{box-sizing:border-box;margin:0;padding:0;scrollbar-width:none;}
-*::-webkit-scrollbar{display:none;}
-body{background:#FAF6EE;color:#2A2118;font-family:'Inter',Arial,sans-serif;font-size:14px;line-height:1.6;-webkit-font-smoothing:antialiased;}
-button{font-family:'Inter',Arial,sans-serif;cursor:pointer;}
-input,textarea,select{font-family:'Inter',Arial,sans-serif;}
-.batik-divider{height:2px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='4'%3E%3Cpath d='M12 0L24 2L12 4L0 2Z' fill='none' stroke='%23C4522A' stroke-width='0.6' opacity='0.35'/%3E%3Ccircle cx='12' cy='2' r='0.8' fill='%23C4522A' opacity='0.3'/%3E%3Ccircle cx='0' cy='2' r='0.5' fill='%23C4522A' opacity='0.2'/%3E%3Ccircle cx='24' cy='2' r='0.5' fill='%23C4522A' opacity='0.2'/%3E%3C/svg%3E");background-repeat:repeat-x;background-position:center;border:none;}
-.batik-bg{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Cpath d='M12 2L22 12L12 22L2 12Z' fill='none' stroke='%23C4522A' stroke-width='0.6' opacity='0.15'/%3E%3Ccircle cx='12' cy='12' r='1' fill='%23C4522A' opacity='0.12'/%3E%3C/svg%3E");background-repeat:repeat;}
-#site-header{background:#2A2118;position:sticky;top:0;z-index:50;}
-.nav-inner{max-width:1100px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:60px;}
-.wordmark{display:flex;align-items:center;gap:10px;}
-.wordmark-text{font-family:'DM Serif Display',Georgia,serif;font-size:19px;color:#FAF6EE;letter-spacing:-0.01em;}
-.wordmark-badge{font-size:9px;font-family:'JetBrains Mono',monospace;color:#8A7D6E;border:1px solid #3A3028;border-radius:4px;padding:2px 6px;letter-spacing:0.08em;}
-.nav-links{display:flex;gap:4px;}
-.nav-btn{font-size:13px;padding:6px 14px;border-radius:8px;border:none;background:transparent;color:#D5CABF;transition:background 0.15s,color 0.15s;text-decoration:none;display:inline-block;}
-.nav-btn.active{background:#C4522A;color:#fff;font-weight:600;}
-.nav-btn.admin-btn{color:#D98A2E;}
-main{max-width:1100px;margin:0 auto;padding:48px 24px;}
-h1{font-family:'DM Serif Display',Georgia,serif;font-size:2.5rem;line-height:1.1;letter-spacing:-0.02em;margin-bottom:12px;}
-.muted{font-size:14px;color:#8A7D6E;}
-.mono{font-family:'JetBrains Mono',monospace;}
-.caption{font-size:11px;font-family:'JetBrains Mono',monospace;letter-spacing:0.06em;color:#8A7D6E;margin-bottom:4px;}
-.card{padding:20px;border:1px solid #D5CABF;border-radius:12px;background:#F3EDE0;}
-.btn-primary{padding:9px 20px;border-radius:10px;font-size:13px;font-weight:600;border:none;background:#C4522A;color:#fff;}
-.btn-secondary{padding:9px 20px;border-radius:10px;font-size:13px;font-weight:600;border:1px solid #D5CABF;background:transparent;color:#2A2118;}
-.btn-primary:hover{background:#A8421F;}
-.success-banner{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;background:#1E5C3A;color:#fff;border-radius:12px;margin-bottom:28px;font-size:13px;}
-.modal-overlay{position:fixed;inset:0;background:rgba(30,20,10,0.65);display:flex;align-items:center;justify-content:center;z-index:100;}
-.modal-box{background:#FAF6EE;padding:32px;border-radius:16px;max-width:400px;width:90%;}
-</style>
+<link rel="stylesheet" href="/css/rewards.css" th:href="@{/css/rewards.css}"/>
 </head>
 <body>
 <!-- NAV -->
