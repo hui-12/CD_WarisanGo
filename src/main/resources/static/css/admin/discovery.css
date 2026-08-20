@@ -1,14 +1,5 @@
-body {
-    background: #f5f7fb;
-    color: #212529;
-}
-
-.container {
-    max-width: 1100px;
-}
-
 .page-header {
-    margin-bottom: 30px;
+    margin: 22px 0 58px;
 }
 
 .page-header h1 {
@@ -17,12 +8,13 @@ body {
 }
 
 .page-header p {
-    color: #6c757d;
+    max-width: 620px;
+    color: var(--admin-muted);
+    font-size: 16px;
 }
 
 .search-card {
-    border: none;
-    border-radius: 12px;
+    border-radius: 16px;
 }
 
 .search-card h4 {
@@ -36,16 +28,16 @@ body {
 
 .video-card {
     height: 100%;
-    border: none;
-    border-radius: 12px;
+    border: 1px solid var(--admin-border);
+    border-radius: 16px;
     overflow: hidden;
-    transition: transform 0.2s ease,
-                box-shadow 0.2s ease;
+    transition: transform 200ms var(--admin-easing),
+                box-shadow 200ms var(--admin-easing);
 }
 
 .video-card:hover {
     transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+    box-shadow: var(--admin-card-shadow);
 }
 
 .video-thumbnail {
@@ -65,14 +57,14 @@ body {
 }
 
 .video-channel {
-    color: #6c757d;
+    color: var(--admin-muted);
     font-size: 14px;
     margin-bottom: 10px;
 }
 
 .video-description {
     font-size: 14px;
-    color: #555;
+    color: var(--admin-muted);
     height: 65px;
     overflow: hidden;
 }
@@ -83,12 +75,12 @@ body {
    ========================================= */
 
 #processingSection {
-    border: none;
-    border-radius: 12px;
+    border-radius: 16px;
 }
 
 .selected-video {
-    background: #f8f9fa;
+    background: var(--admin-background);
+    border: 1px solid var(--admin-border);
     padding: 15px;
     border-radius: 8px;
 }
@@ -109,7 +101,8 @@ body {
     align-items: center;
     gap: 15px;
     padding: 15px;
-    background: #f8f9fa;
+    background: var(--admin-background);
+    border: 1px solid var(--admin-border);
     border-radius: 8px;
 }
 
@@ -123,7 +116,7 @@ body {
 
     border-radius: 50%;
 
-    background: #0d6efd;
+    background: var(--admin-primary);
     color: white;
 
     font-weight: 600;
@@ -135,8 +128,7 @@ body {
    ========================================= */
 
 #transcriptSection {
-    border: none;
-    border-radius: 12px;
+    border-radius: 16px;
 }
 
 .transcript-box {
@@ -151,17 +143,16 @@ body {
    ========================================= */
 
 #resultSection {
-    border: none;
-    border-radius: 12px;
+    border-radius: 16px;
 }
 
 .json-box {
-    background: #1e1e1e;
-    color: #d4d4d4;
+    background: var(--admin-primary);
+    color: var(--admin-on-primary);
 
     padding: 20px;
 
-    border-radius: 8px;
+    border-radius: 16px;
 
     min-height: 200px;
     max-height: 700px;
@@ -189,10 +180,6 @@ body {
 
     .video-thumbnail {
         height: 200px;
-    }
-
-    .page-header h1 {
-        font-size: 28px;
     }
 
     .workflow-step {
