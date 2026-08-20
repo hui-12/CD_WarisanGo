@@ -26,7 +26,7 @@ public class BusinessRepository {
 
     public List<HeritageBusinessDTO> findApprovedBusinesses() throws ExecutionException, InterruptedException {
         ApiFuture<QuerySnapshot> future = firestore.collection(COLLECTION_NAME)
-                .whereEqualTo("status", "APPROVED")
+                .whereEqualTo("status", "Approved")
                 .get();
 
         List<QueryDocumentSnapshot> documents = future.get().getDocuments();
@@ -73,7 +73,7 @@ public class BusinessRepository {
         }
 
         String status = document.getString("status");
-        if (status != null && !status.isBlank() && !"APPROVED".equalsIgnoreCase(status)) {
+        if (status != null && !status.isBlank() && !"Approved".equalsIgnoreCase(status)) {
             return null;
         }
 
@@ -83,7 +83,7 @@ public class BusinessRepository {
     // Real-time Firestore Snapshot Listener
     public ListenerRegistration addApprovedBusinessesListener(Consumer<List<HeritageBusinessDTO>> callback) {
         return firestore.collection(COLLECTION_NAME)
-                .whereEqualTo("status", "APPROVED")
+                .whereEqualTo("status", "Approved")
                 .addSnapshotListener((snapshots, e) -> {
                     if (e != null || snapshots == null) {
                         return;
