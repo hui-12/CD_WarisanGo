@@ -1,147 +1,195 @@
-const audioTestForm = document.getElementById("audioTestForm");
-const videoUrlInput = document.getElementById("videoUrl");
-const testButton = document.getElementById("testButton");
+document.addEventListener("DOMContentLoaded", () => {
 
-const resultSection = document.getElementById("resultSection");
-const statusMessage = document.getElementById("statusMessage");
+    const form = document.getElementById("processingForm");
+    const processButton = document.getElementById("processButton");
 
-const audioUrlContainer =
-    document.getElementById("audioUrlContainer");
+    const resultSection = document.getElementById("resultSection");
+    const statusMessage = document.getElementById("statusMessage");
 
-const audioUrl =
-    document.getElementById("audioUrl");
+    const audioStatus = document.getElementById("audioStatus");
+    const transcriptionStatus = document.getElementById("transcriptionStatus");
+    const extractionStatus = document.getElementById("extractionStatus");
 
+    const audioFileContainer = document.getElementById("audioFileContainer");
+    const transcriptContainer = document.getElementById("transcriptContainer");
+    const jsonContainer = document.getElementById("jsonContainer");
 
-audioTestForm.addEventListener("submit", async (event) => {
+    const audioFile = document.getElementById("audioFile");
+    const transcript = document.getElementById("transcript");
+    const jsonResult = document.getElementById("jsonResult");
 
-    event.preventDefault();
+    form.addEventListener("submit", async (event) => {
 
-    const videoUrl = videoUrlInput.value.trim();
+        event.preventDefault();
 
-    if (!videoUrl) {
-        showError("Please enter a YouTube URL.");
-        return;
-    }
+        const videoUrl = document.getElementById("videoUrl").value.trim();
 
-    setLoading(true);
-
-    try {
-
-        const response = await fetch("/api/audio/test", {
-            method: "POST",
-
-            headers: {
-                "Content-Type": "application/json"
-            },
-
-            body: JSON.stringify({
-                videoUrl: videoUrl
-            })
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-
-            showError(
-                data.message || "Audio extraction failed."
-            );
-
+        if (!videoUrl) {
+            updateStatus("Please enter a YouTube URL.", "danger");
+            resultSection.classList.remove("d-none");
             return;
         }
 
-        showSuccess("Audio URL retrieved successfully.");
+        resetResults();
 
-        audioUrl.value = data.audioUrl;
+        resultSection.classList.remove("d-none");
+        processButton.disabled = true;
+        processButton.innerText = "Processing...";
 
-        audioUrlContainer.classList.remove("d-none");
+        try {
 
-    } catch (error) {
+            // =====================================================
+            // STEP 1 : Audio Extraction
+            // =====================================================
 
-        showError(
-            "Unable to connect to the Spring Boot server."
-        );
+            updateStatus("Step 1: Extracting audio...", "info");
+            audioStatus.innerText = "Downloading using yt-dlp...";
 
-        console.error(error);
+            const audioResponse = await fetch("/api/audio/test", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    videoUrl
+                })
+            });
 
-    } finally {
+            if (!audioResponse.ok) {
+                throw new Error(await getErrorMessage(audioResponse));
+            }
 
-        setLoading(false);
-    }
-});
+            const audioData = await audioResponse.json();
 
+            const audioPath = audioData.audioFile || audioData.file;
 
-function showSuccess(message) {
+            audioFile.value = audioPath;
+            audioFileContainer.classList.remove("d-none");
 
-    resultSection.classList.remove("d-none");
+            audioStatus.innerText = "Completed";
 
-    statusMessage.className =
-        "alert alert-success";
+            // =====================================================
+            // STEP 2 : Speech To Text
+            // =====================================================
 
-    statusMessage.textContent = message;
-}
+            updateStatus("Step 2: Transcribing audio...", "info");
+            transcriptionStatus.innerText = "AssemblyAI is processing...";
 
+            const sttResponse = await fetch("/api/transcription/test", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    audioFile: audioPath
+                })
+            });
 
-function showError(message) {
+            if (!sttResponse.ok) {
+                throw new Error(await getErrorMessage(sttResponse));
+            }
 
-    resultSection.classList.remove("d-none");
+            const sttData = await sttResponse.json();
 
-    statusMessage.className =
-        "alert alert-danger";
+            transcript.value = sttData.transcript;
+            transcriptContainer.classList.remove("d-none");
 
-    statusMessage.textContent = message;
+            transcriptionStatus.innerText = "Completed";
 
-    audioUrlContainer.classList.add("d-none");
-}
+            // =====================================================
+            // STEP 3 : Gemini Extraction
+            // =====================================================
 
+            updateStatus("Step 3: Extracting heritage information...", "info");
+            extractionStatus.innerText = "Gemini is analysing transcript...";
 
-function setLoading(isLoading) {
+            const aiResponse = await fetch("/api/ai-extraction/extract", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    transcript: sttData.transcript
+                })
+            });
 
-    testButton.disabled = isLoading;
+            if (!aiResponse.ok) {
+                throw new Error(await getErrorMessage(aiResponse));
+            }
 
-    if (isLoading) {
+            const aiData = await aiResponse.json();
 
-        testButton.textContent =
-            "Extracting Audio...";
+            jsonResult.textContent = JSON.stringify(aiData, null, 2);
+            jsonContainer.classList.remove("d-none");
 
-    } else {
+            extractionStatus.innerText = "Completed";
 
-        testButton.textContent =
-            "Get Audio URL";
-    }
-}
+            updateStatus("All processing completed successfully.", "success");
 
-async function transcribeAudio() {
+        } catch (error) {
 
-    const audioUrl = document.getElementById("audioUrl").value;
+            console.error(error);
 
-    if (!audioUrl) {
-        alert("Please enter an audio URL.");
-        return;
-    }
+            updateStatus(
+                error.message || "Processing failed.",
+                "danger"
+            );
 
-    try {
-        const response = await fetch("/api/transcription/test", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                audioUrl: audioUrl
-            })
-        });
+        } finally {
 
-        if (!response.ok) {
-            throw new Error("Transcription request failed.");
+            processButton.disabled = false;
+            processButton.innerText = "Process Video";
+
         }
 
-        const data = await response.json();
+    });
 
-        document.getElementById("transcript").textContent =
-            data.transcript;
+    // =========================================================
+    // Helper Functions
+    // =========================================================
 
-    } catch (error) {
-        console.error(error);
-        alert("Failed to transcribe audio.");
+    function resetResults() {
+
+        audioStatus.innerText = "Waiting...";
+        transcriptionStatus.innerText = "Waiting...";
+        extractionStatus.innerText = "Waiting...";
+
+        if (audioFile) audioFile.value = "";
+        if (transcript) transcript.value = "";
+        if (jsonResult) jsonResult.textContent = "";
+
+        if (audioFileContainer)
+            audioFileContainer.classList.add("d-none");
+
+        if (transcriptContainer)
+            transcriptContainer.classList.add("d-none");
+
+        if (jsonContainer)
+            jsonContainer.classList.add("d-none");
+
+        updateStatus("Waiting...", "info");
     }
-}
+
+    function updateStatus(message, type) {
+
+        statusMessage.className = `alert alert-${type}`;
+        statusMessage.innerText = message;
+
+    }
+
+    async function getErrorMessage(response) {
+
+        try {
+
+            const data = await response.json();
+
+            return data.message || data.error || `Error ${response.status}`;
+
+        } catch {
+
+            return `Error ${response.status}`;
+
+        }
+    }
+
+});

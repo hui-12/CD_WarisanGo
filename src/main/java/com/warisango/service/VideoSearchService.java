@@ -6,6 +6,7 @@ import com.warisango.config.YoutubeConfig;
 import com.warisango.dto.VideoDTO;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,14 +26,16 @@ public class VideoSearchService {
 
     public List<VideoDTO> searchVideos(String keyword) throws Exception {
 
-        // Build the YouTube API search URL
-        String url = youtubeConfig.getBaseUrl()
-                + "/search"
-                + "?part=snippet"
-                + "&type=video"
-                + "&maxResults=20"
-                + "&q=" + keyword.replace(" ", "%20")
-                + "&key=" + youtubeConfig.getApiKey();
+        String url = UriComponentsBuilder
+                .fromUriString(youtubeConfig.getBaseUrl() + "/search")
+                .queryParam("part", "snippet")
+                .queryParam("type", "video")
+                .queryParam("maxResults", 20)
+                .queryParam("q", keyword)
+                .queryParam("key", youtubeConfig.getApiKey())
+                .build()
+                .encode()
+                .toUriString();
 
         String response = restClient.get()
                 .uri(url)
@@ -49,7 +52,7 @@ public class VideoSearchService {
 
         JsonNode root = objectMapper.readTree(json);
 
-        JsonNode items = root.get("items");
+        JsonNode items = root.path("items");
 
         for (JsonNode item : items) {
 

@@ -21,12 +21,18 @@ import java.time.Duration;
  * Handles speech-to-text transcription using AssemblyAI.
  *
  * Flow:
- * 1. Download audio from the provided audio URL.
- * 2. Store the audio temporarily on the server.
- * 3. Upload the temporary audio file to AssemblyAI.
- * 4. Submit the AssemblyAI upload URL for transcription.
- * 5. Poll until transcription is completed.
- * 6. Delete the temporary audio file.
+ *
+ * Local .m4a file
+ *      ↓
+ * AssemblyAI Upload API
+ *      ↓
+ * AssemblyAI audio URL
+ *      ↓
+ * AssemblyAI Transcript API
+ *      ↓
+ * Poll transcript status
+ *      ↓
+ * Transcript text
  */
 @Service
 public class SpeechToTextService {
@@ -63,130 +69,100 @@ public class SpeechToTextService {
         this.apiKey = apiKey;
         this.objectMapper = objectMapper;
 
-        this.httpClient = HttpClient.newBuilder()
-                .connectTimeout(Duration.ofSeconds(30))
-                .build();
+        this.httpClient =
+                HttpClient.newBuilder()
+                        .connectTimeout(Duration.ofSeconds(30))
+                        .build();
     }
 
     /**
-     * Downloads audio from the provided URL, uploads it to AssemblyAI,
-     * and returns the completed transcript.
+     * Transcribes a local audio file.
      *
-     * @param audioUrl temporary/direct audio URL
-     * @return completed transcript text
+     * @param audioFile path to the temporary .m4a file
+     * @return completed transcript
      */
-    public String transcribe(String audioUrl) {
+    public String transcribe(Path audioFile) {
 
-        validateAudioUrl(audioUrl);
-
-        Path audioFile = downloadAudio(audioUrl);
+        validateAudioFile(audioFile);
 
         try {
 
-            String uploadUrl =
+            logger.info(
+                    "Starting AssemblyAI transcription for: {}",
+                    audioFile
+            );
+
+            /*
+             * Step 1:
+             * Upload the local .m4a file to AssemblyAI.
+             */
+            String assemblyAudioUrl =
                     uploadAudio(audioFile);
 
-            String transcriptId =
-                    submitTranscription(uploadUrl);
+            logger.info(
+                    "Audio uploaded successfully to AssemblyAI."
+            );
 
-            return waitForTranscript(transcriptId);
+            /*
+             * Step 2:
+             * Submit the AssemblyAI audio URL
+             * for transcription.
+             */
+            String transcriptId =
+                    submitTranscription(assemblyAudioUrl);
+
+            logger.info(
+                    "Transcription submitted. ID: {}",
+                    transcriptId
+            );
+
+            /*
+             * Step 3:
+             * Wait until AssemblyAI finishes.
+             */
+            String transcript =
+                    waitForTranscript(transcriptId);
+
+            logger.info(
+                    "Transcription completed successfully."
+            );
+
+            return transcript;
 
         } finally {
 
-            deleteTemporaryFile(audioFile);
+            /*
+             * Step 4:
+             * Delete the temporary audio file after
+             * transcription is finished.
+             */
+            deleteTemporaryAudio(audioFile);
         }
     }
 
     /**
-     * Downloads the audio URL to a temporary file.
+     * Uploads the local audio file to AssemblyAI.
      *
-     * @param audioUrl direct audio URL
-     * @return path of the temporary audio file
-     */
-    private Path downloadAudio(String audioUrl) {
-
-        try {
-
-            Path tempFile =
-                    Files.createTempFile(
-                            "warisango-audio-",
-                            ".webm"
-                    );
-
-            logger.info(
-                    "Downloading audio to temporary file."
-            );
-
-            HttpRequest request =
-                    HttpRequest.newBuilder()
-                            .uri(URI.create(audioUrl))
-                            .timeout(Duration.ofMinutes(2))
-                            .GET()
-                            .build();
-
-            HttpResponse<Path> response =
-                    httpClient.send(
-                            request,
-                            HttpResponse.BodyHandlers.ofFile(tempFile)
-                    );
-
-            if (response.statusCode() < 200
-                    || response.statusCode() >= 300) {
-
-                Files.deleteIfExists(tempFile);
-
-                logger.error(
-                        "Audio download failed. HTTP status: {}",
-                        response.statusCode()
-                );
-
-                throw new AIProcessingException(
-                        "Failed to download audio. HTTP status: "
-                                + response.statusCode()
-                );
-            }
-
-            logger.info(
-                    "Audio downloaded successfully."
-            );
-
-            return tempFile;
-
-        } catch (IOException exception) {
-
-            logger.error(
-                    "Failed to download audio.",
-                    exception
-            );
-
-            throw new AIProcessingException(
-                    "Failed to download audio file.",
-                    exception
-            );
-
-        } catch (InterruptedException exception) {
-
-            Thread.currentThread().interrupt();
-
-            throw new AIProcessingException(
-                    "Audio download was interrupted.",
-                    exception
-            );
-        }
-    }
-
-    /**
-     * Uploads the temporary audio file to AssemblyAI.
+     * AssemblyAI returns a URL such as:
      *
-     * @param audioFile temporary audio file
-     * @return AssemblyAI upload URL
+     * https://cdn.assemblyai.com/upload/xxxxx
+     *
+     * That URL is then used when creating
+     * the transcription request.
+     *
+     * @param audioFile local .m4a file
+     * @return AssemblyAI audio URL
      */
     private String uploadAudio(Path audioFile) {
 
         try {
 
+            byte[] audioBytes =
+                    Files.readAllBytes(audioFile);
+
             logger.info(
-                    "Uploading audio file to AssemblyAI."
+                    "Uploading audio file to AssemblyAI: {} bytes",
+                    audioBytes.length
             );
 
             HttpRequest request =
@@ -196,7 +172,9 @@ public class SpeechToTextService {
                                             ASSEMBLYAI_UPLOAD_URL
                                     )
                             )
-                            .timeout(Duration.ofMinutes(2))
+                            .timeout(
+                                    Duration.ofMinutes(5)
+                            )
                             .header(
                                     "Authorization",
                                     apiKey
@@ -207,7 +185,7 @@ public class SpeechToTextService {
                             )
                             .POST(
                                     HttpRequest.BodyPublishers
-                                            .ofFile(audioFile)
+                                            .ofByteArray(audioBytes)
                             )
                             .build();
 
@@ -225,8 +203,14 @@ public class SpeechToTextService {
                         response.statusCode()
                 );
 
+                logger.error(
+                        "AssemblyAI response: {}",
+                        response.body()
+                );
+
                 throw new AIProcessingException(
-                        "Failed to upload audio to AssemblyAI."
+                        "AssemblyAI audio upload failed. HTTP status: "
+                                + response.statusCode()
                 );
             }
 
@@ -235,33 +219,28 @@ public class SpeechToTextService {
                             response.body()
                     );
 
-            String uploadUrl =
-                    responseJson
-                            .path("upload_url")
-                            .asText();
+            JsonNode uploadUrlNode =
+                    responseJson.get("upload_url");
 
-            if (uploadUrl.isBlank()) {
+            if (uploadUrlNode == null
+                    || uploadUrlNode.asText().isBlank()) {
 
                 throw new AIProcessingException(
                         "AssemblyAI did not return an upload URL."
                 );
             }
 
-            logger.info(
-                    "Audio uploaded to AssemblyAI successfully."
-            );
-
-            return uploadUrl;
+            return uploadUrlNode.asText();
 
         } catch (IOException exception) {
 
             logger.error(
-                    "Failed to upload audio to AssemblyAI.",
+                    "Failed to read or upload audio file.",
                     exception
             );
 
             throw new AIProcessingException(
-                    "Failed to upload audio to AssemblyAI.",
+                    "Failed to upload audio file to AssemblyAI.",
                     exception
             );
 
@@ -270,25 +249,25 @@ public class SpeechToTextService {
             Thread.currentThread().interrupt();
 
             throw new AIProcessingException(
-                    "AssemblyAI upload was interrupted.",
+                    "AssemblyAI audio upload was interrupted.",
                     exception
             );
         }
     }
 
     /**
-     * Submits an AssemblyAI upload URL for transcription.
+     * Submits the AssemblyAI audio URL for transcription.
      *
-     * @param uploadUrl AssemblyAI uploaded audio URL
-     * @return AssemblyAI transcript ID
+     * @param audioUrl AssemblyAI-hosted audio URL
+     * @return transcript ID
      */
-    private String submitTranscription(String uploadUrl) {
+    private String submitTranscription(String audioUrl) {
 
         try {
 
             String requestBody =
                     objectMapper.writeValueAsString(
-                            new TranscriptRequest(uploadUrl)
+                            new TranscriptRequest(audioUrl)
                     );
 
             HttpRequest request =
@@ -298,7 +277,9 @@ public class SpeechToTextService {
                                             ASSEMBLYAI_TRANSCRIPT_URL
                                     )
                             )
-                            .timeout(Duration.ofSeconds(30))
+                            .timeout(
+                                    Duration.ofSeconds(30)
+                            )
                             .header(
                                     "Authorization",
                                     apiKey
@@ -323,13 +304,18 @@ public class SpeechToTextService {
                     || response.statusCode() >= 300) {
 
                 logger.error(
-                        "AssemblyAI transcription submission failed. "
-                                + "HTTP status: {}",
+                        "AssemblyAI transcription submission failed. HTTP status: {}",
                         response.statusCode()
                 );
 
+                logger.error(
+                        "AssemblyAI response: {}",
+                        response.body()
+                );
+
                 throw new AIProcessingException(
-                        "AssemblyAI transcription request failed."
+                        "AssemblyAI transcription request failed. HTTP status: "
+                                + response.statusCode()
                 );
             }
 
@@ -349,14 +335,7 @@ public class SpeechToTextService {
                 );
             }
 
-            String transcriptId =
-                    idNode.asText();
-
-            logger.info(
-                    "AssemblyAI transcription submitted successfully."
-            );
-
-            return transcriptId;
+            return idNode.asText();
 
         } catch (IOException exception) {
 
@@ -382,10 +361,10 @@ public class SpeechToTextService {
     }
 
     /**
-     * Polls AssemblyAI until transcription is completed or fails.
+     * Polls AssemblyAI until transcription is completed.
      *
      * @param transcriptId AssemblyAI transcript ID
-     * @return completed transcript text
+     * @return transcript text
      */
     private String waitForTranscript(String transcriptId) {
 
@@ -437,10 +416,10 @@ public class SpeechToTextService {
     }
 
     /**
-     * Retrieves the current transcript status from AssemblyAI.
+     * Retrieves the current transcription status.
      *
      * @param transcriptId AssemblyAI transcript ID
-     * @return transcript response
+     * @return AssemblyAI transcript response
      */
     private JsonNode getTranscript(String transcriptId) {
 
@@ -455,7 +434,9 @@ public class SpeechToTextService {
                                                     + transcriptId
                                     )
                             )
-                            .timeout(Duration.ofSeconds(30))
+                            .timeout(
+                                    Duration.ofSeconds(30)
+                            )
                             .header(
                                     "Authorization",
                                     apiKey
@@ -471,6 +452,16 @@ public class SpeechToTextService {
 
             if (response.statusCode() < 200
                     || response.statusCode() >= 300) {
+
+                logger.error(
+                        "Failed to retrieve transcript. HTTP status: {}",
+                        response.statusCode()
+                );
+
+                logger.error(
+                        "AssemblyAI response: {}",
+                        response.body()
+                );
 
                 throw new AIProcessingException(
                         "Failed to retrieve transcription status."
@@ -506,7 +497,9 @@ public class SpeechToTextService {
 
         try {
 
-            Thread.sleep(POLLING_INTERVAL_MS);
+            Thread.sleep(
+                    POLLING_INTERVAL_MS
+            );
 
         } catch (InterruptedException exception) {
 
@@ -520,17 +513,54 @@ public class SpeechToTextService {
     }
 
     /**
-     * Validates the audio URL.
+     * Validates the local audio file.
      *
-     * @param audioUrl direct audio URL
+     * @param audioFile temporary .m4a file
      */
-    private void validateAudioUrl(String audioUrl) {
+    private void validateAudioFile(Path audioFile) {
 
-        if (audioUrl == null
-                || audioUrl.isBlank()) {
+        if (audioFile == null) {
 
             throw new AIProcessingException(
-                    "Audio URL cannot be empty."
+                    "Audio file path cannot be null."
+            );
+        }
+
+        if (!Files.exists(audioFile)) {
+
+            throw new AIProcessingException(
+                    "Audio file does not exist: "
+                            + audioFile
+            );
+        }
+
+        if (!Files.isRegularFile(audioFile)) {
+
+            throw new AIProcessingException(
+                    "Audio path is not a file: "
+                            + audioFile
+            );
+        }
+
+        if (!Files.isReadable(audioFile)) {
+
+            throw new AIProcessingException(
+                    "Audio file cannot be read: "
+                            + audioFile
+            );
+        }
+
+        String fileName =
+                audioFile
+                        .getFileName()
+                        .toString()
+                        .toLowerCase();
+
+        if (!fileName.endsWith(".m4a")) {
+
+            throw new AIProcessingException(
+                    "Unsupported audio format. "
+                            + "Expected .m4a file."
             );
         }
     }
@@ -538,22 +568,62 @@ public class SpeechToTextService {
     /**
      * Deletes the temporary audio file.
      *
+     * The parent directory created by VideoAudioService
+     * is also deleted when it becomes empty.
+     *
      * @param audioFile temporary audio file
      */
-    private void deleteTemporaryFile(Path audioFile) {
+    private void deleteTemporaryAudio(Path audioFile) {
 
         try {
 
-            Files.deleteIfExists(audioFile);
+            if (audioFile != null
+                    && Files.exists(audioFile)) {
 
-            logger.info(
-                    "Temporary audio file deleted."
-            );
+                Files.deleteIfExists(audioFile);
+
+                logger.info(
+                        "Temporary audio file deleted: {}",
+                        audioFile
+                );
+            }
+
+            if (audioFile != null) {
+
+                Path parentDirectory =
+                        audioFile.getParent();
+
+                if (parentDirectory != null
+                        && Files.exists(parentDirectory)) {
+
+                    try (var files =
+                                 Files.list(parentDirectory)) {
+
+                        if (files.findAny().isEmpty()) {
+
+                            Files.deleteIfExists(
+                                    parentDirectory
+                            );
+
+                            logger.info(
+                                    "Temporary audio directory deleted: {}",
+                                    parentDirectory
+                            );
+                        }
+                    }
+                }
+
+            }
 
         } catch (IOException exception) {
 
+            /*
+             * Failure to delete a temporary file should
+             * not cause an otherwise successful transcription
+             * to fail.
+             */
             logger.warn(
-                    "Failed to delete temporary audio file: {}",
+                    "Unable to delete temporary audio file: {}",
                     audioFile,
                     exception
             );
@@ -563,8 +633,10 @@ public class SpeechToTextService {
     /**
      * Request body sent to AssemblyAI.
      *
-     * @param audio_url AssemblyAI uploaded audio URL
+     * @param audio_url AssemblyAI-hosted audio URL
      */
-    private record TranscriptRequest(String audio_url) {
+    private record TranscriptRequest(
+            String audio_url
+    ) {
     }
 }

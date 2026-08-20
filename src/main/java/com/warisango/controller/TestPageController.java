@@ -20,4 +20,9 @@ public class TestPageController {
     public String aiExtractionText() {
         return "test/ai-extraction-test";
     }
+
+    @GetMapping("/admin/ai_discovery")
+    public String aiDiscovery() {
+        return "admin/discovery";
+    }
 }

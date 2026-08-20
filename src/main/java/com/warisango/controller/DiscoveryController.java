@@ -1,20 +1,32 @@
-// package com.warisango.controller;
+package com.warisango.controller;
 
-// @RestController
-// @RequestMapping("/api/discovery")
+import com.warisango.dto.VideoDTO;
+import com.warisango.service.DiscoveryService;
+import org.springframework.web.bind.annotation.*;
 
-// public class DiscoveryController {
+import java.util.List;
+import java.util.Map;
 
-//     private final DiscoveryService discoveryService;
+@RestController
+@RequestMapping("/api/discovery")
+public class DiscoveryController {
 
-//     public DiscoveryController(DiscoveryService discoveryService) {
-//         this.discoveryService = discoveryService;
-//     }
+    private final DiscoveryService discoveryService;
 
-//     @PostMapping("/search")
-//     public List<PendingHeritageDTO> search(@RequestParam String keyword) throws Exception {
+    public DiscoveryController(
+            DiscoveryService discoveryService) {
 
-//         return discoveryService.discover(keyword);
+        this.discoveryService =
+                discoveryService;
+    }
 
-//     }
-// }
+    @PostMapping("/search")
+    public List<VideoDTO> search(
+            @RequestBody Map<String, String> request)
+            throws Exception {
+
+        return discoveryService.discover(
+                request.get("keyword")
+        );
+    }
+}
