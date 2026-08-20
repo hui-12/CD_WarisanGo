@@ -4,6 +4,7 @@ import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import com.warisango.config.YoutubeConfig;
 import com.warisango.dto.VideoDTO;
+import com.warisango.exception.AIProcessingException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -24,9 +25,11 @@ public class VideoSearchService {
         this.objectMapper = new ObjectMapper();
     }
 
-    public List<VideoDTO> searchVideos(String keyword) throws Exception {
+    public List<VideoDTO> searchVideos(String keyword) {
 
-        String url = UriComponentsBuilder
+        try {
+
+            String url = UriComponentsBuilder
                 .fromUriString(youtubeConfig.getBaseUrl() + "/search")
                 .queryParam("part", "snippet")
                 .queryParam("type", "video")
@@ -37,12 +40,18 @@ public class VideoSearchService {
                 .encode()
                 .toUriString();
 
-        String response = restClient.get()
-                .uri(url)
-                .retrieve()
-                .body(String.class);
+            String response = restClient.get()
+                    .uri(url)
+                    .retrieve()
+                    .body(String.class);
 
-        return parseVideos(response);
+            return parseVideos(response);
+        } catch (Exception exception) {
+            throw new AIProcessingException(
+                    "Unable to search YouTube videos.",
+                    exception
+            );
+        }
     }
 
     // Parse the JSON response and extract video details(no content)

@@ -314,25 +314,26 @@ document.addEventListener("DOMContentLoaded", function () {
             // STEP 1 YouTube → VideoAudioService
 
             audioStatus.innerText =
-                "Downloading audio using yt-dlp...";
+                "Server is downloading the selected video audio...";
 
-            const extractedAudioFile =
-                await window.WarisanGoAudio.extract(videoUrl);
+            transcriptionStatus.innerText =
+                "Waiting for server-side transcription...";
 
-            audioStatus.innerText =
-                "Audio extraction completed.";
+            extractionStatus.innerText =
+                "Waiting for Gemini extraction and Firestore save...";
 
             // STEP 2 Audio → AssemblyAI
             processingStatus.innerText =
-                "Audio extracted. Sending audio to AssemblyAI...";
+                "Processing selected video on the server...";
 
-            transcriptionStatus.innerText =
-                "Transcribing audio...";
+            const workflowResult =
+                await window.WarisanGoWorkflow.process(videoUrl);
 
             const transcriptText =
-                await window.WarisanGoTranscription.transcribe(
-                    extractedAudioFile
-                );
+                workflowResult.transcript;
+
+            const extractionData =
+                workflowResult.extraction;
 
             transcript.value =
                 transcriptText;
@@ -345,17 +346,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 "Transcription completed.";
 
             // STEP 3 Transcript → Gemini
-            processingStatus.innerText =
-                "Transcript completed. Sending to Gemini...";
-
-
-            extractionStatus.innerText =
-                "Gemini is extracting heritage information...";
-
-            const extractionData =
-                await window.WarisanGoAIExtraction.extract(
-                    transcriptText
-                );
+            audioStatus.innerText =
+                "Audio extraction completed.";
 
             // =====================================
             // DISPLAY GEMINI RESULT

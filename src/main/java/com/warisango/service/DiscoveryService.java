@@ -35,8 +35,7 @@ public class DiscoveryService {
      * @param keyword search keyword
      * @return list of matching videos
      */
-    public List<VideoDTO> discover(String keyword)
-            throws Exception {
+    public List<VideoDTO> discover(String keyword) {
 
         if (keyword == null || keyword.isBlank()) {
             return List.of();

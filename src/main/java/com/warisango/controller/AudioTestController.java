@@ -1,6 +1,8 @@
 package com.warisango.controller;
 
+import com.warisango.dto.AudioExtractionRequest;
 import com.warisango.service.VideoAudioService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,13 +23,10 @@ public class AudioTestController {
 
     @PostMapping("/test")
     public ResponseEntity<Map<String, String>> testAudioExtraction(
-            @RequestBody Map<String, String> request) {
-
-        String videoUrl =
-                request.get("videoUrl");
+            @Valid @RequestBody AudioExtractionRequest request) {
 
         Path audioFile =
-                videoAudioService.downloadAudio(videoUrl);
+                videoAudioService.downloadAudio(request.videoUrl());
 
         return ResponseEntity.ok(
                 Map.of(

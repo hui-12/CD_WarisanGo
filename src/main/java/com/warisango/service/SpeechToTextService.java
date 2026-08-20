@@ -563,6 +563,31 @@ public class SpeechToTextService {
                             + "Expected .m4a file."
             );
         }
+
+        try {
+            Path realAudioFile = audioFile.toRealPath();
+            Path temporaryRoot = Path.of(
+                    System.getProperty("java.io.tmpdir")
+            ).toRealPath();
+            Path parentDirectory = realAudioFile.getParent();
+
+            boolean isManagedTemporaryFile = parentDirectory != null
+                    && temporaryRoot.equals(parentDirectory.getParent())
+                    && parentDirectory.getFileName()
+                            .toString()
+                            .startsWith("warisango-audio-");
+
+            if (!isManagedTemporaryFile) {
+                throw new AIProcessingException(
+                        "Audio file is outside the managed temporary directory."
+                );
+            }
+        } catch (IOException exception) {
+            throw new AIProcessingException(
+                    "Unable to validate the audio file path.",
+                    exception
+            );
+        }
     }
 
     /**
