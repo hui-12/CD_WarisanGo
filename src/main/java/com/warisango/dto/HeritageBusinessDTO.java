@@ -1,5 +1,8 @@
 package com.warisango.dto;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class HeritageBusinessDTO {
     private String businessId;
     private String name;
@@ -7,6 +10,8 @@ public class HeritageBusinessDTO {
     private String state;
     private String city;
     private String description;
+    private String category;
+    private List<String> photos = new ArrayList<>();
     private double latitude;
     private double longitude;
     private Double averageRating;
@@ -52,4 +57,12 @@ public class HeritageBusinessDTO {
 
     public Double getAverageRating() { return averageRating; }
     public void setAverageRating(Double averageRating) { this.averageRating = averageRating; }
+
+    public String getCategory() { return category; }
+    public void setCategory(String category) { this.category = category; }
+
+    public List<String> getPhotos() { return photos; }
+    public void setPhotos(List<String> photos) {
+        this.photos = photos == null ? new ArrayList<>() : new ArrayList<>(photos);
+    }
 }

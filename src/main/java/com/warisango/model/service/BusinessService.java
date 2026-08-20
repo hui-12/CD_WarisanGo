@@ -11,6 +11,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class BusinessService {
@@ -28,6 +29,15 @@ public class BusinessService {
         } catch (Exception e) {
             logger.error("Error fetching approved heritage businesses", e);
             throw new AIProcessingException("Failed to load map data.");
+        }
+    }
+
+    public Optional<HeritageBusinessDTO> getBusinessById(String id) {
+        try {
+            return businessRepository.findById(id);
+        } catch (Exception e) {
+            logger.error("Error fetching business by id: {}", id, e);
+            return Optional.empty();
         }
     }
 

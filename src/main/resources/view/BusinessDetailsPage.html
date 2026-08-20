@@ -1,35 +1,103 @@
 <!doctype html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="utf-8">
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title th:text="${business.name} + ' — Details'">Business Details</title>
-  <style>
-    body{font-family:Inter,system-ui,Arial,sans-serif;background:#f5f7fb;color:#222;margin:0}
-    .container{max-width:900px;margin:20px auto;padding:20px;background:#fff;border-radius:8px}
-    .gallery img{max-width:100%;height:auto;border-radius:6px;margin-bottom:8px}
-    .back{display:inline-block;margin-bottom:12px}
-    .meta{color:#666;margin-bottom:8px}
-    .photos{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:12px}
-    .photos img{width:100%;height:160px;object-fit:cover;border-radius:6px}
-  </style>
+  <title th:text="${business.name} + ' - Details — WarisanGo'">Business Details — WarisanGo</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Global Styles (With static href fallback) -->
+  <link rel="stylesheet" href="/css/global.css" th:href="@{/css/global.css}">
+  <!-- Assignment + Tailwind compiled styles -->
+  <link rel="stylesheet" th:href="@{/css/bundle.css}" href="/css/bundle.css">
+  <link rel="stylesheet" th:href="@{/css/assignment.css}" href="/css/assignment.css">
+  <!-- Page-specific stylesheet -->
+  <link rel="stylesheet" th:href="@{/css/business-heritage.css}" href="/css/business-heritage.css">
 </head>
 <body>
-  <div class="container">
-    <a class="back" href="/">← Back to directory</a>
+  <!-- Navbar fragment -->
+  <div th:replace="~{fragments/fragments :: navbar('directory')}"></div>
 
-    <h1 th:text="${business.name}">Business Name</h1>
-    <div class="meta" th:text="${business.category} + ' • ' + ${business.city} + ', ' + ${business.state} + ' • ★ ' + ${business.rating}"></div>
-    <p th:text="${business.address}"></p>
-    <p th:text="${business.description}"></p>
+  <main class="detail-page">
+    <a class="detail-back" th:href="@{/directory}">← Back to Directory</a>
 
-    <section class="gallery">
-      <h3>Photos</h3>
-      <div th:if="${business.photos == null or #lists.isEmpty(business.photos)}">No photos available for this business.</div>
-      <div class="photos" th:if="${business.photos != null}">
-        <img th:each="p : ${business.photos}" th:src="${p}" th:alt="${business.name} + ' photo'" />
+    <section class="detail-layout" aria-labelledby="business-title">
+      <div class="detail-main">
+        <div class="gallery" id="photos">
+          <img th:if="${not #lists.isEmpty(business.photos)}" th:src="${business.photos[0]}"
+               th:alt="${business.name} + ' photo'" th:title="${business.name}" class="gallery-featured"
+               data-fallback-image="https://images.unsplash.com/photo-1559925393-8be0ec4767c8?auto=format&amp;fit=crop&amp;w=1200&amp;q=85">
+          <img th:if="${#lists.isEmpty(business.photos)}"
+               src="https://images.unsplash.com/photo-1559925393-8be0ec4767c8?auto=format&amp;fit=crop&amp;w=1200&amp;q=85"
+               th:alt="${business.name} + ' photo'" th:title="${business.name}" class="gallery-featured">
+          <div class="gallery-thumbnails" th:if="${not #lists.isEmpty(business.photos)}">
+            <img th:each="photo, stat : ${business.photos}" th:if="${stat.index < 4}" th:src="${photo}"
+                 th:alt="${business.name} + ' gallery photo'" class="gallery-thumb"
+                 data-fallback-image="https://images.unsplash.com/photo-1559925393-8be0ec4767c8?auto=format&amp;fit=crop&amp;w=240&amp;q=80">
+          </div>
+        </div>
+
+        <header class="business-title-block">
+          <p class="detail-kicker" th:text="${(business.category ?: 'Heritage food') + ' · ' + business.city + ', ' + business.state}">Heritage food · City, State</p>
+          <h1 id="business-title" th:text="${business.name}">Business Name</h1>
+          <p class="detail-rating">
+            <span aria-hidden="true">★★★★★</span>
+            <strong th:text="${business.averageRating != null ? #numbers.formatDecimal(business.averageRating, 1, 1) : 'New'}">4.8</strong>
+            <span>Approved heritage listing</span>
+          </p>
+          <p class="business-summary" th:text="${business.description}">Business description</p>
+        </header>
+
+        <section class="detail-section">
+          <h2>Our Story</h2>
+          <p th:text="${business.description}">Business story</p>
+        </section>
+
+        <section class="detail-section business-information">
+          <h2>Business Information</h2>
+          <dl>
+            <div><dt>Category</dt><dd th:text="${business.category ?: 'Heritage food'}">Heritage food</dd></div>
+            <div><dt>Rating</dt><dd th:text="${business.averageRating != null ? #numbers.formatDecimal(business.averageRating, 1, 1) + ' / 5' : 'New listing'}">4.8 / 5</dd></div>
+            <div class="information-wide"><dt>Address</dt><dd th:text="${business.address}">Business address</dd></div>
+          </dl>
+        </section>
+
+        <section class="check-in-panel" aria-labelledby="check-in-title">
+          <div>
+            <h2 id="check-in-title">Check In</h2>
+            <p>Earn reward points when you check in near this heritage business.</p>
+          </div>
+          <a class="check-in-button" th:href="@{/map}">⌖ Check In Here</a>
+        </section>
       </div>
+
+      <aside class="detail-sidebar" aria-label="Business details">
+        <section class="sidebar-card">
+          <h2>Heritage Details</h2>
+          <dl class="sidebar-list">
+            <div><dt>Category</dt><dd th:text="${business.category ?: 'Heritage food'}">Heritage food</dd></div>
+            <div><dt>Status</dt><dd>Approved</dd></div>
+            <div><dt>Rating</dt><dd th:text="${business.averageRating != null ? #numbers.formatDecimal(business.averageRating, 1, 1) + ' / 5' : 'New'}">4.8 / 5</dd></div>
+            <div><dt>State</dt><dd th:text="${business.state}">State</dd></div>
+          </dl>
+        </section>
+        <section class="sidebar-card">
+          <h2>Location</h2>
+          <p class="sidebar-address" th:text="${business.address}">Business address</p>
+          <a class="map-link" th:href="@{/map}">View on map →</a>
+        </section>
+      </aside>
     </section>
-  </div>
+  </main>
+
+  <!-- Footer fragment -->
+  <div th:replace="~{fragments/footer :: global}"></div>
+
+  <!-- Page-specific script -->
+  <script src="/js/business-heritage.js" th:src="@{/js/business-heritage.js}"></script>
 </body>
 </html>
