@@ -15,21 +15,25 @@ public class AIWorkflowService {
     private final VideoAudioService videoAudioService;
     private final SpeechToTextService speechToTextService;
     private final AIExtractionService aiExtractionService;
+    private final HeritageBusinessPersistenceService persistenceService;
 
     public AIWorkflowService(
             VideoAudioService videoAudioService,
             SpeechToTextService speechToTextService,
-            AIExtractionService aiExtractionService) {
+            AIExtractionService aiExtractionService,
+            HeritageBusinessPersistenceService persistenceService) {
 
         this.videoAudioService = videoAudioService;
         this.speechToTextService = speechToTextService;
         this.aiExtractionService = aiExtractionService;
+        this.persistenceService = persistenceService;
     }
 
     public DiscoveryProcessResponse process(String videoUrl) {
         Path audioFile = videoAudioService.downloadAudio(videoUrl);
         String transcript = speechToTextService.transcribe(audioFile);
         AIExtractionResult extraction = aiExtractionService.extract(transcript);
+        persistenceService.save(extraction, videoUrl);
 
         return new DiscoveryProcessResponse(
                 transcript,

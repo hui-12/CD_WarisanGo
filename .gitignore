@@ -1,5 +1,6 @@
 HELP.md
 target/
+src/main/resources/firebase-service-account.json
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/

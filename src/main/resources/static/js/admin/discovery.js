@@ -320,7 +320,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 "Waiting for server-side transcription...";
 
             extractionStatus.innerText =
-                "Waiting for Gemini extraction...";
+                "Waiting for Gemini extraction and Firebase save...";
 
             // STEP 2 Audio → AssemblyAI
             processingStatus.innerText =
@@ -365,7 +365,7 @@ document.addEventListener("DOMContentLoaded", function () {
             );
 
             extractionStatus.innerText =
-                "AI extraction completed.";
+                "AI extraction completed and saved to Firebase.";
 
             processingStatus.className =
                 "alert alert-success";

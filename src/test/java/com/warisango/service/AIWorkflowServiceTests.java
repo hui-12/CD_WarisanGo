@@ -11,6 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.nio.file.Path;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -24,6 +25,9 @@ class AIWorkflowServiceTests {
 
     @Mock
     private AIExtractionService aiExtractionService;
+
+    @Mock
+    private HeritageBusinessPersistenceService persistenceService;
 
     @InjectMocks
     private AIWorkflowService aiWorkflowService;
@@ -42,5 +46,6 @@ class AIWorkflowServiceTests {
 
         assertThat(response.transcript()).isEqualTo(transcript);
         assertThat(response.extraction()).isSameAs(extraction);
+        verify(persistenceService).save(extraction, videoUrl);
     }
 }
