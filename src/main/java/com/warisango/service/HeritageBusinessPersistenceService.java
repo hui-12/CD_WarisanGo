@@ -53,6 +53,8 @@ public class HeritageBusinessPersistenceService {
         document.put("name", nullIfBlank(business.name()));
         document.put("sourceVideoLink", nullIfBlank(sourceVideoLink));
         document.put("status", PENDING_STATUS);
+        document.put("approveAt", null);
+        document.put("rejectAt", null);
         return document;
     }
 

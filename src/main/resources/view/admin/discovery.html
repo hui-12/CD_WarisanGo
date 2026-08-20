@@ -16,11 +16,17 @@
 
     <link
             rel="stylesheet"
+            th:href="@{/css/admin/admin.css}">
+
+    <link
+            rel="stylesheet"
             th:href="@{/css/admin/discovery.css}">
 
 </head>
 
 <body>
+
+<header th:replace="~{admin/fragments/navigation :: navigation('discovery')}"></header>
 
 <div class="container py-4">
 
@@ -63,7 +69,8 @@
                             type="text"
                             id="keyword"
                             class="form-control"
-                            placeholder="Example: Best traditional Penang char kuey teow in Malaysia">
+                            placeholder="Exp: Best-traditional-Penang-char-kuey-teow-in
+                                        -Malaysia(Replace-spaces-with-dashes)">
 
                 </div>
 

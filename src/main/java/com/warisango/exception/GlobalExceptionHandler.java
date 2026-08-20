@@ -44,7 +44,16 @@ public class GlobalExceptionHandler {
 
         logger.error("Firestore persistence failed.", exception);
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
-                .body(new ErrorResponse("Unable to save heritage businesses."));
+                .body(new ErrorResponse("Unable to access heritage businesses."));
+    }
+
+    @ExceptionHandler(BusinessNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleBusinessNotFound(
+            BusinessNotFoundException exception) {
+
+        logger.warn("Heritage business lookup failed: {}", exception.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ErrorResponse(exception.getMessage()));
     }
 
     @ExceptionHandler(Exception.class)

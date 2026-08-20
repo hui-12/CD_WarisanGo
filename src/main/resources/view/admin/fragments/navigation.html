@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<body>
+
+<header class="admin-header" th:fragment="navigation(activePage)">
+
+    <nav class="admin-navigation container" aria-label="Admin navigation">
+
+        <a class="admin-brand" th:href="@{/admin/ai_discovery}">
+            WarisanGo
+        </a>
+
+        <div class="admin-navigation-links">
+
+            <a class="admin-navigation-link"
+               th:classappend="${activePage == 'discovery'} ? 'active'"
+               th:href="@{/admin/ai_discovery}"
+               th:attr="aria-current=${activePage == 'discovery'} ? 'page' : null">
+                Discovery
+            </a>
+
+            <a class="admin-navigation-link"
+               th:classappend="${activePage == 'pending'} ? 'active'"
+               th:href="@{/admin/pending-list}"
+               th:attr="aria-current=${activePage == 'pending'} ? 'page' : null">
+                Pending List
+            </a>
+
+            <a class="admin-navigation-link"
+               th:classappend="${activePage == 'audit'} ? 'active'"
+               th:href="@{/admin/audit-log}"
+               th:attr="aria-current=${activePage == 'audit'} ? 'page' : null">
+                Audit Log
+            </a>
+
+        </div>
+
+    </nav>
+
+</header>
+
+</body>
+
+</html>
