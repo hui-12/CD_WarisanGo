@@ -10,9 +10,11 @@ document.addEventListener("click", (event) => {
             "home": "/",
             "directory": "/directory",
             "map": "/map",
+            "checkin": "/CheckInPage",
             "rewards": "/rewards",
             "badges": "/badges",
             "challenges": "/challenges",
+            "ac": "/AdminChallengePage",
             "profile": "/profile"
         };
         
@@ -23,8 +25,11 @@ document.addEventListener("click", (event) => {
 });
 
 // Shared HTML escaping utility to prevent XSS
-const escapeHtml = (text) => {
-    if (!text) return '';
+window.escapeHtml = function (text) {
+    if (text === null || text === undefined) {
+        return '';
+    }
+
     return String(text)
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
@@ -32,3 +37,12 @@ const escapeHtml = (text) => {
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
 };
+/*const escapeHtml = (text) => {
+    if (!text) return '';
+    return String(text)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+};*/
