@@ -2,7 +2,6 @@ package com.warisango.model.repository;
 
 import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.*;
-import com.google.firebase.cloud.FirestoreClient;
 import com.warisango.dto.HeritageBusinessDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,10 +18,14 @@ public class BusinessRepository {
 
     private static final String COLLECTION_NAME = "HeritageBusinesses";
     private static final Logger logger = LoggerFactory.getLogger(BusinessRepository.class);
+    private final Firestore firestore;
+
+    public BusinessRepository(Firestore firestore) {
+        this.firestore = firestore;
+    }
 
     public List<HeritageBusinessDTO> findApprovedBusinesses() throws ExecutionException, InterruptedException {
-        Firestore db = FirestoreClient.getFirestore();
-        ApiFuture<QuerySnapshot> future = db.collection(COLLECTION_NAME)
+        ApiFuture<QuerySnapshot> future = firestore.collection(COLLECTION_NAME)
                 .whereEqualTo("status", "APPROVED")
                 .get();
 
@@ -40,10 +43,46 @@ public class BusinessRepository {
         return list;
     }
 
+    /**
+     * Loads one approved business for Review pages.
+     * The normal Firestore document ID is used first, with a businessId field query as a fallback.
+     */
+    public HeritageBusinessDTO findByBusinessId(String businessId)
+            throws ExecutionException, InterruptedException {
+        if (businessId == null || businessId.isBlank()) {
+            return null;
+        }
+
+        DocumentSnapshot document = firestore.collection(COLLECTION_NAME)
+                .document(businessId)
+                .get()
+                .get();
+
+        if (!document.exists()) {
+            QuerySnapshot snapshot = firestore.collection(COLLECTION_NAME)
+                    .whereEqualTo("businessId", businessId)
+                    .limit(1)
+                    .get()
+                    .get();
+
+            if (snapshot.isEmpty()) {
+                return null;
+            }
+
+            document = snapshot.getDocuments().get(0);
+        }
+
+        String status = document.getString("status");
+        if (status != null && !status.isBlank() && !"APPROVED".equalsIgnoreCase(status)) {
+            return null;
+        }
+
+        return toBusinessDTO(document);
+    }
+
     // Real-time Firestore Snapshot Listener
     public ListenerRegistration addApprovedBusinessesListener(Consumer<List<HeritageBusinessDTO>> callback) {
-        Firestore db = FirestoreClient.getFirestore();
-        return db.collection(COLLECTION_NAME)
+        return firestore.collection(COLLECTION_NAME)
                 .whereEqualTo("status", "APPROVED")
                 .addSnapshotListener((snapshots, e) -> {
                     if (e != null || snapshots == null) {
@@ -60,14 +99,13 @@ public class BusinessRepository {
                         list.add(dto);
                     }
                     callback.accept(list);
-                });
+        });
     }
 
     // Find single business by document id
     public Optional<HeritageBusinessDTO> findById(String id) {
-        Firestore db = FirestoreClient.getFirestore();
         try {
-            DocumentSnapshot doc = db.collection(COLLECTION_NAME).document(id).get().get();
+            DocumentSnapshot doc = firestore.collection(COLLECTION_NAME).document(id).get().get();
             if (doc == null || !doc.exists()) {
                 return Optional.empty();
             }
@@ -107,5 +145,24 @@ public class BusinessRepository {
                     .toList());
         }
         return dto;
+    }
+
+    private HeritageBusinessDTO toBusinessDTO(DocumentSnapshot document) {
+        GeoPoint geoPoint = document.getGeoPoint("location");
+        double lat = geoPoint != null ? geoPoint.getLatitude() : 0.0;
+        double lng = geoPoint != null ? geoPoint.getLongitude() : 0.0;
+        String businessId = document.getString("businessId");
+
+        return new HeritageBusinessDTO(
+                businessId == null || businessId.isBlank() ? document.getId() : businessId,
+                document.getString("name"),
+                document.getString("address"),
+                document.getString("state"),
+                document.getString("city"),
+                document.getString("description"),
+                lat,
+                lng,
+                document.getDouble("averageRating")
+        );
     }
 }

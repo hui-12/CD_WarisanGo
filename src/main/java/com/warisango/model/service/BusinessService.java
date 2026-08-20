@@ -41,6 +41,19 @@ public class BusinessService {
         }
     }
 
+    /**
+     * Loads an approved business for the review pages, accepting either a Firestore document ID
+     * or the businessId stored in the document.
+     */
+    public HeritageBusinessDTO getApprovedBusinessForReview(String businessId) {
+        try {
+            return businessRepository.findByBusinessId(businessId);
+        } catch (Exception e) {
+            logger.warn("Could not load heritage business {} for Review page.", businessId, e);
+            return null;
+        }
+    }
+
     // Stream real-time updates via SSE
     public SseEmitter streamApprovedBusinesses() {
         SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
