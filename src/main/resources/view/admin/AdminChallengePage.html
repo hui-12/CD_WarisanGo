@@ -1,1 +1,236 @@
-<!-- TODO -->
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>WarisanGo — Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="/css/rewards.css" th:href="@{/css/rewards.css}"/>
+</head>
+<body>
+<!-- NAV -->
+<header id="site-header">
+  <div class="nav-inner">
+    <div class="wordmark">
+      <span style="font-size:20px">🍛</span>
+      <span class="wordmark-text">WarisanGo</span>
+      <span class="wordmark-badge">REWARDS</span>
+    </div>
+    <nav class="nav-links" id="nav-menu">
+      <button type="button" class="nav-btn" th:classappend="${activePage == 'checkin'} ? ' active'" data-navigate="checkin">Check In</button>
+      <button type="button" class="nav-btn" th:classappend="${activePage == 'badges'} ? ' active'" data-navigate="badges">Badges</button>
+      <button type="button" class="nav-btn" th:classappend="${activePage == 'rewards'} ? ' active'" data-navigate="rewards">Rewards</button>
+      <button type="button" class="nav-btn" th:classappend="${activePage == 'challenges'} ? ' active'" data-navigate="challenges">Challenges</button>
+      <button type="button" class="nav-btn admin-btn" th:classappend="${activePage == 'admin'} ? ' active'" data-navigate="admin">Admin</button>
+    </nav>
+  </div>
+  <div class="batik-divider" style="opacity:0.5"></div>
+</header>
+
+<div id="page-admin" class="page active">
+<main>
+  <div id="admin-success" style="display:none" class="success-banner">
+    <span id="admin-success-msg"></span>
+    <button onclick="document.getElementById('admin-success').style.display='none'" style="background:none;border:none;color:rgba(255,255,255,0.6);font-size:18px;cursor:pointer">×</button>
+  </div>
+
+  <!-- Delete modal -->
+  <div id="delete-modal" style="display:none" class="modal-overlay">
+    <div class="modal-box" style="border:2px solid #C4522A">
+      <h3 style="font-family:'DM Serif Display',Georgia,serif;font-size:22px;margin-bottom:12px">Delete Challenge?</h3>
+      <p style="font-size:13px;color:#8A7D6E;margin-bottom:24px">Are you sure you want to delete <strong id="delete-name" style="color:#2A2118"></strong>? This cannot be undone.</p>
+      <div style="display:flex;gap:10px">
+        <button class="btn-primary" onclick="confirmDelete()">Delete</button>
+        <button class="btn-secondary" onclick="document.getElementById('delete-modal').style.display='none'">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:32px">
+    <h1 id="admin-title">Challenge Management</h1>
+    <button class="btn-primary" id="admin-create-btn" onclick="openAdminCreate()" style="margin-top:8px">+ Create New Challenge</button>
+  </div>
+  <div class="batik-divider" style="margin-bottom:32px"></div>
+
+  <!-- List view -->
+  <div id="admin-list">
+    <div style="border:1px solid #D5CABF;border-radius:12px;overflow:hidden">
+      <div style="display:grid;grid-template-columns:1fr 80px 130px 110px 130px;padding:10px 20px;background:#2A2118;color:#fff;font-size:11px;font-family:'JetBrains Mono',monospace;letter-spacing:0.06em">
+        <span>CHALLENGE</span><span>POINTS</span><span>BADGE</span><span>EXPIRES</span><span style="text-align:right">ACTIONS</span>
+      </div>
+      <div id="admin-rows"></div>
+    </div>
+  </div>
+
+  <!-- Form view -->
+  <div id="admin-form" style="display:none;max-width:600px;padding:32px;border:1px solid #D5CABF;border-radius:12px;background:#F3EDE0">
+    <div style="margin-bottom:18px"><label style="display:block;font-size:12px;font-weight:600;margin-bottom:6px">Challenge Title *</label><input id="f-title" type="text" style="width:100%;padding:9px 12px;border-radius:8px;font-size:13px;border:1px solid #D5CABF;background:#FAF6EE;color:#2A2118"/><div id="e-title" style="font-size:12px;color:#C4522A;margin-top:4px;font-weight:600;display:none"></div></div>
+    <div style="margin-bottom:18px"><label style="display:block;font-size:12px;font-weight:600;margin-bottom:6px">Description *</label><textarea id="f-desc" rows="3" style="width:100%;padding:9px 12px;border-radius:8px;font-size:13px;border:1px solid #D5CABF;background:#FAF6EE;color:#2A2118;resize:vertical"></textarea><div id="e-desc" style="font-size:12px;color:#C4522A;margin-top:4px;font-weight:600;display:none"></div></div>
+    <div style="margin-bottom:18px"><label style="display:block;font-size:12px;font-weight:600;margin-bottom:6px">Requirements *</label><textarea id="f-req" rows="3" style="width:100%;padding:9px 12px;border-radius:8px;font-size:13px;border:1px solid #D5CABF;background:#FAF6EE;color:#2A2118;resize:vertical"></textarea><div id="e-req" style="font-size:12px;color:#C4522A;margin-top:4px;font-weight:600;display:none"></div></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px">
+      <div><label style="display:block;font-size:12px;font-weight:600;margin-bottom:6px">Bonus Points *</label><input id="f-pts" type="number" style="width:100%;padding:9px 12px;border-radius:8px;font-size:13px;border:1px solid #D5CABF;background:#FAF6EE;color:#2A2118"/><div id="e-pts" style="font-size:12px;color:#C4522A;margin-top:4px;font-weight:600;display:none"></div></div>
+      <div><label style="display:block;font-size:12px;font-weight:600;margin-bottom:6px">Exclusive Badge Name *</label><input id="f-badge" type="text" style="width:100%;padding:9px 12px;border-radius:8px;font-size:13px;border:1px solid #D5CABF;background:#FAF6EE;color:#2A2118"/><div id="e-badge" style="font-size:12px;color:#C4522A;margin-top:4px;font-weight:600;display:none"></div></div>
+    </div>
+    <div style="margin-bottom:18px"><label style="display:block;font-size:12px;font-weight:600;margin-bottom:6px">Expiry Date *</label><input id="f-date" type="date" style="width:100%;padding:9px 12px;border-radius:8px;font-size:13px;border:1px solid #D5CABF;background:#FAF6EE;color:#2A2118"/><div id="e-date" style="font-size:12px;color:#C4522A;margin-top:4px;font-weight:600;display:none"></div></div>
+    <div style="display:flex;gap:10px;margin-top:8px">
+      <button class="btn-primary" id="form-save-btn" onclick="saveAdminForm()">Publish Challenge</button>
+      <button class="btn-secondary" onclick="closeAdminForm()">Cancel</button>
+    </div>
+  </div>
+</main>
+</div>
+<script>
+// ══════════════════════════════════════
+// PAGE 5: ADMIN CHALLENGES
+// ══════════════════════════════════════
+let adminChallenges = [
+  { id:1, title:'Weekend Foodie Sprint', desc:'Visit 3 heritage businesses this weekend.',         req:'Check in at 3 different heritage food businesses between Fri–Sun.', pts:150, badge:'Weekend Warrior', expiry:'2026-08-03' },
+  { id:2, title:'Penang Pilgrimage',      desc:"Explore 5 heritage businesses in Penang's George Town.", req:'Check in at 5 businesses located in Penang.',               pts:300, badge:'Penang Pride',    expiry:'2026-08-15' },
+];
+let adminMode = 'list'; // 'list' | 'create' | 'edit'
+let editingId = null;
+let deleteTargetId = null;
+
+function renderAdminRows() {
+  const container = document.getElementById('admin-rows');
+  if (!adminChallenges.length) {
+    container.innerHTML = `<div style="padding:48px;text-align:center;color:#8A7D6E"><p>No challenges yet.</p><p style="font-size:13px;margin-top:8px">Create your first challenge to get tourists engaged.</p></div>`;
+    return;
+  }
+  container.innerHTML = adminChallenges.map((ch, i) => {
+    const expired = new Date(ch.expiry) < new Date();
+    return `<div style="display:grid;grid-template-columns:1fr 80px 130px 110px 130px;padding:14px 20px;
+      border-bottom:${i < adminChallenges.length-1 ? '1px solid #D5CABF' : 'none'};
+      background:${expired ? '#EDE5D4' : i % 2 === 0 ? '#FAF6EE' : '#F3EDE0'};align-items:center">
+      <div>
+        <div style="font-size:13px;font-weight:600;margin-bottom:2px">${ch.title}</div>
+        <div style="font-size:12px;color:#8A7D6E;line-height:1.4">${ch.desc}</div>
+        ${expired ? '<span style="display:inline-block;margin-top:4px;font-size:9px;font-family:\'JetBrains Mono\',monospace;color:#8A7D6E;border:1px solid #D5CABF;border-radius:4px;padding:2px 6px">EXPIRED</span>' : ''}
+      </div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:#D98A2E">+${ch.pts}</div>
+      <div style="font-size:12px;color:#8A7D6E">${ch.badge}</div>
+      <div style="font-size:12px;font-family:'JetBrains Mono',monospace;color:${expired ? '#8A7D6E' : '#2A2118'}">
+        ${new Date(ch.expiry).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button onclick="openAdminEdit(${ch.id})" style="padding:5px 12px;background:transparent;color:#2A2118;border:1px solid #D5CABF;border-radius:8px;font-size:12px;cursor:pointer">Edit</button>
+        <button onclick="openDeleteModal(${ch.id},'${ch.title.replace(/'/g,"\\'")}')" style="padding:5px 12px;background:#C4522A;color:#fff;border:none;border-radius:8px;font-size:12px;cursor:pointer">Delete</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openAdminCreate() {
+  adminMode = 'create'; editingId = null;
+  document.getElementById('admin-title').textContent = 'Create New Challenge';
+  document.getElementById('admin-create-btn').style.display = 'none';
+  document.getElementById('admin-list').style.display = 'none';
+  document.getElementById('admin-form').style.display = 'block';
+  document.getElementById('form-save-btn').textContent = 'Publish Challenge';
+  ['title','desc','req','pts','badge','date'].forEach(k => {
+    document.getElementById('f-' + k).value = '';
+    document.getElementById('e-' + k).style.display = 'none';
+  });
+}
+
+function openAdminEdit(id) {
+  const ch = adminChallenges.find(c => c.id === id);
+  adminMode = 'edit'; editingId = id;
+  document.getElementById('admin-title').textContent = 'Edit: ' + ch.title;
+  document.getElementById('admin-create-btn').style.display = 'none';
+  document.getElementById('admin-list').style.display = 'none';
+  document.getElementById('admin-form').style.display = 'block';
+  document.getElementById('form-save-btn').textContent = 'Save Changes';
+  document.getElementById('f-title').value = ch.title;
+  document.getElementById('f-desc').value  = ch.desc;
+  document.getElementById('f-req').value   = ch.req;
+  document.getElementById('f-pts').value   = ch.pts;
+  document.getElementById('f-badge').value = ch.badge;
+  document.getElementById('f-date').value  = ch.expiry;
+  ['title','desc','req','pts','badge','date'].forEach(k => document.getElementById('e-'+k).style.display='none');
+}
+
+function closeAdminForm() {
+  adminMode = 'list';
+  document.getElementById('admin-title').textContent = 'Challenge Management';
+  document.getElementById('admin-create-btn').style.display = 'block';
+  document.getElementById('admin-list').style.display = 'block';
+  document.getElementById('admin-form').style.display = 'none';
+}
+
+function saveAdminForm() {
+  const title = document.getElementById('f-title').value.trim();
+  const desc  = document.getElementById('f-desc').value.trim();
+  const req   = document.getElementById('f-req').value.trim();
+  const pts   = document.getElementById('f-pts').value;
+  const badge = document.getElementById('f-badge').value.trim();
+  const date  = document.getElementById('f-date').value;
+  let valid = true;
+
+  function setErr(k, msg) { const el = document.getElementById('e-'+k); el.textContent = msg; el.style.display = msg ? 'block' : 'none'; if (msg) valid = false; }
+
+  setErr('title', !title ? 'Title is required.' : '');
+  setErr('desc',  !desc  ? 'Description is required.' : '');
+  setErr('req',   !req   ? 'Requirements are required.' : '');
+  setErr('pts',   (!pts || isNaN(Number(pts)) || Number(pts) <= 0) ? 'Enter a valid positive number.' : '');
+  setErr('badge', !badge ? 'Badge name is required.' : '');
+  if (!date) setErr('date', 'Expiry date is required.');
+  else if (new Date(date) <= new Date()) setErr('date', 'Expiry date must be a future date.');
+  else setErr('date', '');
+
+  if (!valid) return;
+
+  if (adminMode === 'create') {
+    adminChallenges.push({ id: Date.now(), title, desc, req, pts: Number(pts), badge, expiry: date });
+    showAdminSuccess(`Challenge "${title}" published.`);
+  } else {
+    adminChallenges = adminChallenges.map(c => c.id === editingId ? { ...c, title, desc, req, pts: Number(pts), badge, expiry: date } : c);
+    showAdminSuccess(`Challenge "${title}" updated.`);
+  }
+  closeAdminForm();
+  renderAdminRows();
+}
+
+function openDeleteModal(id, title) {
+  deleteTargetId = id;
+  document.getElementById('delete-name').textContent = `"${title}"`;
+  document.getElementById('delete-modal').style.display = 'flex';
+}
+
+function confirmDelete() {
+  const ch = adminChallenges.find(c => c.id === deleteTargetId);
+  adminChallenges = adminChallenges.filter(c => c.id !== deleteTargetId);
+  document.getElementById('delete-modal').style.display = 'none';
+  showAdminSuccess(`Challenge "${ch.title}" deleted.`);
+  renderAdminRows();
+}
+
+function showAdminSuccess(msg) {
+  const el = document.getElementById('admin-success');
+  document.getElementById('admin-success-msg').textContent = '✓ ' + msg;
+  el.style.display = 'flex';
+}
+
+// ── Init ──────────────────────────────────────────────────────
+renderAdminRows();
+</script>
+<script>
+// Nav routing: maps data-navigate keys to Spring routes
+(function () {
+  var ROUTES = {
+    checkin: '/CheckInPage',
+    badges: '/BadgePage',
+    rewards: '/RewardPage',
+    challenges: '/ChallengePage',
+    admin: '/AdminChallengePage'
+  };
+  document.getElementById('nav-menu').addEventListener('click', function (e) {
+    var btn = e.target.closest('[data-navigate]');
+    if (!btn) return;
+    var key = btn.getAttribute('data-navigate');
+    if (ROUTES[key]) window.location.href = ROUTES[key];
+  });
+})();
+</script>
+</body>
+</html>
