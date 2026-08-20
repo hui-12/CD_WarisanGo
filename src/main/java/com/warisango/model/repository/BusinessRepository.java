@@ -39,7 +39,8 @@ public class BusinessRepository {
                     doc.getString("description"),
                     lat,
                     lng,
-                    doc.getDouble("averageRating")
+                    doc.getDouble("averageRating"),
+                    getCheckInPoints(doc)
             );
             list.add(dto);
         }
@@ -71,11 +72,16 @@ public class BusinessRepository {
                                 doc.getString("description"),
                                 lat,
                                 lng,
-                                doc.getDouble("averageRating")
+                                doc.getDouble("averageRating"),
+                                getCheckInPoints(doc)
                         );
                         list.add(dto);
                     }
                     callback.accept(list);
                 });
+    }
+    private int getCheckInPoints(DocumentSnapshot doc) {
+        Long points = doc.getLong("checkInPoints");
+        return points != null && points > 0 ? points.intValue() : 50;
     }
 }

@@ -36,12 +36,12 @@
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:32px">
     <div class="batik-bg" style="padding:28px;background:#1E5C3A;border-radius:12px;color:#fff">
       <div style="font-size:11px;font-family:'JetBrains Mono',monospace;letter-spacing:0.08em;color:rgba(255,255,255,0.5);margin-bottom:8px">CURRENT TIER</div>
-      <div style="font-family:'DM Serif Display',Georgia,serif;font-size:2.25rem;color:#C4762A;margin-bottom:4px">Bronze</div>
-      <div style="font-family:'JetBrains Mono',monospace;font-size:24px;margin-bottom:20px">320 pts</div>
+      <div id="rw-tier-name" style="font-family:'DM Serif Display',Georgia,serif;font-size:2.25rem;color:#C4762A;margin-bottom:4px">Loading</div>
+      <div id="rw-points" style="font-family:'JetBrains Mono',monospace;font-size:24px;margin-bottom:20px">Loading...</div>
       <div style="height:5px;background:rgba(255,255,255,0.12);border-radius:4px;margin-bottom:8px;overflow:hidden">
-        <div style="height:100%;width:64%;background:#C4762A;border-radius:4px"></div>
+        <div id="rw-tier-progress" style="height:100%;width:0%;background:#C4762A;border-radius:4px"></div>
       </div>
-      <div style="font-size:12px;color:rgba(255,255,255,0.6)">180 pts to <span style="color:#8A9BA8">Silver</span></div>
+      <div id="rw-next-tier" style="font-size:12px;color:rgba(255,255,255,0.6)">Loading tier progress...</div>
     </div>
     <div style="display:grid;grid-template-rows:1fr 1fr;gap:12px">
       <div class="card"><div class="caption">LEADERBOARD RANK</div><div class="mono" style="font-size:28px;font-weight:700">#8</div><div style="font-size:12px;color:#8A7D6E">out of 10 active users</div></div>
@@ -102,6 +102,51 @@ const LEADERBOARD = [
   { rank:10, name:'Danial Azri',      points:115,  tier:'Bronze' },
 ];
 const TC = { Bronze:'#C4762A', Silver:'#8A9BA8', Gold:'#D98A2E', Platinum:'#5B7080' };
+const RW_USER_ID = localStorage.getItem('warisangoUserId') || 'demo-user';
+const RW_TIERS = [
+  { name: 'Bronze', min: 0, max: 499, color: '#C4762A' },
+  { name: 'Silver', min: 500, max: 999, color: '#8A9BA8' },
+  { name: 'Gold', min: 1000, max: 1999, color: '#D98A2E' },
+  { name: 'Platinum', min: 2000, max: Infinity, color: '#5B7080' }
+];
+
+function renderCurrentPoints(points) {
+  const tier = [...RW_TIERS].reverse().find(t => points >= t.min) || RW_TIERS[0];
+  const next = RW_TIERS.find(t => t.min > points);
+  const tierName = document.getElementById('rw-tier-name');
+  const pointsEl = document.getElementById('rw-points');
+  const progressEl = document.getElementById('rw-tier-progress');
+  const nextEl = document.getElementById('rw-next-tier');
+
+  tierName.textContent = tier.name;
+  tierName.style.color = tier.color;
+  pointsEl.textContent = points.toLocaleString() + ' pts';
+
+  if (next) {
+    const progress = ((points - tier.min) / (next.min - tier.min)) * 100;
+    progressEl.style.width = Math.max(0, Math.min(100, progress)) + '%';
+    progressEl.style.background = tier.color;
+    nextEl.innerHTML = `${(next.min - points).toLocaleString()} pts to <span style="color:${next.color}">${next.name}</span>`;
+  } else {
+    progressEl.style.width = '100%';
+    progressEl.style.background = tier.color;
+    nextEl.textContent = 'Highest tier reached';
+  }
+}
+
+async function loadCurrentPoints() {
+  try {
+    const response = await fetch(`/api/user/points?userId=${encodeURIComponent(RW_USER_ID)}`);
+    if (!response.ok) throw new Error('Unable to load points');
+    const data = await response.json();
+    renderCurrentPoints(Number(data.currentPoints || 0));
+  } catch (error) {
+    console.error('loadCurrentPoints:', error);
+    document.getElementById('rw-points').textContent = 'Unable to load';
+    document.getElementById('rw-next-tier').textContent = 'Please refresh the page.';
+  }
+}
+
 
 function renderLeaderboard() {
   document.getElementById('lb-rows').innerHTML = LEADERBOARD.map((e, i) => `
@@ -135,6 +180,7 @@ function showRwTab(tab, btn) {
 
 // ── Init ──────────────────────────────────────────────────────
 renderLeaderboard();
+loadCurrentPoints();
 </script>
 <script>
 // Nav routing: maps data-navigate keys to Spring routes
