@@ -5,7 +5,6 @@ import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.google.cloud.firestore.QuerySnapshot;
-import com.google.firebase.cloud.FirestoreClient;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -24,8 +23,8 @@ public class UserRepositoryImpl implements UserRepository {
 
     private final Firestore firestore;
 
-    public UserRepositoryImpl() {
-        this.firestore = FirestoreClient.getFirestore();
+    public UserRepositoryImpl(Firestore firestore) {
+        this.firestore = firestore;
     }
 
     @Override

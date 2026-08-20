@@ -7,7 +7,6 @@ import com.google.cloud.firestore.FieldValue;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.google.cloud.firestore.QuerySnapshot;
-import com.google.firebase.cloud.FirestoreClient;
 import com.warisango.dto.CommentLikeDTO;
 import org.springframework.stereotype.Repository;
 
@@ -26,8 +25,8 @@ public class CommentLikeRepositoryImpl implements CommentLikeRepository {
 
     private final Firestore firestore;
 
-    public CommentLikeRepositoryImpl() {
-        this.firestore = FirestoreClient.getFirestore();
+    public CommentLikeRepositoryImpl(Firestore firestore) {
+        this.firestore = firestore;
     }
 
     @Override

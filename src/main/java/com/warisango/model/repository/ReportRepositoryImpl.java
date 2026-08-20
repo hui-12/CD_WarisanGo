@@ -7,7 +7,6 @@ import com.google.cloud.firestore.FieldValue;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.google.cloud.firestore.QuerySnapshot;
-import com.google.firebase.cloud.FirestoreClient;
 import com.warisango.dto.ReportDTO;
 import com.warisango.util.ReviewDateFormatter;
 import org.springframework.stereotype.Repository;
@@ -27,8 +26,8 @@ public class ReportRepositoryImpl implements ReportRepository {
 
     private final Firestore firestore;
 
-    public ReportRepositoryImpl() {
-        this.firestore = FirestoreClient.getFirestore();
+    public ReportRepositoryImpl(Firestore firestore) {
+        this.firestore = firestore;
     }
 
     @Override

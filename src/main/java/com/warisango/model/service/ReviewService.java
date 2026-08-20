@@ -353,7 +353,7 @@ public class ReviewService {
 
         applyFallbackBusinessInformation(business, businessId);
 
-        HeritageBusinessDTO firestoreBusiness = businessService.getBusinessById(businessId);
+        HeritageBusinessDTO firestoreBusiness = businessService.getApprovedBusinessForReview(businessId);
         if (firestoreBusiness != null) {
             if (hasText(firestoreBusiness.getName())) {
                 business.put("businessName", firestoreBusiness.getName());

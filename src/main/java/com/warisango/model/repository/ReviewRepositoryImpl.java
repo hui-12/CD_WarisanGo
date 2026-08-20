@@ -7,7 +7,6 @@ import com.google.cloud.firestore.FieldValue;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.google.cloud.firestore.QuerySnapshot;
-import com.google.firebase.cloud.FirestoreClient;
 import com.warisango.dto.ReviewDTO;
 import com.warisango.util.ReviewDateFormatter;
 import org.springframework.stereotype.Repository;
@@ -24,8 +23,8 @@ public class ReviewRepositoryImpl implements ReviewRepository {
 
     private final Firestore firestore;
 
-    public ReviewRepositoryImpl() {
-        this.firestore = FirestoreClient.getFirestore();
+    public ReviewRepositoryImpl(Firestore firestore) {
+        this.firestore = firestore;
     }
 
 

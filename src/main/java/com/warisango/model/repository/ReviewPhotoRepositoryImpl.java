@@ -6,7 +6,6 @@ import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.google.cloud.firestore.QuerySnapshot;
-import com.google.firebase.cloud.FirestoreClient;
 import com.warisango.dto.ReviewPhotoDTO;
 import org.springframework.stereotype.Repository;
 
@@ -25,8 +24,8 @@ public class ReviewPhotoRepositoryImpl implements ReviewPhotoRepository {
 
     private final Firestore firestore;
 
-    public ReviewPhotoRepositoryImpl() {
-        this.firestore = FirestoreClient.getFirestore();
+    public ReviewPhotoRepositoryImpl(Firestore firestore) {
+        this.firestore = firestore;
     }
 
     @Override

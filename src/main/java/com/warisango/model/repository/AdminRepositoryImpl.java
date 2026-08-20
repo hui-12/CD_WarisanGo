@@ -1,6 +1,6 @@
 package com.warisango.model.repository;
 
-import com.google.firebase.cloud.FirestoreClient;
+import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
 import org.springframework.stereotype.Repository;
 
@@ -11,6 +11,11 @@ import org.springframework.stereotype.Repository;
 public class AdminRepositoryImpl implements AdminRepository {
 
     private static final String COLLECTION = "Admins";
+    private final Firestore firestore;
+
+    public AdminRepositoryImpl(Firestore firestore) {
+        this.firestore = firestore;
+    }
 
     @Override
     public boolean existsByUserId(String userId) {
@@ -19,7 +24,7 @@ public class AdminRepositoryImpl implements AdminRepository {
         }
 
         try {
-            return !FirestoreClient.getFirestore()
+            return !firestore
                     .collection(COLLECTION)
                     .whereEqualTo("userId", userId)
                     .limit(1)
@@ -38,7 +43,7 @@ public class AdminRepositoryImpl implements AdminRepository {
         }
 
         try {
-            for (QueryDocumentSnapshot document : FirestoreClient.getFirestore()
+            for (QueryDocumentSnapshot document : firestore
                     .collection(COLLECTION)
                     .whereEqualTo("userId", userId)
                     .limit(1)
