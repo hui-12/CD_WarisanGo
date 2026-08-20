@@ -2,6 +2,11 @@ package com.warisango.service;
 
 import com.warisango.dto.AIExtractionResult;
 import com.warisango.dto.DiscoveryProcessResponse;
+import com.warisango.model.service.AIExtractionService;
+import com.warisango.model.service.AIRecordService;
+import com.warisango.model.service.AIWorkflowService;
+import com.warisango.model.service.SpeechToTextService;
+import com.warisango.model.service.VideoAudioService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

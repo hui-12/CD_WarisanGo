@@ -1,4 +1,4 @@
-package com.warisango.repository;
+package com.warisango.model.repository;
 
 import com.google.cloud.firestore.Firestore;
 import com.warisango.exception.FirebasePersistenceException;
