@@ -1,7 +1,9 @@
 package com.warisango.model.service;
 
 import com.warisango.dto.ReviewDTO;
+import com.warisango.dto.HeritageBusinessDTO;
 import com.warisango.model.repository.ReviewRepository;
+import com.warisango.model.repository.ReviewLikeRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,14 +23,29 @@ public class ReviewService {
 
     private final ReviewRepository reviewRepository;
     private final ReviewPhotoService reviewPhotoService;
+    private final ContentModerationService contentModerationService;
+    private final ReviewLikeRepository reviewLikeRepository;
+    private final CommentService commentService;
+    private final BusinessService businessService;
+    private final UserService userService;
     private final String currentTouristId;
 
     public ReviewService(
             ReviewRepository reviewRepository,
             ReviewPhotoService reviewPhotoService,
+            ContentModerationService contentModerationService,
+            ReviewLikeRepository reviewLikeRepository,
+            CommentService commentService,
+            BusinessService businessService,
+            UserService userService,
             @Value("${warisango.review.current-tourist-id:tourist_002}") String currentTouristId) {
         this.reviewRepository = reviewRepository;
         this.reviewPhotoService = reviewPhotoService;
+        this.contentModerationService = contentModerationService;
+        this.reviewLikeRepository = reviewLikeRepository;
+        this.commentService = commentService;
+        this.businessService = businessService;
+        this.userService = userService;
         this.currentTouristId = currentTouristId;
     }
 
@@ -37,7 +54,9 @@ public class ReviewService {
      */
     public List<ReviewDTO> getAllReviews() {
         List<ReviewDTO> reviews = reviewRepository.findAll();
+        reviews.removeIf(review -> !isVisible(review));
         reviewPhotoService.populatePhotos(reviews);
+        enrichReviewerNames(reviews);
         return reviews;
     }
 
@@ -46,7 +65,9 @@ public class ReviewService {
      */
     public List<ReviewDTO> getReviewsByBusiness(String businessId) {
         List<ReviewDTO> reviews = reviewRepository.findByBusinessId(businessId);
+        reviews.removeIf(review -> !isVisible(review));
         reviewPhotoService.populatePhotos(reviews);
+        enrichReviewerNames(reviews);
         return reviews;
     }
 
@@ -55,7 +76,21 @@ public class ReviewService {
      */
     public ReviewDTO getReview(String reviewId) {
         ReviewDTO review = reviewRepository.findByReviewId(reviewId);
+        if (!isVisible(review)) {
+            return null;
+        }
         reviewPhotoService.populatePhotos(review);
+        enrichReviewerName(review);
+        return review;
+    }
+
+    /**
+     * Loads a review for moderation workflows, including hidden content.
+     */
+    public ReviewDTO getReviewIncludingHidden(String reviewId) {
+        ReviewDTO review = reviewRepository.findByReviewId(reviewId);
+        reviewPhotoService.populatePhotos(review);
+        enrichReviewerName(review);
         return review;
     }
 
@@ -71,6 +106,7 @@ public class ReviewService {
      */
     public void createReview(ReviewDTO review, MultipartFile[] photos) {
 
+        contentModerationService.validate(review.getReviewText());
         reviewPhotoService.validateNewPhotos(photos);
 
         review.setTouristId(currentTouristId);
@@ -131,6 +167,8 @@ public class ReviewService {
             return false;
         }
 
+        contentModerationService.validate(review.getReviewText());
+
         reviewPhotoService.validatePhotoChange(review.getReviewId(), removePhotoIds, photos);
 
         // Keep immutable fields from the existing review.
@@ -173,9 +211,43 @@ public class ReviewService {
         }
 
         reviewPhotoService.deletePhotos(reviewId);
+        deleteReviewLikes(reviewId);
+        commentService.deleteCommentsForReview(reviewId);
         reviewRepository.delete(reviewId);
 
         return true;
+    }
+
+    public void hideReview(String reviewId) {
+        ReviewDTO review = getReviewIncludingHidden(reviewId);
+        if (review == null) {
+            throw new IllegalArgumentException("Review was not found.");
+        }
+
+        review.setModerationStatus("HIDDEN");
+        reviewRepository.update(review);
+    }
+
+    public void restoreReview(String reviewId) {
+        ReviewDTO review = getReviewIncludingHidden(reviewId);
+        if (review == null) {
+            throw new IllegalArgumentException("Review was not found.");
+        }
+
+        review.setModerationStatus("VISIBLE");
+        reviewRepository.update(review);
+    }
+
+    public void deleteReviewByAdmin(String reviewId) {
+        ReviewDTO review = getReviewIncludingHidden(reviewId);
+        if (review == null) {
+            throw new IllegalArgumentException("Review was not found.");
+        }
+
+        reviewPhotoService.deletePhotos(reviewId);
+        deleteReviewLikes(reviewId);
+        commentService.deleteCommentsForReview(reviewId);
+        reviewRepository.delete(reviewId);
     }
 
     /**
@@ -183,7 +255,7 @@ public class ReviewService {
      */
     public int getTotalReviews(String businessId) {
 
-        return reviewRepository.findByBusinessId(businessId).size();
+        return getReviewsByBusiness(businessId).size();
 
     }
 
@@ -192,8 +264,7 @@ public class ReviewService {
      */
     public double getAverageRating(String businessId) {
 
-        List<ReviewDTO> reviews =
-                reviewRepository.findByBusinessId(businessId);
+        List<ReviewDTO> reviews = getReviewsByBusiness(businessId);
 
         if (reviews.isEmpty()) {
             return 0;
@@ -216,7 +287,7 @@ public class ReviewService {
      */
     public List<Map<String, Object>> getRatingDistribution(String businessId) {
 
-        List<ReviewDTO> reviews = reviewRepository.findByBusinessId(businessId);
+        List<ReviewDTO> reviews = getReviewsByBusiness(businessId);
         List<Map<String, Object>> rows = new ArrayList<>();
         int totalReviews = reviews.size();
 
@@ -246,6 +317,29 @@ public class ReviewService {
         return review != null && Objects.equals(review.getTouristId(), currentUserId);
     }
 
+    private boolean isVisible(ReviewDTO review) {
+        return review != null && !"HIDDEN".equalsIgnoreCase(review.getModerationStatus());
+    }
+
+    private void enrichReviewerNames(List<ReviewDTO> reviews) {
+        for (ReviewDTO review : reviews) {
+            enrichReviewerName(review);
+        }
+    }
+
+    private void enrichReviewerName(ReviewDTO review) {
+        if (review == null || review.getTouristId() == null || review.getTouristId().isBlank()) {
+            return;
+        }
+
+        review.setTouristName(userService.getDisplayNameByTouristId(review.getTouristId()));
+    }
+
+    private void deleteReviewLikes(String reviewId) {
+        reviewLikeRepository.findByReviewId(reviewId)
+                .forEach(like -> reviewLikeRepository.delete(like.getLikeId()));
+    }
+
     public Map<String, Object> getBusinessInformation(String businessId) {
 
         Map<String, Object> business = new HashMap<>();
@@ -257,16 +351,50 @@ public class ReviewService {
                 "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1400&q=80");
         business.put("category", "Heritage Food");
 
-        if ("BUS001".equals(businessId)) {
+        applyFallbackBusinessInformation(business, businessId);
+
+        HeritageBusinessDTO firestoreBusiness = businessService.getBusinessById(businessId);
+        if (firestoreBusiness != null) {
+            if (hasText(firestoreBusiness.getName())) {
+                business.put("businessName", firestoreBusiness.getName());
+            }
+            if (hasText(firestoreBusiness.getAddress())) {
+                business.put("businessAddress", firestoreBusiness.getAddress());
+            }
+            business.put("category", "Heritage Business");
+        }
+
+        return business;
+
+    }
+
+    private void applyFallbackBusinessInformation(Map<String, Object> business, String businessId) {
+        if ("hb_001".equals(businessId)) {
+            business.put("businessName", "Yut Kee Restaurant");
+            business.put("businessAddress", "7, Jalan Kamunting, Kuala Lumpur");
+            business.put("businessImage",
+                    "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1400&q=80");
+        } else if ("hb_002".equals(businessId)) {
+            business.put("businessName", "Restoran Kim Lian Kee");
+            business.put("businessAddress", "49, Jalan Petaling, Kuala Lumpur");
+            business.put("businessImage",
+                    "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=1400&h=900&fit=crop&auto=format");
+        } else if ("hb_003".equals(businessId)) {
+            business.put("businessName", "Nasi Kandar Line Clear");
+            business.put("businessAddress", "177, Jalan Penang, George Town, Penang");
+            business.put("businessImage",
+                    "https://images.unsplash.com/photo-1516550893923-42d28e5677af?auto=format&fit=crop&w=1400&q=80");
+        } else if ("BUS001".equals(businessId)) {
             business.put("businessName", "Wulandari Batik Studio");
             business.put("businessAddress", "Laweyan, Solo, Central Java");
             business.put("businessImage",
                     "https://images.unsplash.com/photo-1516550893923-42d28e5677af?auto=format&fit=crop&w=1400&q=80");
             business.put("category", "Heritage Business");
         }
+    }
 
-        return business;
-
+    private boolean hasText(String value) {
+        return value != null && !value.isBlank();
     }
 
 }

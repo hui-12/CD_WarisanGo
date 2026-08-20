@@ -46,6 +46,44 @@ public class BusinessRepository {
         return list;
     }
 
+    /**
+     * Loads one approved business for Review pages.
+     * The normal Firestore document ID is used first, with a businessId field query as a fallback.
+     */
+    public HeritageBusinessDTO findByBusinessId(String businessId)
+            throws ExecutionException, InterruptedException {
+        if (businessId == null || businessId.isBlank()) {
+            return null;
+        }
+
+        Firestore db = FirestoreClient.getFirestore();
+        DocumentSnapshot document = db.collection(COLLECTION_NAME)
+                .document(businessId)
+                .get()
+                .get();
+
+        if (!document.exists()) {
+            QuerySnapshot snapshot = db.collection(COLLECTION_NAME)
+                    .whereEqualTo("businessId", businessId)
+                    .limit(1)
+                    .get()
+                    .get();
+
+            if (snapshot.isEmpty()) {
+                return null;
+            }
+
+            document = snapshot.getDocuments().get(0);
+        }
+
+        String status = document.getString("status");
+        if (status != null && !status.isBlank() && !"APPROVED".equalsIgnoreCase(status)) {
+            return null;
+        }
+
+        return toBusinessDTO(document);
+    }
+
     // Real-time Firestore Snapshot Listener
     public ListenerRegistration addApprovedBusinessesListener(Consumer<List<HeritageBusinessDTO>> callback) {
         Firestore db = FirestoreClient.getFirestore();
@@ -76,6 +114,25 @@ public class BusinessRepository {
                         list.add(dto);
                     }
                     callback.accept(list);
-                });
+        });
+    }
+
+    private HeritageBusinessDTO toBusinessDTO(DocumentSnapshot document) {
+        GeoPoint geoPoint = document.getGeoPoint("location");
+        double lat = geoPoint != null ? geoPoint.getLatitude() : 0.0;
+        double lng = geoPoint != null ? geoPoint.getLongitude() : 0.0;
+        String businessId = document.getString("businessId");
+
+        return new HeritageBusinessDTO(
+                businessId == null || businessId.isBlank() ? document.getId() : businessId,
+                document.getString("name"),
+                document.getString("address"),
+                document.getString("state"),
+                document.getString("city"),
+                document.getString("description"),
+                lat,
+                lng,
+                document.getDouble("averageRating")
+        );
     }
 }

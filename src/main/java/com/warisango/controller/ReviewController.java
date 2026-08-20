@@ -3,6 +3,7 @@ package com.warisango.controller;
 import com.warisango.dto.CommentDTO;
 import com.warisango.dto.LikeStatusDTO;
 import com.warisango.dto.ReviewDTO;
+import com.warisango.exception.ProhibitedContentException;
 import com.warisango.model.service.CommentService;
 import com.warisango.model.service.CommentLikeService;
 import com.warisango.model.service.ReviewService;
@@ -73,6 +74,7 @@ public class ReviewController {
         binder.setDisallowedFields(
                 "touristId",
                 "touristName",
+                "replyToTouristName",
                 "createdAt",
                 "updatedAt"
         );
@@ -129,6 +131,10 @@ public class ReviewController {
 
         try {
             reviewService.createReview(review, photos);
+        } catch (ProhibitedContentException e) {
+            addBusiness(model, review.getBusinessId());
+            model.addAttribute("reviewError", e.getMessage());
+            return "ReviewFormPage";
         } catch (IllegalArgumentException | IllegalStateException e) {
             logger.warn("Review create was rejected: {}", e.getMessage(), e);
             addBusiness(model, review.getBusinessId());
@@ -208,6 +214,11 @@ public class ReviewController {
             if (!updated) {
                 return "redirect:/reviews/" + existingReview.getBusinessId();
             }
+        } catch (ProhibitedContentException e) {
+            restoreExistingPhotos(review, existingReview);
+            addBusiness(model, existingReview.getBusinessId());
+            model.addAttribute("reviewError", e.getMessage());
+            return "ReviewEditPage";
         } catch (IllegalArgumentException | IllegalStateException e) {
             logger.warn("Review update was rejected: {}", e.getMessage(), e);
             restoreExistingPhotos(review, existingReview);
@@ -336,7 +347,22 @@ public class ReviewController {
         }
 
         try {
-            commentService.createComment(comment, reviewService.getCurrentTouristId());
+            commentService.createComment(
+                    comment,
+                    reviewService.getCurrentTouristId(),
+                    comment.getReplyToCommentId()
+            );
+        } catch (ProhibitedContentException e) {
+            addReviewDetailModel(
+                    model,
+                    review,
+                    commentService.getCommentsByReview(reviewId),
+                    comment,
+                    emptyCommentEdit(reviewId),
+                    null,
+                    e.getMessage()
+            );
+            return "ReviewDetailPage";
         } catch (RuntimeException e) {
             logger.error("Could not create comment for review {}", reviewId, e);
             addReviewDetailModel(
@@ -404,6 +430,17 @@ public class ReviewController {
             if (!updated) {
                 return "redirect:/reviews/detail/" + reviewId;
             }
+        } catch (ProhibitedContentException e) {
+            addReviewDetailModel(
+                    model,
+                    review,
+                    commentService.getCommentsByReview(reviewId),
+                    newCommentForReview(reviewId),
+                    commentEdit,
+                    existingComment.getCommentId(),
+                    e.getMessage()
+            );
+            return "ReviewDetailPage";
         } catch (RuntimeException e) {
             logger.error("Could not update comment {}", existingComment.getCommentId(), e);
             addReviewDetailModel(

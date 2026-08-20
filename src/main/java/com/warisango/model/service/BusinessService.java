@@ -31,6 +31,15 @@ public class BusinessService {
         }
     }
 
+    public HeritageBusinessDTO getBusinessById(String businessId) {
+        try {
+            return businessRepository.findByBusinessId(businessId);
+        } catch (Exception e) {
+            logger.warn("Could not load heritage business {} for Review page.", businessId, e);
+            return null;
+        }
+    }
+
     // Stream real-time updates via SSE
     public SseEmitter streamApprovedBusinesses() {
         SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);

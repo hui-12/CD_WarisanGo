@@ -5,10 +5,15 @@
 
 document.addEventListener("DOMContentLoaded", function () {
     initializeDeleteModal();
+    initializeReportModal();
     initializeLikeButtons();
     initializeCharacterCounters();
+    initializeModerationForms();
+    initializeModerationDeleteConfirmation();
+    initializeReportTable();
     initializePhotoUpload();
     initializeCommentPreview();
+    initializeCommentReplies();
     protectOwnerActions();
 });
 
@@ -57,6 +62,420 @@ function initializeDeleteModal() {
         modal.classList.remove("open");
         modal.setAttribute("aria-hidden", "true");
         document.body.style.overflow = "";
+    }
+}
+
+function initializeReportModal() {
+    const modal = document.getElementById("reviewReportModal");
+    const form = modal ? modal.querySelector("[data-report-form]") : null;
+
+    if (!modal || !form) {
+        return;
+    }
+
+    const error = form.querySelector("[data-report-error]");
+
+    document.querySelectorAll("[data-report-target]").forEach(function (button) {
+        button.addEventListener("click", function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            form.elements.targetType.value = button.dataset.reportTarget || "";
+            form.elements.reviewId.value = button.dataset.reviewId || "";
+            form.elements.commentId.value = button.dataset.commentId || "";
+            form.elements.reason.value = "";
+            if (error) {
+                error.hidden = true;
+                error.textContent = "";
+            }
+
+            modal.classList.add("open");
+            modal.setAttribute("aria-hidden", "false");
+            document.body.style.overflow = "hidden";
+        });
+    });
+
+    document.querySelectorAll("[data-cancel-report]").forEach(function (button) {
+        button.addEventListener("click", closeModal);
+    });
+
+    modal.addEventListener("click", function (event) {
+        if (event.target === modal) {
+            closeModal();
+        }
+    });
+
+    form.addEventListener("submit", function (event) {
+        event.preventDefault();
+
+        const submitButton = form.querySelector("button[type='submit']");
+        if (submitButton) {
+            submitButton.disabled = true;
+        }
+
+        fetch(form.action, {
+            method: "POST",
+            headers: {
+                "Accept": "application/json",
+                "X-Requested-With": "XMLHttpRequest"
+            },
+            body: new FormData(form)
+        })
+            .then(function (response) {
+                return response.json().then(function (result) {
+                    if (!response.ok) {
+                        throw new Error(result.message || "The report could not be submitted.");
+                    }
+                    return result;
+                });
+            })
+            .then(function (result) {
+                closeModal();
+                window.alert(result.message || "Thank you. Your report has been submitted.");
+            })
+            .catch(function (reportError) {
+                if (error) {
+                    error.textContent = reportError.message;
+                    error.hidden = false;
+                }
+            })
+            .finally(function () {
+                if (submitButton) {
+                    submitButton.disabled = false;
+                }
+            });
+    });
+
+    document.addEventListener("keydown", function (event) {
+        if (event.key === "Escape" && modal.classList.contains("open")) {
+            closeModal();
+        }
+    });
+
+    function closeModal() {
+        modal.classList.remove("open");
+        modal.setAttribute("aria-hidden", "true");
+        document.body.style.overflow = "";
+    }
+}
+
+function initializeModerationForms() {
+    document.querySelectorAll("form[data-content-form]").forEach(function (form) {
+        const textarea = form.querySelector("[data-moderated-text]");
+
+        if (!textarea) {
+            return;
+        }
+
+        const error = document.createElement("span");
+        error.className = "review-field-error review-moderation-error";
+        error.hidden = true;
+        textarea.insertAdjacentElement("afterend", error);
+
+        form.addEventListener("submit", function (event) {
+            if (form.dataset.moderationAllowed === "true") {
+                delete form.dataset.moderationAllowed;
+                return;
+            }
+
+            if (!textarea.value.trim()) {
+                return;
+            }
+
+            event.preventDefault();
+            error.hidden = true;
+
+            fetch("/reviews/moderation/check", {
+                method: "POST",
+                headers: {
+                    "Accept": "application/json",
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "X-Requested-With": "XMLHttpRequest"
+                },
+                body: "text=" + encodeURIComponent(textarea.value)
+            })
+                .then(function (response) {
+                    if (!response.ok) {
+                        throw new Error("The content check could not be completed.");
+                    }
+                    return response.json();
+                })
+                .then(function (result) {
+                    if (!result.allowed) {
+                        error.textContent = result.message
+                                || "Please remove prohibited language before submitting.";
+                        error.hidden = false;
+                        textarea.focus();
+                        return;
+                    }
+
+                    form.dataset.moderationAllowed = "true";
+                    if (typeof form.requestSubmit === "function") {
+                        form.requestSubmit();
+                    } else {
+                        form.submit();
+                    }
+                })
+                .catch(function (moderationError) {
+                    error.textContent = moderationError.message;
+                    error.hidden = false;
+                });
+        });
+    });
+}
+
+function initializeModerationDeleteConfirmation() {
+    document.querySelectorAll("form[data-moderation-delete]").forEach(function (form) {
+        form.addEventListener("submit", function (event) {
+            if (!window.confirm("Delete this content permanently? This action cannot be undone.")) {
+                event.preventDefault();
+            }
+        });
+    });
+}
+
+function initializeReportTable() {
+    const table = document.querySelector("[data-report-table]");
+    if (!table) {
+        return;
+    }
+
+    const tableBody = table.querySelector("tbody");
+    const searchInput = document.querySelector("[data-report-search]");
+    const categorySelect = document.querySelector("[data-report-category]");
+    const sortButtons = document.querySelectorAll("[data-report-sort-key]");
+    const sortIndicators = document.querySelectorAll("[data-report-sort-indicator]");
+    const noResultsRow = table.querySelector("[data-report-no-results]");
+    const reportRows = Array.from(table.querySelectorAll(".review-admin-table-row"));
+    const actionsModal = document.querySelector("[data-report-actions-modal]");
+    const actionsModalBody = actionsModal
+            ? actionsModal.querySelector("[data-report-actions-modal-body]")
+            : null;
+    const actionsModalMessage = actionsModal
+            ? actionsModal.querySelector("[data-report-actions-message]")
+            : null;
+    let activeActions = null;
+    let activePlaceholder = null;
+    let activeButton = null;
+    let sortKey = "default";
+    let sortDirection = "desc";
+
+    document.querySelectorAll("[data-report-actions-toggle]").forEach(function (button) {
+        button.addEventListener("click", function () {
+            const row = button.closest("tr");
+            const actions = row ? row.querySelector("[data-report-actions]") : null;
+            const placeholder = row
+                    ? row.querySelector("[data-report-actions-placeholder]")
+                    : null;
+
+            if (!actions || !placeholder || !actionsModal || !actionsModalBody) {
+                return;
+            }
+
+            closeActionsModal();
+
+            const username = row.querySelector(".review-admin-table-user strong");
+            const message = row.querySelector(".review-admin-table-message span");
+            const reportType = row.dataset.reportType || "REPORT";
+
+            if (actionsModalMessage) {
+                actionsModalMessage.textContent = reportType + " report from "
+                        + (username ? username.textContent.trim() : "this user")
+                        + ". Choose an action.";
+            }
+
+            actionsModalBody.appendChild(actions);
+            actions.hidden = false;
+            activeActions = actions;
+            activePlaceholder = placeholder;
+            activeButton = button;
+            button.setAttribute("aria-expanded", "true");
+            actionsModal.hidden = false;
+            actionsModal.classList.add("open");
+            document.body.style.overflow = "hidden";
+
+            if (message) {
+                message.setAttribute("aria-current", "true");
+            }
+        });
+    });
+
+    function sortReports() {
+        reportRows.sort(function (firstRow, secondRow) {
+            if (sortKey === "default") {
+                const firstPending = firstRow.dataset.reportStatus === "PENDING" ? 0 : 1;
+                const secondPending = secondRow.dataset.reportStatus === "PENDING" ? 0 : 1;
+
+                if (firstPending !== secondPending) {
+                    return firstPending - secondPending;
+                }
+
+                return (secondRow.dataset.reportCreated || "")
+                        .localeCompare(firstRow.dataset.reportCreated || "");
+            }
+
+            const firstValue = getSortValue(firstRow, sortKey);
+            const secondValue = getSortValue(secondRow, sortKey);
+            const comparison = firstValue.localeCompare(
+                    secondValue,
+                    undefined,
+                    {numeric: true, sensitivity: "base"}
+            );
+
+            return sortDirection === "asc" ? comparison : -comparison;
+        });
+
+        reportRows.forEach(function (row) {
+            tableBody.insertBefore(row, noResultsRow);
+        });
+
+        updateSortIndicator();
+    }
+
+    function getSortValue(row, key) {
+        if (key === "date") {
+            return row.dataset.reportCreated || "";
+        }
+        if (key === "status") {
+            return row.dataset.reportStatus || "";
+        }
+
+        const selector = key === "username"
+                ? ".review-admin-table-user strong"
+                : ".review-admin-table-message span";
+        const field = row.querySelector(selector);
+        return field ? field.textContent.trim() : "";
+    }
+
+    function filterReports() {
+        const searchTerm = searchInput
+                ? searchInput.value.trim().toLowerCase()
+                : "";
+        const selectedCategory = categorySelect
+                ? categorySelect.value
+                : "ALL";
+        let visibleCount = 0;
+
+        reportRows.forEach(function (row) {
+            const rowText = Array.from(row.querySelectorAll("[data-report-search-field]"))
+                    .map(function (field) {
+                        return field.textContent;
+                    })
+                    .join(" ")
+                    .toLowerCase();
+            const categoryMatches = selectedCategory === "ALL"
+                    || row.dataset.reportType === selectedCategory;
+            const searchMatches = !searchTerm || rowText.includes(searchTerm);
+            const visible = categoryMatches && searchMatches;
+
+            row.hidden = !visible;
+            if (visible) {
+                visibleCount += 1;
+            }
+        });
+
+        if (noResultsRow) {
+            noResultsRow.hidden = visibleCount !== 0;
+        }
+    }
+
+    function updateSearchPlaceholder() {
+        if (!searchInput) {
+            return;
+        }
+
+        if (categorySelect && categorySelect.value === "REVIEW") {
+            searchInput.placeholder = "Search username or review message";
+        } else if (categorySelect && categorySelect.value === "COMMENT") {
+            searchInput.placeholder = "Search username or comment message";
+        } else {
+            searchInput.placeholder = "Search username or review/comment message";
+        }
+    }
+
+    function updateSortIndicator() {
+        sortIndicators.forEach(function (indicator) {
+            const indicatorKey = indicator.dataset.reportSortIndicator;
+
+            if (sortKey === "default") {
+                indicator.textContent = indicatorKey === "date" ? "↓" : "↕";
+                return;
+            }
+
+            if (indicatorKey !== sortKey) {
+                indicator.textContent = "↕";
+                return;
+            }
+
+            indicator.textContent = sortDirection === "asc" ? "↑" : "↓";
+        });
+    }
+
+    function closeActionsModal() {
+        if (activeActions && activePlaceholder) {
+            activePlaceholder.insertAdjacentElement("afterend", activeActions);
+            activeActions.hidden = true;
+        }
+
+        if (activeButton) {
+            activeButton.setAttribute("aria-expanded", "false");
+        }
+
+        activeActions = null;
+        activePlaceholder = null;
+        activeButton = null;
+
+        if (actionsModal) {
+            actionsModal.hidden = true;
+            actionsModal.classList.remove("open");
+        }
+        document.body.style.overflow = "";
+    }
+
+    sortReports();
+    updateSearchPlaceholder();
+    filterReports();
+
+    if (searchInput) {
+        searchInput.addEventListener("input", filterReports);
+    }
+    if (categorySelect) {
+        categorySelect.addEventListener("change", function () {
+            updateSearchPlaceholder();
+            filterReports();
+        });
+    }
+    sortButtons.forEach(function (sortButton) {
+        sortButton.addEventListener("click", function () {
+            const requestedKey = sortButton.dataset.reportSortKey;
+
+            if (sortKey === requestedKey) {
+                sortDirection = sortDirection === "asc" ? "desc" : "asc";
+            } else {
+                sortKey = requestedKey;
+                sortDirection = requestedKey === "date" ? "desc" : "asc";
+            }
+
+            sortReports();
+        });
+    });
+    if (actionsModal) {
+        actionsModal.addEventListener("click", function (event) {
+            if (event.target === actionsModal) {
+                closeActionsModal();
+            }
+        });
+
+        const closeButton = actionsModal.querySelector("[data-report-actions-close]");
+        if (closeButton) {
+            closeButton.addEventListener("click", closeActionsModal);
+        }
+
+        document.addEventListener("keydown", function (event) {
+            if (event.key === "Escape" && !actionsModal.hidden) {
+                closeActionsModal();
+            }
+        });
     }
 }
 
@@ -318,6 +737,45 @@ function initializeCommentPreview() {
             }
         });
     });
+}
+
+function initializeCommentReplies() {
+    const form = document.querySelector("form[data-comment-form]");
+    const replyIdInput = form ? form.querySelector("[name='replyToCommentId']") : null;
+    const replyTarget = document.getElementById("replyTarget");
+    const replyName = replyTarget ? replyTarget.querySelector("[data-reply-name]") : null;
+    const commentText = form ? form.querySelector("[data-moderated-text]") : null;
+
+    if (!form || !replyIdInput || !replyTarget || !replyName) {
+        return;
+    }
+
+    document.querySelectorAll("[data-reply-trigger]").forEach(function (button) {
+        button.addEventListener("click", function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            replyIdInput.value = button.dataset.replyCommentId || "";
+            replyName.textContent = button.dataset.replyTouristName || "Visitor";
+            replyTarget.hidden = false;
+
+            if (commentText) {
+                commentText.focus();
+            }
+        });
+    });
+
+    document.querySelectorAll("[data-cancel-reply]").forEach(function (button) {
+        button.addEventListener("click", function () {
+            clearReplyTarget();
+        });
+    });
+
+    function clearReplyTarget() {
+        replyIdInput.value = "";
+        replyName.textContent = "";
+        replyTarget.hidden = true;
+    }
 }
 
 function protectOwnerActions() {

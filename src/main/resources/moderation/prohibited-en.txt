@@ -1,0 +1,168 @@
+# English profanity and insult list for WarisanGo review/comment moderation.
+# Expanded from public profanity lists and manually reviewed for common chat use.
+# Keep one term or phrase per line. Do not add normal words without reviewing them.
+fuck
+fucking
+shit
+shitty
+bitch
+bastard
+asshole
+motherfucker
+bullshit
+damn
+idiot
+moron
+stupid
+son of a bitch
+cunt
+dick
+dickhead
+prick
+twat
+wanker
+slut
+whore
+skank
+douchebag
+dumbass
+jackass
+dipshit
+shithead
+shitface
+crap
+crappy
+goddamn
+god damn
+fuck off
+go fuck yourself
+shut the fuck up
+piece of shit
+piece of crap
+retard
+retarded
+faggot
+fag
+dyke
+nigger
+chink
+spic
+kike
+wetback
+tranny
+
+# Common English variants and chat abbreviations.
+arse
+arsehole
+arsewipe
+ass
+assbag
+assclown
+assface
+asshat
+asshole
+asslicker
+asswipe
+bellend
+berk
+bozo
+bugger
+cockhead
+cockwad
+crackhead
+cretin
+dickhead
+dickwad
+douche
+douchecanoe
+douchewaffle
+dumbfuck
+dumbshit
+fuckboy
+fuckface
+fuckhead
+fuckknuckle
+fucknugget
+fuckoff
+fuckstick
+fuckwit
+goddammit
+jackoff
+jerkoff
+knob
+knobhead
+loser
+meathead
+motherfuck
+motherfucking
+numbnuts
+numbskull
+pieceofshit
+prat
+scumbag
+scumbucket
+shitbag
+shitbird
+shitbrains
+shitbreath
+shitcunt
+shitforbrains
+shitheel
+shitstain
+shitstorm
+shitwad
+skank
+tosser
+turd
+turdburglar
+twatwaffle
+wazzock
+whorebag
+
+# Common phrases and abbreviations.
+asfuck
+bs
+fml
+fuck you
+fuck yourself
+get fucked
+go to hell
+gtfo
+holy shit
+kiss my ass
+lmfao
+omfg
+screw you
+stfu
+wtf
+
+# Common obfuscated spellings.
+a55
+a55hole
+a55h0le
+a$$
+@sshole
+b1tch
+b!tch
+b4stard
+c0ck
+d1ck
+d!ck
+f4g
+f4ggot
+fck
+fcked
+fcking
+fuk
+fuker
+fukk
+f*ck
+f**k
+motherf#cker
+n1gga
+n1gger
+sh1t
+sh!t
+$h1t
+$h!t
+wh0re

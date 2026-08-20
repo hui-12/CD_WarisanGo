@@ -19,7 +19,6 @@ public class ReviewDTO {
 
     private String touristId;
 
-    @NotBlank(message = "Your name is required.")
     private String touristName;
 
     @NotBlank(message = "Review text is required.")
@@ -43,6 +42,12 @@ public class ReviewDTO {
     private int likeCount;
 
     private boolean likedByCurrentUser;
+
+    /**
+     * Content visibility state used by the moderation workflow.
+     * Existing documents without this field are treated as VISIBLE.
+     */
+    private String moderationStatus = "VISIBLE";
 
     private String createdAt;
 
@@ -153,6 +158,16 @@ public class ReviewDTO {
 
     public void setLikedByCurrentUser(boolean likedByCurrentUser) {
         this.likedByCurrentUser = likedByCurrentUser;
+    }
+
+    public String getModerationStatus() {
+        return moderationStatus;
+    }
+
+    public void setModerationStatus(String moderationStatus) {
+        this.moderationStatus = moderationStatus == null || moderationStatus.isBlank()
+                ? "VISIBLE"
+                : moderationStatus;
     }
 
     public String getCreatedAt() {

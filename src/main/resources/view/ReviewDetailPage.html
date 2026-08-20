@@ -108,6 +108,13 @@
                     💬 Comments
                 </a>
 
+                <button class="review-detail-action review-report-trigger"
+                        type="button"
+                        data-report-target="REVIEW"
+                        th:attr="data-review-id=${review.reviewId}">
+                    ⚑ Report
+                </button>
+
             </div>
 
 
@@ -125,7 +132,8 @@
                  th:if="${comments != null and !#lists.isEmpty(comments)}">
 
                 <article class="review-comment-full"
-                         th:each="comment : ${comments}">
+                         th:each="comment : ${comments}"
+                         th:id="${'comment-' + comment.commentId}">
 
                     <p class="review-comment-full-user"
                        th:text="${comment.touristName}">
@@ -137,17 +145,24 @@
                         2026-08-14
                     </span>
 
+                    <p class="review-comment-reply-target"
+                       th:if="${comment.replyToTouristName != null and !#strings.isEmpty(comment.replyToTouristName)}">
+                        Replying to <span th:text="${comment.replyToTouristName}">Visitor</span>
+                    </p>
+
                     <form class="review-comment-edit-form"
                           th:if="${editingCommentId == comment.commentId}"
                           th:action="@{/reviews/comments/update}"
                           th:object="${commentEdit}"
-                          method="post">
+                          method="post"
+                          data-content-form>
 
                         <input type="hidden" th:field="*{commentId}">
                         <input type="hidden" th:field="*{reviewId}">
 
                         <textarea class="review-comment-textarea"
                                   th:field="*{commentText}"
+                                  data-moderated-text
                                   data-review-counter="commentEditCharacterCount"
                                   maxlength="500"></textarea>
 
@@ -183,6 +198,13 @@
                          th:unless="${editingCommentId == comment.commentId}">
 
                         <button type="button"
+                                class="review-detail-action review-reply-trigger"
+                                data-reply-trigger
+                                th:attr="data-reply-comment-id=${comment.commentId},data-reply-tourist-name=${comment.touristName}">
+                            ↩ Reply
+                        </button>
+
+                        <button type="button"
                                 class="review-detail-action"
                                 data-comment-like
                                 th:attr="data-like-url=@{/reviews/comments/like/{id}(id=${comment.commentId})},data-liked=${comment.likedByCurrentUser},aria-pressed=${comment.likedByCurrentUser}"
@@ -191,6 +213,13 @@
                             <span data-like-icon
                                   th:text="${comment.likedByCurrentUser ? '♥' : '♡'}">♡</span>
                             Like <span data-like-count th:text="${comment.likeCount}">0</span>
+                        </button>
+
+                        <button type="button"
+                                class="review-detail-action review-report-trigger"
+                                data-report-target="COMMENT"
+                                th:attr="data-review-id=${review.reviewId},data-comment-id=${comment.commentId}">
+                            ⚑ Report
                         </button>
 
                         <div class="review-comment-owner-actions"
@@ -236,17 +265,32 @@
             <form class="review-comment-form"
                   th:action="@{/reviews/comments/create}"
                   th:object="${comment}"
-                  method="post">
+                  method="post"
+                  data-content-form
+                  data-comment-form>
 
                 <input type="hidden" th:field="*{reviewId}">
+                <input type="hidden" th:field="*{replyToCommentId}">
 
                 <label for="commentText">
                     Add a comment
                 </label>
 
+                <p class="review-reply-selection"
+                   id="replyTarget"
+                   hidden>
+                    Replying to <strong data-reply-name></strong>
+                    <button type="button"
+                            class="review-reply-cancel"
+                            data-cancel-reply>
+                        Cancel reply
+                    </button>
+                </p>
+
                 <textarea id="commentText"
                           class="review-comment-textarea"
                           th:field="*{commentText}"
+                          data-moderated-text
                           data-review-counter="commentCharacterCount"
                           maxlength="500"
                           placeholder="Join the discussion..."></textarea>
@@ -288,6 +332,68 @@
     </article>
 
 </main>
+
+
+<div id="reviewReportModal"
+     class="review-modal"
+     aria-hidden="true">
+
+    <div class="review-modal-card">
+
+        <button type="button"
+                class="review-modal-close"
+                data-cancel-report
+                aria-label="Close">
+            ×
+        </button>
+
+        <h3 class="review-modal-title">Report Content</h3>
+
+        <p class="review-modal-text">
+            Select a reason. Our team will review this content.
+        </p>
+
+        <form class="review-report-form"
+              data-report-form
+              method="post"
+              th:action="@{/reviews/reports}">
+
+            <input type="hidden" name="targetType">
+            <input type="hidden" name="reviewId">
+            <input type="hidden" name="commentId">
+
+            <label for="reportReason">Reason</label>
+            <select id="reportReason"
+                    name="reason"
+                    class="review-input"
+                    required>
+                <option value="">Choose a reason</option>
+                <option value="SPAM">Spam</option>
+                <option value="ABUSIVE_CONTENT">Abusive content</option>
+                <option value="HATE_SPEECH">Hate speech</option>
+                <option value="FALSE_INFORMATION">False information</option>
+                <option value="OTHER">Other</option>
+            </select>
+
+            <p class="review-field-error"
+               data-report-error
+               hidden></p>
+
+            <div class="review-modal-actions">
+                <button type="button"
+                        class="review-btn-outline"
+                        data-cancel-report>
+                    Cancel
+                </button>
+                <button type="submit"
+                        class="review-btn-primary">
+                    Submit Report
+                </button>
+            </div>
+        </form>
+
+    </div>
+</div>
 
 <footer th:replace="~{fragments/footer :: global}"></footer>
 <script th:src="@{/js/review.js}"></script>

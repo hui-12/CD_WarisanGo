@@ -71,7 +71,8 @@
                     th:action="@{/reviews/update}"
                     th:object="${review}"
                     method="post"
-                    enctype="multipart/form-data">
+                    enctype="multipart/form-data"
+                    data-content-form>
 
                 <!-- Keep review ID -->
                 <input
@@ -82,33 +83,6 @@
                 <input
                         type="hidden"
                         th:field="*{businessId}">
-
-
-                <!-- =========================
-                     NAME
-                     ========================= -->
-                <div class="review-form-field">
-
-                    <label for="touristName">
-                        Name
-                    </label>
-
-                    <input
-                            class="review-input"
-                            id="touristName"
-                            type="text"
-                            th:field="*{touristName}"
-                            maxlength="80"
-                            placeholder="Your name">
-
-                    <span
-                            class="review-field-error"
-                            th:if="${#fields.hasErrors('touristName')}"
-                            th:errors="*{touristName}">
-                        Name is required.
-                    </span>
-
-                </div>
 
 
                 <!-- =========================
@@ -206,6 +180,7 @@
                             class="review-textarea"
                             id="reviewText"
                             th:field="*{reviewText}"
+                            data-moderated-text
                             data-review-counter="reviewCharacterCount"
                             maxlength="500"
                             placeholder="Share your experience..."></textarea>

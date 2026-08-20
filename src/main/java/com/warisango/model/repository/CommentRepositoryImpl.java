@@ -9,6 +9,7 @@ import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.google.cloud.firestore.QuerySnapshot;
 import com.google.firebase.cloud.FirestoreClient;
 import com.warisango.dto.CommentDTO;
+import com.warisango.util.ReviewDateFormatter;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
@@ -148,8 +149,11 @@ public class CommentRepositoryImpl implements CommentRepository {
         // Tourist/User lookup will replace this temporary display value later.
         comment.setTouristName(comment.getTouristId());
         comment.setCommentText(getString(document, "commentText"));
-        comment.setCreatedAt(getTimestampText(document, "createdAt"));
-        comment.setUpdatedAt(getTimestampText(document, "updatedAt"));
+        comment.setReplyToCommentId(getString(document, "replyToCommentId"));
+        comment.setReplyToTouristName(getString(document, "replyToTouristName"));
+        comment.setModerationStatus(getString(document, "moderationStatus"));
+        comment.setCreatedAt(ReviewDateFormatter.format(document.get("createdAt")));
+        comment.setUpdatedAt(ReviewDateFormatter.format(document.get("updatedAt")));
         return comment;
     }
 
@@ -159,6 +163,8 @@ public class CommentRepositoryImpl implements CommentRepository {
         data.put("reviewId", comment.getReviewId());
         data.put("touristId", comment.getTouristId());
         data.put("commentText", comment.getCommentText());
+        data.put("moderationStatus", comment.getModerationStatus());
+        addReplyFields(data, comment);
         data.put("createdAt", FieldValue.serverTimestamp());
         data.put("updatedAt", FieldValue.serverTimestamp());
         return data;
@@ -170,8 +176,19 @@ public class CommentRepositoryImpl implements CommentRepository {
         data.put("reviewId", comment.getReviewId());
         data.put("touristId", comment.getTouristId());
         data.put("commentText", comment.getCommentText());
+        data.put("moderationStatus", comment.getModerationStatus());
+        addReplyFields(data, comment);
         data.put("updatedAt", FieldValue.serverTimestamp());
         return data;
+    }
+
+    private void addReplyFields(Map<String, Object> data, CommentDTO comment) {
+        if (comment.getReplyToCommentId() != null && !comment.getReplyToCommentId().isBlank()) {
+            data.put("replyToCommentId", comment.getReplyToCommentId());
+        }
+        if (comment.getReplyToTouristName() != null && !comment.getReplyToTouristName().isBlank()) {
+            data.put("replyToTouristName", comment.getReplyToTouristName());
+        }
     }
 
     private String getString(DocumentSnapshot document, String field) {
@@ -179,8 +196,4 @@ public class CommentRepositoryImpl implements CommentRepository {
         return value == null ? "" : value;
     }
 
-    private String getTimestampText(DocumentSnapshot document, String field) {
-        Object value = document.get(field);
-        return value == null ? "" : value.toString();
-    }
 }

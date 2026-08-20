@@ -9,6 +9,7 @@ import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.google.cloud.firestore.QuerySnapshot;
 import com.google.firebase.cloud.FirestoreClient;
 import com.warisango.dto.ReviewDTO;
+import com.warisango.util.ReviewDateFormatter;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
@@ -349,6 +350,10 @@ public class ReviewRepositoryImpl implements ReviewRepository {
                 )
         );
 
+        review.setModerationStatus(
+                getString(document, "moderationStatus")
+        );
+
 
         /*
          * ReviewPhotoService enriches this DTO from the root-level ReviewPhotos collection.
@@ -362,7 +367,7 @@ public class ReviewRepositoryImpl implements ReviewRepository {
         Object createdAt = document.get("createdAt");
 
         if (createdAt != null) {
-            review.setCreatedAt(createdAt.toString());
+            review.setCreatedAt(ReviewDateFormatter.format(createdAt));
         }
 
 
@@ -370,7 +375,7 @@ public class ReviewRepositoryImpl implements ReviewRepository {
         Object updatedAt = document.get("updatedAt");
 
         if (updatedAt != null) {
-            review.setUpdatedAt(updatedAt.toString());
+            review.setUpdatedAt(ReviewDateFormatter.format(updatedAt));
         }
 
 
@@ -415,6 +420,11 @@ public class ReviewRepositoryImpl implements ReviewRepository {
                 review.getReviewText()
         );
 
+        data.put(
+                "moderationStatus",
+                review.getModerationStatus()
+        );
+
 
         /*
          * Use Firestore server timestamp.
@@ -446,6 +456,7 @@ public class ReviewRepositoryImpl implements ReviewRepository {
         data.put("businessId", review.getBusinessId());
         data.put("rating", review.getRating());
         data.put("reviewText", review.getReviewText());
+        data.put("moderationStatus", review.getModerationStatus());
         data.put("updatedAt", FieldValue.serverTimestamp());
 
         return data;
