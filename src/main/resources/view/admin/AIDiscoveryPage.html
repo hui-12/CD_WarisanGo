@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>WarisanGo - AI Heritage Discovery</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+
+        body{
+            background:#f8f9fa;
+        }
+
+        .card{
+            border-radius:15px;
+            margin-bottom:20px;
+        }
+
+        .table img{
+            width:120px;
+            border-radius:8px;
+        }
+
+        .status{
+            font-weight:bold;
+        }
+
+        .log-box{
+
+            height:250px;
+            overflow-y:auto;
+            background:#212529;
+            color:#ffffff;
+            padding:15px;
+            border-radius:10px;
+            font-family:monospace;
+
+        }
+
+    </style>
+
+</head>
+<body>
+
+<div class="container mt-4">
+
+    <h2 class="mb-4">
+        AI Heritage Discovery
+    </h2>
+
+    <!-- Search Card -->
+
+    <div class="card shadow">
+
+        <div class="card-body">
+
+            <form id="searchForm">
+
+                <div class="row">
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            Search Keyword
+                        </label>
+
+                        <input
+                                type="text"
+                                id="keyword"
+                                class="form-control"
+                                placeholder="Example: Traditional Food Malaysia">
+
+                    </div>
+
+                    <div class="col-md-3">
+
+                        <label class="form-label">
+                            Platform
+                        </label>
+
+                        <select
+                                id="platform"
+                                class="form-select">
+
+                            <option value="youtube">
+                                YouTube
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                    <div class="col-md-3 d-flex align-items-end">
+
+                        <button
+                                type="button"
+                                class="btn btn-primary w-100"
+                                onclick="searchVideos()">
+
+                            Search
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <!-- Processing Log -->
+
+    <div class="card shadow">
+
+        <div class="card-header">
+
+            Processing Log
+
+        </div>
+
+        <div class="card-body">
+
+            <div
+                    class="log-box"
+                    id="logs">
+
+                System Ready...
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Search Result -->
+
+    <div class="card shadow">
+
+        <div class="card-header">
+
+            Search Results
+
+        </div>
+
+        <div class="card-body">
+
+            <table class="table table-bordered table-hover">
+
+                <thead>
+
+                <tr>
+
+                    <th>Thumbnail</th>
+                    <th>Video Title</th>
+                    <th>Channel</th>
+                    <th>Published</th>
+                    <th>Action</th>
+
+                </tr>
+
+                </thead>
+
+                <tbody id="videoTable">
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+
+    <!-- Pending Heritage -->
+
+    <div class="card shadow">
+
+        <div class="card-header">
+
+            Pending Heritage Records
+
+        </div>
+
+        <div class="card-body">
+
+            <table class="table table-striped">
+
+                <thead>
+
+                <tr>
+
+                    <th>Business Name</th>
+                    <th>Food</th>
+                    <th>Location</th>
+                    <th>Status</th>
+
+                </tr>
+
+                </thead>
+
+                <tbody id="pendingTable">
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    function log(message){
+
+        let logs=document.getElementById("logs");
+
+        logs.innerHTML += "<br>" + message;
+
+        logs.scrollTop = logs.scrollHeight;
+
+    }
+
+
+    function searchVideos(){
+
+        let keyword=document.getElementById("keyword").value;
+
+        if(keyword===""){
+
+            alert("Please enter keyword");
+
+            return;
+
+        }
+
+        log("Searching YouTube...");
+
+        fetch("/api/videos/search?keyword="+encodeURIComponent(keyword))
+
+            .then(response=>response.json())
+
+            .then(data=>{
+
+                log("Found "+data.length+" videos");
+
+                loadVideos(data);
+
+            })
+
+            .catch(error=>{
+
+                log("Error : "+error);
+
+            });
+
+    }
+
+
+    function loadVideos(videos){
+
+        let table=document.getElementById("videoTable");
+
+        table.innerHTML="";
+
+        videos.forEach(video=>{
+
+            table.innerHTML+=`
+
+            <tr>
+
+                <td>
+
+                    <img src="${video.thumbnail}">
+
+                </td>
+
+                <td>
+
+                    ${video.title}
+
+                </td>
+
+                <td>
+
+                    ${video.channel}
+
+                </td>
+
+                <td>
+
+                    ${video.publishedAt}
+
+                </td>
+
+                <td>
+
+                    <button
+                        class="btn btn-success btn-sm"
+                        onclick="processVideo('${video.videoId}')">
+
+                        Process
+
+                    </button>
+
+                </td>
+
+            </tr>
+
+            `;
+
+        });
+
+    }
+
+
+    function processVideo(videoId){
+
+        log("Processing Video : "+videoId);
+
+        fetch("/api/discovery/process/"+videoId)
+
+            .then(response=>response.json())
+
+            .then(data=>{
+
+                log("AI Extraction Completed");
+
+                addPending(data);
+
+            });
+
+    }
+
+
+    function addPending(record){
+
+        let table=document.getElementById("pendingTable");
+
+        table.innerHTML+=`
+
+        <tr>
+
+            <td>${record.businessName}</td>
+
+            <td>${record.foodName}</td>
+
+            <td>${record.location}</td>
+
+            <td class="status text-warning">
+
+                Pending
+
+            </td>
+
+        </tr>
+
+        `;
+
+    }
+
+</script>
+
+</body>
+</html>

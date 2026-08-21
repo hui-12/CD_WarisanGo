@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head(title)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title}">WarisanGo</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Global Styles (With static href fallback) -->
+    <link rel="stylesheet" href="/css/global.css" th:href="@{/css/global.css}">
+</head>
+<body>
+    <!-- Sticky Navbar Fragment -->
+    <header th:fragment="navbar(activePage)" class="navbar">
+        <div class="nav-container">
+            <button type="button" class="brand-logo" data-navigate="home">
+                <span class="brand-main">Warisan</span><span class="brand-accent">Go</span>
+                <span id="admin-badge" class="admin-badge hidden">ADMIN</span>
+            </button>
+
+            <nav class="nav-links" id="nav-menu">
+                <button type="button" class="nav-item" th:classappend="${activePage == 'home'} ? ' active'" data-navigate="home">Home</button>
+                <button type="button" class="nav-item" th:classappend="${activePage == 'directory'} ? ' active'" data-navigate="directory">Directory</button>
+                <button type="button" class="nav-item" th:classappend="${activePage == 'map'} ? ' active'" data-navigate="map">Map</button>
+                <button type="button" class="nav-item" th:classappend="${activePage == 'rewards'} ? ' active'" data-navigate="rewards">Rewards</button>
+                <button type="button" class="nav-item" th:classappend="${activePage == 'badges'} ? ' active'" data-navigate="badges">Badges</button>
+                <button type="button" class="nav-item" th:classappend="${activePage == 'challenges'} ? ' active'" data-navigate="challenges">Challenges</button>
+                <button type="button" class="nav-item" th:classappend="${activePage == 'profile'} ? ' active'" data-navigate="profile">Profile</button>
+            </nav>
+
+            <div class="nav-actions">
+                <button type="button" id="role-toggle-btn" class="btn-role-switch" data-action="toggle-role">→ Admin View</button>
+                <button type="button" class="user-profile-btn" data-navigate="profile">
+                    <img id="user-avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop" alt="User Avatar" class="avatar-img">
+                    <span id="user-name" class="user-name">Diddy</span>
+                </button>
+            </div>
+        </div>
+    </header>
+</body>
+</html>
