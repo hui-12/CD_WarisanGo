@@ -8,7 +8,7 @@ public class HomeController {
 
     @GetMapping({"/"})
     public String home() {
-        return "login";
+        return "home";
     }
 
     // Route for the Map page template

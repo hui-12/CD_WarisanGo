@@ -24,15 +24,21 @@ public class AuthService {
 
     public User authenticateAndProcessUser(LoginRequest loginRequest) {
         try {
-            // Verify the integrity of the token retrieved from JS using Firebase Admin SDK
+            // Verify token with Firebase Admin SDK
             FirebaseToken decodedToken = FirebaseAuth.getInstance().verifyIdToken(loginRequest.getIdToken());
             String uid = decodedToken.getUid();
+            String assignedRole = resolveRole(decodedToken);
 
             Optional<User> existingUser = userRepository.findById(uid);
 
             if (existingUser.isPresent()) {
+                User user = existingUser.get();
+                if (!assignedRole.equals(user.getRole())) {
+                    user.setRole(assignedRole);
+                    userRepository.save(user);
+                }
                 logger.info("Returning user {} successfully authenticated.", uid);
-                return existingUser.get();
+                return user;
             } else {
                 logger.info("Registering new user {} in Firestore.", uid);
                 User newUser = new User(
@@ -40,14 +46,25 @@ public class AuthService {
                     decodedToken.getEmail(),
                     decodedToken.getName(),
                     decodedToken.getPicture(),
-                    loginRequest.getRole()
+                    assignedRole
                 );
                 userRepository.save(newUser);
                 return newUser;
             }
         } catch (FirebaseAuthException e) {
-            logger.error("Invalid Firebase ID token provided.", e);
-            throw new IllegalArgumentException("Authentication failed due to invalid token.");
+            // Log the exact cause from Firebase SDK
+            logger.error("Firebase token verification failed. Error code: {}, Message: {}",
+                e.getAuthErrorCode(), e.getMessage(), e);
+            throw new IllegalArgumentException("Authentication failed: " + e.getMessage());
         }
+    }
+
+    public Optional<User> findUserByUid(String uid) {
+        return userRepository.findById(uid);
+    }
+
+    private String resolveRole(FirebaseToken firebaseToken) {
+        Object adminClaim = firebaseToken.getClaims().get("admin");
+        return Boolean.TRUE.equals(adminClaim) ? "admin" : "tourist";
     }
 }
