@@ -49,12 +49,12 @@
             <strong th:text="${business.averageRating != null ? #numbers.formatDecimal(business.averageRating, 1, 1) : 'New'}">4.8</strong>
             <span>Approved heritage listing</span>
           </p>
-          <p class="business-summary" th:text="${business.description}">Business description</p>
+          <p class="business-summary" th:text="${business.displayDescription}">Business description</p>
         </header>
 
         <section class="detail-section">
           <h2>Our Story</h2>
-          <p th:text="${business.description}">Business story</p>
+          <p th:text="${business.story}">Business story</p>
         </section>
 
         <section class="detail-section business-information">
@@ -62,6 +62,8 @@
           <dl>
             <div><dt>Category</dt><dd th:text="${business.category ?: 'Heritage food'}">Heritage food</dd></div>
             <div><dt>Rating</dt><dd th:text="${business.averageRating != null ? #numbers.formatDecimal(business.averageRating, 1, 1) + ' / 5' : 'New listing'}">4.8 / 5</dd></div>
+            <div th:if="${business.operatingHours != null}"><dt>Operating hours</dt><dd th:text="${business.operatingHours}">Operating hours</dd></div>
+            <div th:if="${business.phoneNumber != null}"><dt>Phone</dt><dd th:text="${business.phoneNumber}">Phone number</dd></div>
             <div class="information-wide"><dt>Address</dt><dd th:text="${business.address}">Business address</dd></div>
           </dl>
         </section>
@@ -83,19 +85,17 @@
             <div><dt>Status</dt><dd>Approved</dd></div>
             <div><dt>Rating</dt><dd th:text="${business.averageRating != null ? #numbers.formatDecimal(business.averageRating, 1, 1) + ' / 5' : 'New'}">4.8 / 5</dd></div>
             <div><dt>State</dt><dd th:text="${business.state}">State</dd></div>
+            <div th:if="${business.operatingHours != null}"><dt>Hours</dt><dd th:text="${business.operatingHours}">Hours</dd></div>
           </dl>
         </section>
         <section class="sidebar-card">
           <h2>Location</h2>
           <p class="sidebar-address" th:text="${business.address}">Business address</p>
           <a class="map-link" th:href="@{/map}">View on map →</a>
-        </section>
-      </aside>
-    </section>
-  </main>
-
-  <!-- Footer fragment -->
-  <div th:replace="~{fragments/footer :: global}"></div>
+          <a class="map-link" th:if="${business.sourceUrl != null}" th:href="${business.sourceUrl}"
+             target="_blank" rel="noopener noreferrer">View source →</a>
+ss="map-link" th:href="@{/map}">View on map →</a>
+:replace="~{fragments/footer :: global}"></div>
 
   <!-- Page-specific script -->
   <script src="/js/business-heritage.js" th:src="@{/js/business-heritage.js}"></script>
