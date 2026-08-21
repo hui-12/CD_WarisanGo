@@ -9,9 +9,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
@@ -263,20 +268,25 @@ public class ReviewService {
      * Calculate average rating for one business.
      */
     public double getAverageRating(String businessId) {
+        Double averageRating = getCurrentAverageRating(businessId);
+        return averageRating == null ? 0 : averageRating;
 
+    }
+
+    /**
+     * Returns the current average from visible Reviews. A null result means
+     * the business has no visible reviews yet.
+     */
+    public Double getCurrentAverageRating(String businessId) {
         List<ReviewDTO> reviews = getReviewsByBusiness(businessId);
 
         if (reviews.isEmpty()) {
-            return 0;
+            return null;
         }
 
-        int total = 0;
-
-        for (ReviewDTO review : reviews) {
-
-            total += review.getRating();
-
-        }
+        int total = reviews.stream()
+                .mapToInt(ReviewDTO::getRating)
+                .sum();
 
         return Math.round(((double) total / reviews.size()) * 10.0) / 10.0;
 
@@ -309,8 +319,65 @@ public class ReviewService {
         return rows;
     }
 
+    /**
+     * Selects the review shown on the Heritage Business detail page.
+     * Reviews with likes are ranked by like count. If every visible review has
+     * zero likes, the earliest review is shown instead. Ties use the earliest
+     * review so the result remains deterministic.
+     */
+    public ReviewDTO getFeaturedReview(String businessId) {
+        List<ReviewDTO> reviews = getReviewsByBusiness(businessId);
+
+        if (reviews.isEmpty()) {
+            return null;
+        }
+
+        for (ReviewDTO review : reviews) {
+            review.setLikeCount(reviewLikeRepository.findByReviewId(review.getReviewId()).size());
+        }
+
+        boolean hasLikes = reviews.stream().anyMatch(review -> review.getLikeCount() > 0);
+        Comparator<ReviewDTO> earliestFirst = Comparator.comparing(
+                review -> parseCreatedAt(review.getCreatedAt())
+        );
+
+        if (!hasLikes) {
+            return reviews.stream()
+                    .min(earliestFirst)
+                    .orElse(null);
+        }
+
+        return reviews.stream()
+                .sorted(Comparator.comparingInt(ReviewDTO::getLikeCount)
+                        .reversed()
+                        .thenComparing(earliestFirst))
+                .findFirst()
+                .orElse(null);
+    }
+
     public String getCurrentTouristId() {
         return currentTouristId;
+    }
+
+    private LocalDateTime parseCreatedAt(String createdAt) {
+        if (createdAt == null || createdAt.isBlank()) {
+            return LocalDateTime.MAX;
+        }
+
+        try {
+            return LocalDateTime.parse(
+                    createdAt,
+                    DateTimeFormatter.ofPattern("d MMM yyyy, h:mm a", Locale.ENGLISH)
+            );
+        } catch (DateTimeParseException ignored) {
+            // Support older records that may contain a date without a time.
+        }
+
+        try {
+            return LocalDate.parse(createdAt).atStartOfDay();
+        } catch (DateTimeParseException ignored) {
+            return LocalDateTime.MAX;
+        }
     }
 
     public boolean isReviewOwner(ReviewDTO review, String currentUserId) {
