@@ -2,6 +2,7 @@ package com.warisango.controller;
 
 import com.warisango.dto.HeritageBusinessDTO;
 import com.warisango.model.service.BusinessService;
+import com.warisango.model.service.ReviewService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,15 +17,20 @@ import java.util.Optional;
 public class BusinessDirectoryController {
 
     private final BusinessService businessService;
+    private final ReviewService reviewService;
 
-    public BusinessDirectoryController(BusinessService businessService) {
+    public BusinessDirectoryController(BusinessService businessService, ReviewService reviewService) {
         this.businessService = businessService;
+        this.reviewService = reviewService;
     }
 
     // Directory page (list)
     @GetMapping({"/directory", "/business-directory"})
     public String showBusinessDirectory(Model model) {
         List<HeritageBusinessDTO> businesses = businessService.getApprovedBusinesses();
+        businesses.forEach(business -> business.setAverageRating(
+                reviewService.getCurrentAverageRating(business.getBusinessId())
+        ));
         model.addAttribute("businesses", businesses);
         return "BusinessDirectoryPage"; // must match src/main/resources/view/BusinessDirectoryPage.html
     }
@@ -37,7 +43,11 @@ public class BusinessDirectoryController {
             redirectAttributes.addFlashAttribute("error", "Business not found");
             return "redirect:/directory";
         }
-        model.addAttribute("business", opt.get());
+        HeritageBusinessDTO business = opt.get();
+        business.setAverageRating(reviewService.getCurrentAverageRating(id));
+
+        model.addAttribute("business", business);
+        model.addAttribute("featuredReview", reviewService.getFeaturedReview(id));
         return "BusinessDetailsPage"; // must match file name
     }
 
