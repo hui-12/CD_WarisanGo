@@ -47,6 +47,7 @@
     <div style="margin-bottom:18px"><label style="display:block;font-size:12px;font-weight:600;margin-bottom:6px">Description *</label><textarea id="f-desc" rows="3" style="width:100%;padding:9px 12px;border-radius:8px;font-size:13px;border:1px solid #e8e6e0;background:#faf9f5;color:#141413;resize:vertical"></textarea><div id="e-desc" style="font-size:12px;color:#c9a84c;margin-top:4px;font-weight:600;display:none"></div></div>
     <div style="margin-bottom:18px"><label style="display:block;font-size:12px;font-weight:600;margin-bottom:6px">Requirements *</label><textarea id="f-req" rows="3" style="width:100%;padding:9px 12px;border-radius:8px;font-size:13px;border:1px solid #e8e6e0;background:#faf9f5;color:#141413;resize:vertical"></textarea><div id="e-req" style="font-size:12px;color:#c9a84c;margin-top:4px;font-weight:600;display:none"></div></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px">
+      <div><label style="display:block;font-size:12px;font-weight:600;margin-bottom:6px">Target Check-ins *</label><input id="f-target" type="number" min="1" value="1" style="width:100%;padding:9px 12px;border-radius:8px;font-size:13px;border:1px solid #e8e6e0;background:#faf9f5;color:#141413"/><div id="e-target" style="font-size:12px;color:#c9a84c;margin-top:4px;font-weight:600;display:none"></div></div>
       <div><label style="display:block;font-size:12px;font-weight:600;margin-bottom:6px">Bonus Points *</label><input id="f-pts" type="number" style="width:100%;padding:9px 12px;border-radius:8px;font-size:13px;border:1px solid #e8e6e0;background:#faf9f5;color:#141413"/><div id="e-pts" style="font-size:12px;color:#c9a84c;margin-top:4px;font-weight:600;display:none"></div></div>
       <div><label style="display:block;font-size:12px;font-weight:600;margin-bottom:6px">Exclusive Badge Name *</label><input id="f-badge" type="text" style="width:100%;padding:9px 12px;border-radius:8px;font-size:13px;border:1px solid #e8e6e0;background:#faf9f5;color:#141413"/><div id="e-badge" style="font-size:12px;color:#c9a84c;margin-top:4px;font-weight:600;display:none"></div></div>
     </div>
@@ -59,139 +60,73 @@
 </main>
 </div>
 <script>
-// ══════════════════════════════════════
-// PAGE 5: ADMIN CHALLENGES
-// ══════════════════════════════════════
-let adminChallenges = [
-  { id:1, title:'Weekend Foodie Sprint', desc:'Visit 3 heritage businesses this weekend.',         req:'Check in at 3 different heritage food businesses between Fri–Sun.', pts:150, badge:'Weekend Warrior', expiry:'2026-08-03' },
-  { id:2, title:'Penang Pilgrimage',      desc:"Explore 5 heritage businesses in Penang's George Town.", req:'Check in at 5 businesses located in Penang.',               pts:300, badge:'Penang Pride',    expiry:'2026-08-15' },
-];
-let adminMode = 'list'; // 'list' | 'create' | 'edit'
+let adminChallenges = [];
+let adminMode = 'list';
 let editingId = null;
 let deleteTargetId = null;
 
+async function loadAdminChallenges() {
+  try {
+    const r = await fetch('/api/admin/challenges');
+    if (!r.ok) throw new Error('Unable to load challenges');
+    adminChallenges = await r.json();
+    renderAdminRows();
+  } catch(e) {
+    console.error(e);
+    document.getElementById('admin-rows').innerHTML = '<div style="padding:48px;text-align:center;color:#6b6b68">Unable to load challenges from Firebase.</div>';
+  }
+}
+
 function renderAdminRows() {
   const container = document.getElementById('admin-rows');
-  if (!adminChallenges.length) {
-    container.innerHTML = `<div style="padding:48px;text-align:center;color:#6b6b68"><p>No challenges yet.</p><p style="font-size:13px;margin-top:8px">Create your first challenge to get tourists engaged.</p></div>`;
-    return;
-  }
-  container.innerHTML = adminChallenges.map((ch, i) => {
-    const expired = new Date(ch.expiry) < new Date();
-    return `<div style="display:grid;grid-template-columns:1fr 80px 130px 110px 130px;padding:14px 20px;
-      border-bottom:${i < adminChallenges.length-1 ? '1px solid #e8e6e0' : 'none'};
-      background:${expired ? '#f5e9c4' : i % 2 === 0 ? '#faf9f5' : '#ffffff'};align-items:center">
-      <div>
-        <div style="font-size:13px;font-weight:600;margin-bottom:2px">${ch.title}</div>
-        <div style="font-size:12px;color:#6b6b68;line-height:1.4">${ch.desc}</div>
-        ${expired ? '<span style="display:inline-block;margin-top:4px;font-size:9px;font-family:\'Inter\',monospace;color:#6b6b68;border:1px solid #e8e6e0;border-radius:4px;padding:2px 6px">EXPIRED</span>' : ''}
-      </div>
-      <div style="font-family:'Inter',monospace;font-size:13px;font-weight:700;color:#c9a84c">+${ch.pts}</div>
-      <div style="font-size:12px;color:#6b6b68">${ch.badge}</div>
-      <div style="font-size:12px;font-family:'Inter',monospace;color:${expired ? '#6b6b68' : '#141413'}">
-        ${new Date(ch.expiry).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}
-      </div>
-      <div style="display:flex;gap:8px;justify-content:flex-end">
-        <button onclick="openAdminEdit(${ch.id})" style="padding:5px 12px;background:transparent;color:#141413;border:1px solid #e8e6e0;border-radius:8px;font-size:12px;cursor:pointer">Edit</button>
-        <button onclick="openDeleteModal(${ch.id},'${ch.title.replace(/'/g,"\\'")}')" style="padding:5px 12px;background:#c9a84c;color:#fff;border:none;border-radius:8px;font-size:12px;cursor:pointer">Delete</button>
-      </div>
+  if (!adminChallenges.length) { container.innerHTML='<div style="padding:48px;text-align:center;color:#6b6b68">No challenges yet. Create your first challenge.</div>'; return; }
+  container.innerHTML = adminChallenges.map((ch,i)=>{
+    const expired = ch.expiry && new Date(ch.expiry) < new Date();
+    return `<div style="display:grid;grid-template-columns:1fr 80px 130px 110px 130px;padding:14px 20px;border-bottom:${i<adminChallenges.length-1?'1px solid #e8e6e0':'none'};background:${expired?'#f5e9c4':i%2===0?'#faf9f5':'#fff'};align-items:center">
+      <div><div style="font-size:13px;font-weight:600;margin-bottom:2px">${escapeHtml(ch.title||'')}</div><div style="font-size:12px;color:#6b6b68;line-height:1.4">${escapeHtml(ch.description||'')}</div></div>
+      <div style="font-family:'Inter',monospace;font-size:13px;font-weight:700;color:#c9a84c">+${Number(ch.rewardPoints||0)}</div>
+      <div style="font-size:12px;color:#6b6b68">${escapeHtml(ch.badge||'')}</div>
+      <div style="font-size:12px;font-family:'Inter',monospace">${escapeHtml(ch.expiry||'—')}</div>
+      <div style="display:flex;gap:8px;justify-content:flex-end"><button onclick="openAdminEdit('${escapeJs(ch.id)}')" style="padding:5px 12px;background:transparent;color:#141413;border:1px solid #e8e6e0;border-radius:8px;font-size:12px;cursor:pointer">Edit</button><button onclick="openDeleteModal('${escapeJs(ch.id)}','${escapeJs(ch.title||'Challenge')}')" style="padding:5px 12px;background:#c9a84c;color:#fff;border:none;border-radius:8px;font-size:12px;cursor:pointer">Delete</button></div>
     </div>`;
   }).join('');
 }
 
 function openAdminCreate() {
-  adminMode = 'create'; editingId = null;
-  document.getElementById('admin-title').textContent = 'Create New Challenge';
-  document.getElementById('admin-create-btn').style.display = 'none';
-  document.getElementById('admin-list').style.display = 'none';
-  document.getElementById('admin-form').style.display = 'block';
-  document.getElementById('form-save-btn').textContent = 'Publish Challenge';
-  ['title','desc','req','pts','badge','date'].forEach(k => {
-    document.getElementById('f-' + k).value = '';
-    document.getElementById('e-' + k).style.display = 'none';
-  });
+  adminMode='create'; editingId=null;
+  document.getElementById('admin-title').textContent='Create New Challenge';
+  document.getElementById('admin-create-btn').style.display='none'; document.getElementById('admin-list').style.display='none'; document.getElementById('admin-form').style.display='block'; document.getElementById('form-save-btn').textContent='Publish Challenge';
+  ['title','desc','req','pts','badge','date'].forEach(k=>{document.getElementById('f-'+k).value='';}); document.getElementById('f-target').value='1';
 }
 
 function openAdminEdit(id) {
-  const ch = adminChallenges.find(c => c.id === id);
-  adminMode = 'edit'; editingId = id;
-  document.getElementById('admin-title').textContent = 'Edit: ' + ch.title;
-  document.getElementById('admin-create-btn').style.display = 'none';
-  document.getElementById('admin-list').style.display = 'none';
-  document.getElementById('admin-form').style.display = 'block';
-  document.getElementById('form-save-btn').textContent = 'Save Changes';
-  document.getElementById('f-title').value = ch.title;
-  document.getElementById('f-desc').value  = ch.desc;
-  document.getElementById('f-req').value   = ch.req;
-  document.getElementById('f-pts').value   = ch.pts;
-  document.getElementById('f-badge').value = ch.badge;
-  document.getElementById('f-date').value  = ch.expiry;
-  ['title','desc','req','pts','badge','date'].forEach(k => document.getElementById('e-'+k).style.display='none');
+  const ch=adminChallenges.find(c=>c.id===id); if(!ch)return;
+  adminMode='edit'; editingId=id;
+  document.getElementById('admin-title').textContent='Edit: '+ch.title; document.getElementById('admin-create-btn').style.display='none'; document.getElementById('admin-list').style.display='none'; document.getElementById('admin-form').style.display='block'; document.getElementById('form-save-btn').textContent='Save Changes';
+  document.getElementById('f-title').value=ch.title||''; document.getElementById('f-desc').value=ch.description||''; document.getElementById('f-req').value=ch.requirement||''; document.getElementById('f-target').value=ch.target||1; document.getElementById('f-pts').value=ch.rewardPoints||0; document.getElementById('f-badge').value=ch.badge||''; document.getElementById('f-date').value=ch.expiry||'';
 }
 
-function closeAdminForm() {
-  adminMode = 'list';
-  document.getElementById('admin-title').textContent = 'Challenge Management';
-  document.getElementById('admin-create-btn').style.display = 'block';
-  document.getElementById('admin-list').style.display = 'block';
-  document.getElementById('admin-form').style.display = 'none';
+function closeAdminForm(){adminMode='list';document.getElementById('admin-title').textContent='Challenge Management';document.getElementById('admin-create-btn').style.display='block';document.getElementById('admin-list').style.display='block';document.getElementById('admin-form').style.display='none';}
+
+async function saveAdminForm(){
+  const body={title:document.getElementById('f-title').value.trim(),description:document.getElementById('f-desc').value.trim(),requirement:document.getElementById('f-req').value.trim(),target:Number(document.getElementById('f-target').value),rewardPoints:Number(document.getElementById('f-pts').value),badge:document.getElementById('f-badge').value.trim(),expiry:document.getElementById('f-date').value,status:'ACTIVE'};
+  if(!body.title||!body.description||!body.requirement||body.target<1||body.rewardPoints<1||!body.badge||!body.expiry){alert('Please complete all fields with valid values.');return;}
+  const url=adminMode==='create'?'/api/admin/challenges':`/api/admin/challenges/${encodeURIComponent(editingId)}`;
+  const r=await fetch(url,{method:adminMode==='create'?'POST':'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  if(!r.ok){alert('Unable to save challenge.');return;}
+  closeAdminForm(); await loadAdminChallenges(); showAdminSuccess(`Challenge "${body.title}" ${adminMode==='create'?'published':'updated'}.`);
 }
 
-function saveAdminForm() {
-  const title = document.getElementById('f-title').value.trim();
-  const desc  = document.getElementById('f-desc').value.trim();
-  const req   = document.getElementById('f-req').value.trim();
-  const pts   = document.getElementById('f-pts').value;
-  const badge = document.getElementById('f-badge').value.trim();
-  const date  = document.getElementById('f-date').value;
-  let valid = true;
-
-  function setErr(k, msg) { const el = document.getElementById('e-'+k); el.textContent = msg; el.style.display = msg ? 'block' : 'none'; if (msg) valid = false; }
-
-  setErr('title', !title ? 'Title is required.' : '');
-  setErr('desc',  !desc  ? 'Description is required.' : '');
-  setErr('req',   !req   ? 'Requirements are required.' : '');
-  setErr('pts',   (!pts || isNaN(Number(pts)) || Number(pts) <= 0) ? 'Enter a valid positive number.' : '');
-  setErr('badge', !badge ? 'Badge name is required.' : '');
-  if (!date) setErr('date', 'Expiry date is required.');
-  else if (new Date(date) <= new Date()) setErr('date', 'Expiry date must be a future date.');
-  else setErr('date', '');
-
-  if (!valid) return;
-
-  if (adminMode === 'create') {
-    adminChallenges.push({ id: Date.now(), title, desc, req, pts: Number(pts), badge, expiry: date });
-    showAdminSuccess(`Challenge "${title}" published.`);
-  } else {
-    adminChallenges = adminChallenges.map(c => c.id === editingId ? { ...c, title, desc, req, pts: Number(pts), badge, expiry: date } : c);
-    showAdminSuccess(`Challenge "${title}" updated.`);
-  }
-  closeAdminForm();
-  renderAdminRows();
+function openDeleteModal(id,title){deleteTargetId=id;document.getElementById('delete-name').textContent='"'+title+'"';document.getElementById('delete-modal').style.display='flex';}
+async function confirmDelete(){
+  const r=await fetch(`/api/admin/challenges/${encodeURIComponent(deleteTargetId)}`,{method:'DELETE'}); document.getElementById('delete-modal').style.display='none';
+  if(!r.ok){alert('Unable to delete challenge.');return;} await loadAdminChallenges(); showAdminSuccess('Challenge deleted.');
 }
-
-function openDeleteModal(id, title) {
-  deleteTargetId = id;
-  document.getElementById('delete-name').textContent = `"${title}"`;
-  document.getElementById('delete-modal').style.display = 'flex';
+function showAdminSuccess(msg){document.getElementById('admin-success-msg').textContent='✓ '+msg;document.getElementById('admin-success').style.display='flex';}
+function escapeJs(value) {
+  return String(value ?? '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
 }
-
-function confirmDelete() {
-  const ch = adminChallenges.find(c => c.id === deleteTargetId);
-  adminChallenges = adminChallenges.filter(c => c.id !== deleteTargetId);
-  document.getElementById('delete-modal').style.display = 'none';
-  showAdminSuccess(`Challenge "${ch.title}" deleted.`);
-  renderAdminRows();
-}
-
-function showAdminSuccess(msg) {
-  const el = document.getElementById('admin-success');
-  document.getElementById('admin-success-msg').textContent = '✓ ' + msg;
-  el.style.display = 'flex';
-}
-
-// ── Init ──────────────────────────────────────────────────────
-renderAdminRows();
+loadAdminChallenges();
 </script>
   <div th:replace="~{fragments/footer :: global}"></div>
 </body>

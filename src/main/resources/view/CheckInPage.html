@@ -11,11 +11,7 @@
   <p class="muted">Visit a heritage food business and confirm your GPS location within 50 metres to earn reward points.</p>
   <div class="batik-divider" style="margin:24px 0"></div>
 
-  <div class="card" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;">
-    <div>
-      <div class="caption">Your points balance</div>
-      <div class="mono" style="font-size:30px;font-weight:600;line-height:1.1" id="ci-points-display">Loading... <span style="font-size:14px;color:#6b6b68">pts</span></div>
-    </div>
+
     <div id="ci-tier-badge" style="padding:10px 18px;border:2px solid #c9a84c;border-radius:12px;text-align:center">
       <div class="caption">TIER</div>
       <div style="font-size:17px;font-weight:700;color:#c9a84c">Loading</div>
@@ -38,44 +34,13 @@
 // Replace this with the authenticated user's ID later.
 const USER_ID = localStorage.getItem('warisangoUserId') || 'demo-user';
 const MAX_DISTANCE_METERS = 50;
+const URL_BUSINESS_ID = new URLSearchParams(window.location.search).get('businessId');
 
-let totalPoints = 0;
 let BUSINESSES = [];
 let checkedIn = [];
 let selectedBiz = null;
 
-function getTier(pts) {
-  if (pts >= 2000) return { name: 'Platinum', color: '#5B7080' };
-  if (pts >= 1000) return { name: 'Gold', color: '#c9a84c' };
-  if (pts >= 500)  return { name: 'Silver', color: '#8A9BA8' };
-  return { name: 'Bronze', color: '#c9a84c' };
-}
 
-function updatePointsUI() {
-  const t = getTier(totalPoints);
-  document.getElementById('ci-points-display').innerHTML =
-      totalPoints.toLocaleString() + ' <span style="font-size:14px;color:#6b6b68">pts</span>';
-
-  const tb = document.getElementById('ci-tier-badge');
-  tb.style.borderColor = t.color;
-  tb.innerHTML = `<div class="caption">TIER</div>
-                  <div style="font-size:17px;font-weight:700;color:${t.color}">${t.name}</div>`;
-}
-
-async function loadPoints() {
-  try {
-    const response = await fetch(`/api/user/points?userId=${encodeURIComponent(USER_ID)}`);
-    if (!response.ok) throw new Error('Unable to load points');
-
-    const data = await response.json();
-    totalPoints = Number(data.currentPoints || 0);
-    updatePointsUI();
-  } catch (error) {
-    console.error('loadPoints:', error);
-    document.getElementById('ci-points-display').innerHTML =
-        'Unable to load <span style="font-size:14px;color:#6b6b68">pts</span>';
-  }
-}
 
 async function loadBusinesses() {
   const grid = document.getElementById('biz-grid');
@@ -104,6 +69,10 @@ async function loadBusinesses() {
     }
 
     renderBizGrid();
+    if (URL_BUSINESS_ID) {
+      const selected = BUSINESSES.find(b => b.id === URL_BUSINESS_ID);
+      if (selected) selectBiz(selected.id);
+    }
   } catch (error) {
     console.error('loadBusinesses:', error);
     grid.innerHTML = `
@@ -275,9 +244,6 @@ async function submitCheckIn(biz, userLat, userLng, distanceMeters, accuracy) {
     const result = await response.json();
 
     if (!response.ok || !result.success) {
-      totalPoints = Number(result.currentPoints || totalPoints);
-      updatePointsUI();
-
       document.getElementById('ci-status').innerHTML = statusCard(
           'warning',
           'Check-in was not completed',
@@ -291,9 +257,6 @@ async function submitCheckIn(biz, userLat, userLng, distanceMeters, accuracy) {
     }
 
     // The backend response is now the source of truth for the balance.
-    totalPoints = Number(result.currentPoints || 0);
-    updatePointsUI();
-
     checkedIn.push(biz.id);
     selectedBiz = null;
     renderBizGrid();
@@ -301,7 +264,7 @@ async function submitCheckIn(biz, userLat, userLng, distanceMeters, accuracy) {
     document.getElementById('ci-status').innerHTML = statusCard(
         'success',
         `+${result.pointsEarned} points awarded`,
-        `Check-in confirmed at ${escapeHtml(biz.name)}. You were ${Math.round(result.distanceMeters)} metres away. Updated balance: ${totalPoints.toLocaleString()} pts.`,
+        `Check-in confirmed at ${escapeHtml(biz.name)}. You were ${Math.round(result.distanceMeters)} metres away. Your points have been saved to Firebase.`,
         'Check In Somewhere Else',
         'cancelCI()',
         '', ''
@@ -382,10 +345,7 @@ function escapeJs(value) {
 // Initial load
 // ============================================================
 (async function init() {
-  await Promise.all([
-    loadPoints(),
-    loadBusinesses()
-  ]);
+  await loadBusinesses();
 })();
 </script>
   <div th:replace="~{fragments/footer :: global}"></div>

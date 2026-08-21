@@ -28,80 +28,75 @@
 </main>
 </div>
 <script>
-// ══════════════════════════════════════
-// PAGE 4: CHALLENGES (Tourist)
-// ══════════════════════════════════════
-let challenges = [
-  { id:1, title:'Weekend Foodie Sprint',  desc:'Visit 3 heritage businesses this weekend.',          req:'Check in at 3 different heritage food businesses between Fri–Sun.', pts:150, badge:'🌟 Weekend Warrior', expiry:'3 Aug 2026',  days:4,  joined:true,  done:false, progress:2, total:3 },
-  { id:2, title:'Penang Pilgrimage',       desc:"Explore 5 heritage businesses in Penang's George Town.", req:'Check in at 5 businesses located in Penang.',               pts:300, badge:'🦁 Penang Pride',   expiry:'15 Aug 2026', days:16, joined:false, done:false, progress:0, total:5 },
-  { id:3, title:'Noodle Nomad',            desc:'Try 4 different noodle-based heritage dishes.',       req:'Check in at 4 businesses tagged with noodle dishes.',           pts:200, badge:'🍜 Noodle Nomad',   expiry:'10 Aug 2026', days:11, joined:false, done:false, progress:0, total:4 },
-];
+const CH_USER_ID = localStorage.getItem('warisangoUserId') || 'demo-user';
+let challenges = [];
+
+async function loadChallenges() {
+  const container = document.getElementById('challenges-list');
+  try {
+    const response = await fetch(`/api/challenges?userId=${encodeURIComponent(CH_USER_ID)}`);
+    if (!response.ok) throw new Error('Unable to load challenges');
+    challenges = await response.json();
+    renderChallenges();
+  } catch (e) {
+    console.error(e);
+    container.innerHTML = '<div class="card">Unable to load challenges from Firebase.</div>';
+  }
+}
 
 function renderChallenges() {
-  document.getElementById('challenges-list').innerHTML = challenges.map(ch => {
-    const pct    = (ch.progress / ch.total) * 100;
-    const urgent = ch.days <= 3;
-    const bg     = ch.done ? '#2d7a4f' : '#faf9f5';
-    const col    = ch.done ? '#fff' : '#141413';
-    return `<div class="${ch.done ? 'batik-bg' : ''}" style="padding:24px;border-radius:12px;
-      border:${ch.done ? '1.5px solid #2d7a4f' : urgent ? '1.5px solid #c9a84c' : '1px solid #e8e6e0'};
-      background:${bg};color:${col};display:grid;grid-template-columns:1fr auto;gap:24px;align-items:start">
+  const container = document.getElementById('challenges-list');
+  if (!challenges.length) {
+    container.innerHTML = '<div class="card"><strong>No active challenges.</strong><p style="margin-top:8px;color:#6b6b68">Admin can publish a challenge from Admin Challenge.</p></div>';
+    return;
+  }
+  container.innerHTML = challenges.map(ch => {
+    const total = Number(ch.target || 1);
+    const progress = Math.min(Number(ch.progress || 0), total);
+    const pct = Math.min(100, progress / total * 100);
+    const joined = !!ch.joined;
+    const done = !!ch.done;
+    const reward = Number(ch.rewardPoints || 0);
+    return `<div class="card" style="padding:24px;border-radius:12px;display:grid;grid-template-columns:1fr auto;gap:24px;align-items:start">
       <div>
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap">
-          <span style="font-size:16px;font-weight:700">${ch.title}</span>
-          ${urgent && !ch.done ? '<span style="font-size:9px;font-family:\'Inter\',monospace;letter-spacing:0.07em;color:#fff;background:#c9a84c;border-radius:4px;padding:2px 8px">EXPIRING SOON</span>' : ''}
-          ${ch.done ? '<span style="font-size:9px;font-family:\'Inter\',monospace;letter-spacing:0.07em;color:rgba(255,255,255,0.45)">COMPLETED</span>' : ''}
+          <span style="font-size:16px;font-weight:700">${escapeHtml(ch.title || 'Challenge')}</span>
+          ${done ? '<span style="font-size:9px;color:#fff;background:#2d7a4f;border-radius:4px;padding:2px 8px">COMPLETED</span>' : ''}
         </div>
-        <p style="font-size:13px;opacity:0.75;margin-bottom:12px;line-height:1.55">${ch.desc}</p>
-        <div style="font-size:12px;padding:8px 12px;border-radius:8px;margin-bottom:16px;line-height:1.55;
-          background:${ch.done ? 'rgba(255,255,255,0.08)' : '#f5e9c4'};color:${ch.done ? 'rgba(255,255,255,0.7)' : '#6b6b68'}">
-          <strong style="color:${ch.done ? 'rgba(255,255,255,0.9)' : '#141413'}">Requirements:</strong> ${ch.req}
+        <p style="font-size:13px;color:#6b6b68;margin-bottom:12px;line-height:1.55">${escapeHtml(ch.description || '')}</p>
+        <div style="font-size:12px;padding:8px 12px;border-radius:8px;margin-bottom:16px;line-height:1.55;background:#f5e9c4;color:#6b6b68">
+          <strong style="color:#141413">Requirements:</strong> ${escapeHtml(ch.requirement || '')}
         </div>
-        ${ch.joined ? `
-          <div style="height:5px;background:${ch.done ? 'rgba(255,255,255,0.15)' : '#f5e9c4'};border-radius:4px;margin-bottom:6px;overflow:hidden">
-            <div style="height:100%;width:${pct}%;background:${ch.done ? 'rgba(255,255,255,0.6)' : '#c9a84c'};border-radius:4px;transition:width 0.4s"></div>
-          </div>
-          <div style="font-size:11px;font-family:'Inter',monospace;color:${ch.done ? 'rgba(255,255,255,0.45)' : '#6b6b68'}">${ch.progress} / ${ch.total} requirements met</div>` : ''}
+        ${joined ? `<div style="height:5px;background:#f5e9c4;border-radius:4px;margin-bottom:6px;overflow:hidden"><div style="height:100%;width:${pct}%;background:#c9a84c;border-radius:4px"></div></div><div style="font-size:11px;color:#6b6b68">${progress} / ${total} requirements met</div>` : '<div style="font-size:11px;color:#6b6b68">Join this challenge to start tracking progress.</div>'}
       </div>
-      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:10px;min-width:160px">
-        <div style="text-align:right">
-          <div style="font-family:'Inter',monospace;font-size:20px;font-weight:700;color:${ch.done ? 'rgba(255,255,255,0.85)' : '#c9a84c'}">+${ch.pts} pts</div>
-          <div style="font-size:12px;opacity:0.7;margin-bottom:4px">${ch.badge}</div>
-          <div style="font-size:11px;font-family:'Inter',monospace;color:${urgent && !ch.done ? '#c9a84c' : ch.done ? 'rgba(255,255,255,0.4)' : '#6b6b68'};font-weight:${urgent && !ch.done ? 700 : 400}">Expires ${ch.expiry}</div>
-          <div style="font-size:11px;color:${urgent && !ch.done ? '#c9a84c' : ch.done ? 'rgba(255,255,255,0.4)' : '#6b6b68'}">${ch.days} days left</div>
-        </div>
-        ${!ch.joined ? `<button class="btn-primary" style="width:100%" onclick="joinChallenge(${ch.id})">Join Challenge</button>` : ''}
-        ${ch.joined && !ch.done ? `<button class="btn-secondary" style="width:100%" onclick="progressChallenge(${ch.id})">Simulate Visit +1</button>` : ''}
-        ${ch.done ? `<div style="font-size:12px;color:rgba(255,255,255,0.45);font-family:'Inter',monospace">✓ DONE</div>` : ''}
+      <div style="min-width:160px;text-align:right">
+        <div style="font-family:'Inter',monospace;font-size:20px;font-weight:700;color:#c9a84c">+${reward} pts</div>
+        <div style="font-size:12px;color:#6b6b68;margin:4px 0 10px">${escapeHtml(ch.badge || '')}</div>
+        <div style="font-size:11px;color:#6b6b68;margin-bottom:10px">Expires ${escapeHtml(ch.expiry || '—')}</div>
+        ${done ? '<button class="btn-secondary" disabled>Completed</button>' : !joined ? `<button class="btn-primary" onclick="joinChallenge('${escapeJs(ch.id)}')">Join Challenge</button>` : progress >= total ? `<button class="btn-primary" onclick="claimChallenge('${escapeJs(ch.id)}')">Claim Reward</button>` : '<button class="btn-secondary" disabled>In Progress</button>'}
       </div>
     </div>`;
   }).join('');
 }
 
-function joinChallenge(id) {
-  challenges = challenges.map(c => c.id === id ? {...c, joined:true} : c);
-  renderChallenges();
+async function joinChallenge(id) {
+  const response = await fetch(`/api/challenges/${encodeURIComponent(id)}/join?userId=${encodeURIComponent(CH_USER_ID)}`, {method:'POST'});
+  if (!response.ok) { alert('Unable to join challenge.'); return; }
+  await loadChallenges();
 }
 
-function progressChallenge(id) {
-  challenges = challenges.map(c => {
-    if (c.id !== id) return c;
-    const np = Math.min(c.progress + 1, c.total);
-    const done = np >= c.total;
-    if (done) {
-      const ch = challenges.find(x => x.id === id);
-      document.getElementById('done-title').textContent = ch.title;
-      document.getElementById('done-pts').textContent = '+' + ch.pts;
-      document.getElementById('done-badge').textContent = ch.badge.split(' ')[0];
-      document.getElementById('complete-modal').style.display = 'flex';
-    }
-    return {...c, progress:np, done};
-  });
-  renderChallenges();
+async function claimChallenge(id) {
+  const response = await fetch(`/api/challenges/${encodeURIComponent(id)}/claim?userId=${encodeURIComponent(CH_USER_ID)}`, {method:'POST'});
+  const result = await response.json();
+  if (!response.ok || !result.success) { alert(result.message || 'Unable to claim challenge.'); return; }
+  document.getElementById('done-title').textContent = challenges.find(c => c.id === id)?.title || 'Challenge';
+  document.getElementById('done-pts').textContent = '+' + Number(result.pointsEarned || 0);
+  document.getElementById('done-badge').textContent = '🏅';
+  document.getElementById('complete-modal').style.display = 'flex';
+  await loadChallenges();
 }
 
-// ── Init ──────────────────────────────────────────────────────
-renderChallenges();
+loadChallenges();
 </script>
   <div th:replace="~{fragments/footer :: global}"></div>
 </body>
