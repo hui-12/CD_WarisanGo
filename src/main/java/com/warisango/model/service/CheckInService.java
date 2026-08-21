@@ -19,6 +19,7 @@ public class CheckInService {
     private static final String BUSINESS_COLLECTION = "HeritageBusinesses";
     private static final String USER_COLLECTION = "Users";
     private static final String CHECKIN_COLLECTION = "CheckIns";
+    private static final String HISTORY_COLLECTION = "PointHistory";
     private static final double MAX_DISTANCE_METERS = 50.0;
 
     public CheckInResponse processCheckIn(CheckInRequest request) {
@@ -110,6 +111,16 @@ public class CheckInService {
                 checkInData.put("businessLocation", location);
                 checkInData.put("timestamp", FieldValue.serverTimestamp());
                 transaction.set(checkInRef, checkInData);
+
+                DocumentReference historyRef = db.collection(HISTORY_COLLECTION).document();
+                Map<String, Object> historyData = new HashMap<>();
+                historyData.put("userId", request.getUserId());
+                historyData.put("type", "CHECK_IN");
+                historyData.put("description", "Check-in: " + business.getString("name"));
+                historyData.put("points", checkInPoints);
+                historyData.put("referenceId", request.getBusinessId());
+                historyData.put("timestamp", FieldValue.serverTimestamp());
+                transaction.set(historyRef, historyData);
 
                 return updatedPoints;
             }).get();
