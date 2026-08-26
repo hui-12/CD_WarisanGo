@@ -1,30 +1,187 @@
-/* Shared external stylesheet for Check In, Badges, Rewards, Challenges and Admin Challenges. */
+.rewards-page {
+    min-height: calc(100vh - 56px);
+}
 
-*{box-sizing:border-box;margin:0;padding:0;scrollbar-width:none;}
-*::-webkit-scrollbar{display:none;}
-body{background:#FAF6EE;color:#2A2118;font-family:'Inter',Arial,sans-serif;font-size:14px;line-height:1.6;-webkit-font-smoothing:antialiased;}
-button{font-family:'Inter',Arial,sans-serif;cursor:pointer;}
-input,textarea,select{font-family:'Inter',Arial,sans-serif;}
-.batik-divider{height:2px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='4'%3E%3Cpath d='M12 0L24 2L12 4L0 2Z' fill='none' stroke='%23C4522A' stroke-width='0.6' opacity='0.35'/%3E%3Ccircle cx='12' cy='2' r='0.8' fill='%23C4522A' opacity='0.3'/%3E%3Ccircle cx='0' cy='2' r='0.5' fill='%23C4522A' opacity='0.2'/%3E%3Ccircle cx='24' cy='2' r='0.5' fill='%23C4522A' opacity='0.2'/%3E%3C/svg%3E");background-repeat:repeat-x;background-position:center;border:none;}
-.batik-bg{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Cpath d='M12 2L22 12L12 22L2 12Z' fill='none' stroke='%23C4522A' stroke-width='0.6' opacity='0.15'/%3E%3Ccircle cx='12' cy='12' r='1' fill='%23C4522A' opacity='0.12'/%3E%3C/svg%3E");background-repeat:repeat;}
-#site-header{background:#2A2118;position:sticky;top:0;z-index:50;}
-.nav-inner{max-width:1100px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:60px;}
-.wordmark{display:flex;align-items:center;gap:10px;}
-.wordmark-text{font-family:'DM Serif Display',Georgia,serif;font-size:19px;color:#FAF6EE;letter-spacing:-0.01em;}
-.wordmark-badge{font-size:9px;font-family:'JetBrains Mono',monospace;color:#8A7D6E;border:1px solid #3A3028;border-radius:4px;padding:2px 6px;letter-spacing:0.08em;}
-.nav-links{display:flex;gap:4px;}
-.nav-btn{font-size:13px;padding:6px 14px;border-radius:8px;border:none;background:transparent;color:#D5CABF;transition:background 0.15s,color 0.15s;text-decoration:none;display:inline-block;}
-.nav-btn.active{background:#C4522A;color:#fff;font-weight:600;}
-.nav-btn.admin-btn{color:#D98A2E;}
-main{max-width:1100px;margin:0 auto;padding:48px 24px;}
-h1{font-family:'DM Serif Display',Georgia,serif;font-size:2.5rem;line-height:1.1;letter-spacing:-0.02em;margin-bottom:12px;}
-.muted{font-size:14px;color:#8A7D6E;}
-.mono{font-family:'JetBrains Mono',monospace;}
-.caption{font-size:11px;font-family:'JetBrains Mono',monospace;letter-spacing:0.06em;color:#8A7D6E;margin-bottom:4px;}
-.card{padding:20px;border:1px solid #D5CABF;border-radius:12px;background:#F3EDE0;}
-.btn-primary{padding:9px 20px;border-radius:10px;font-size:13px;font-weight:600;border:none;background:#C4522A;color:#fff;}
-.btn-secondary{padding:9px 20px;border-radius:10px;font-size:13px;font-weight:600;border:1px solid #D5CABF;background:transparent;color:#2A2118;}
-.btn-primary:hover{background:#A8421F;}
-.success-banner{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;background:#1E5C3A;color:#fff;border-radius:12px;margin-bottom:28px;font-size:13px;}
-.modal-overlay{position:fixed;inset:0;background:rgba(30,20,10,0.65);display:flex;align-items:center;justify-content:center;z-index:100;}
-.modal-box{background:#FAF6EE;padding:32px;border-radius:16px;max-width:400px;width:90%;}
+main {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 32px 24px;
+}
+
+h1 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 30px;
+    font-weight: 700;
+    line-height: 1.1;
+    color: #141413;
+    margin-bottom: 8px;
+}
+
+h2, h3, h4 {
+    font-family: 'Fraunces', Georgia, serif;
+    color: #141413;
+}
+
+.muted {
+    font-size: 13px;
+    color: #6b6b68;
+    line-height: 1.6;
+}
+
+.mono {
+    font-family: 'Inter', Arial, sans-serif;
+}
+
+.caption {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: #6b6b68;
+    margin-bottom: 4px;
+}
+
+.batik-divider {
+    height: 2px;
+    background: repeating-linear-gradient(90deg, transparent 0 8px, rgba(201,168,76,.45) 8px 10px, transparent 10px 18px);
+    border: 0;
+}
+
+.batik-bg {
+    background-image: linear-gradient(135deg, rgba(201,168,76,.08) 25%, transparent 25%, transparent 50%, rgba(201,168,76,.08) 50%, rgba(201,168,76,.08) 75%, transparent 75%);
+    background-size: 24px 24px;
+}
+
+/* Cards */
+.card {
+    padding: 20px;
+    border: 1.5px solid #141413;
+    border-radius: 12px;
+    background: #ffffff;
+}
+
+.btn-primary, .btn-secondary {
+    padding: 9px 20px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: 'Inter', Arial, sans-serif;
+    cursor: pointer;
+    transition: all 100ms ease;
+}
+
+.btn-primary {
+    border: 1.5px solid #141413;
+    background: #141413;
+    color: #faf9f5;
+}
+
+.btn-primary:hover {
+    background: #c9a84c;
+    color: #141413;
+}
+
+.btn-secondary {
+    border: 1.5px solid #141413;
+    background: transparent;
+    color: #141413;
+}
+
+.btn-secondary:hover {
+    background: #e8e6e0;
+}
+
+.success-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 20px;
+    background: #2d7a4f;
+    color: #ffffff;
+    border-radius: 12px;
+    margin-bottom: 28px;
+    font-size: 13px;
+}
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(20,20,19,.62);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+}
+
+.modal-box {
+    background: #faf9f5;
+    padding: 32px;
+    border: 1.5px solid #141413;
+    border-radius: 12px;
+    max-width: 420px;
+    width: 90%;
+}
+
+/* Form controls */
+input, textarea, select {
+    font-family: 'Inter', Arial, sans-serif;
+    color: #141413;
+}
+
+/* Reward page layouts */
+.reward-tier-card {
+    background: #141413 !important;
+    border-radius: 12px;
+}
+
+.reward-tier-accent {
+    color: #c9a84c !important;
+}
+
+.reward-white-card {
+    background: #ffffff !important;
+    border: 1.5px solid #141413 !important;
+    border-radius: 12px !important;
+}
+
+/* Challenge / badge item surfaces */
+.reward-item {
+    border: 1.5px solid #141413;
+    border-radius: 12px;
+    background: #ffffff;
+}
+
+/* Admin table */
+.admin-table {
+    border: 1.5px solid #141413;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+/* Mobile */
+@media (max-width: 900px) {
+    main {
+        padding: 24px 18px;
+    }
+}
+
+@media (max-width: 760px) {
+    h1 {
+        font-size: 26px;
+    }
+
+    main {
+        padding: 20px 16px;
+    }
+
+    .nav-container {
+        padding: 0 16px;
+    }
+
+    .nav-links {
+        overflow-x: auto;
+    }
+
+    .nav-actions {
+        display: none;
+    }
+}

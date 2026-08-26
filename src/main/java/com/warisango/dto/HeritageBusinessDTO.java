@@ -15,11 +15,13 @@ public class HeritageBusinessDTO {
     private double latitude;
     private double longitude;
     private Double averageRating;
+    private int checkInPoints;
 
     public HeritageBusinessDTO() {}
 
     public HeritageBusinessDTO(String businessId, String name, String address, String state, String city,
-                               String description, double latitude, double longitude, Double averageRating) {
+                               String description, double latitude, double longitude,
+                               Double averageRating, int checkInPoints) {
         this.businessId = businessId;
         this.name = name;
         this.address = address;
@@ -29,6 +31,7 @@ public class HeritageBusinessDTO {
         this.latitude = latitude;
         this.longitude = longitude;
         this.averageRating = averageRating;
+        this.checkInPoints = checkInPoints;
     }
 
     public String getBusinessId() { return businessId; }
@@ -65,4 +68,6 @@ public class HeritageBusinessDTO {
     public void setPhotos(List<String> photos) {
         this.photos = photos == null ? new ArrayList<>() : new ArrayList<>(photos);
     }
+    public int getCheckInPoints() { return checkInPoints; }
+    public void setCheckInPoints(int checkInPoints) { this.checkInPoints = checkInPoints; }
 }

@@ -1,35 +1,14 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>WarisanGo — Badges</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
-<link rel="stylesheet" href="/css/rewards.css" th:href="@{/css/rewards.css}"/>
+  <th:block th:replace="~{fragments/fragments :: head('WarisanGo — Badges')}"></th:block>
+  <link rel="stylesheet" href="/css/rewards.css" th:href="@{/css/rewards.css}">
 </head>
 <body>
-<!-- NAV -->
-<header id="site-header">
-  <div class="nav-inner">
-    <div class="wordmark">
-      <span style="font-size:20px">🍛</span>
-      <span class="wordmark-text">WarisanGo</span>
-      <span class="wordmark-badge">REWARDS</span>
-    </div>
-    <nav class="nav-links" id="nav-menu">
-      <button type="button" class="nav-btn" th:classappend="${activePage == 'checkin'} ? ' active'" data-navigate="checkin">Check In</button>
-      <button type="button" class="nav-btn" th:classappend="${activePage == 'badges'} ? ' active'" data-navigate="badges">Badges</button>
-      <button type="button" class="nav-btn" th:classappend="${activePage == 'rewards'} ? ' active'" data-navigate="rewards">Rewards</button>
-      <button type="button" class="nav-btn" th:classappend="${activePage == 'challenges'} ? ' active'" data-navigate="challenges">Challenges</button>
-      <button type="button" class="nav-btn admin-btn" th:classappend="${activePage == 'admin'} ? ' active'" data-navigate="admin">Admin</button>
-    </nav>
-  </div>
-  <div class="batik-divider" style="opacity:0.5"></div>
-</header>
-
+  <div th:replace="~{fragments/fragments :: navbar('badges')}"></div>
 <div id="page-badges" class="page active">
 <main>
-  <div id="badge-notif" style="display:flex;align-items:center;justify-content:space-between;padding:12px 20px;background:#1E5C3A;color:#fff;border-radius:12px;margin-bottom:32px;font-size:13px">
+  <div id="badge-notif" style="display:flex;align-items:center;justify-content:space-between;padding:12px 20px;background:#2d7a4f;color:#fff;border-radius:12px;margin-bottom:32px;font-size:13px">
     <span>🔓 Silver Palate badge unlocked! You've reached 500 points.</span>
     <button onclick="this.parentElement.style.display='none'" style="background:none;border:none;color:rgba(255,255,255,0.6);font-size:18px;cursor:pointer">×</button>
   </div>
@@ -42,10 +21,10 @@
   <div style="display:flex;gap:12px;margin-bottom:32px" id="badge-stats"></div>
 
   <!-- Filter tabs -->
-  <div style="display:flex;border-bottom:1px solid #D5CABF;margin-bottom:24px">
-    <button class="badge-tab" data-filter="all" onclick="filterBadges('all',this)" style="padding:10px 20px;border:none;border-bottom:2px solid #C4522A;background:transparent;color:#C4522A;font-weight:700;font-size:13px;cursor:pointer;margin-bottom:-1px">All Badges</button>
-    <button class="badge-tab" data-filter="earned" onclick="filterBadges('earned',this)" style="padding:10px 20px;border:none;border-bottom:2px solid transparent;background:transparent;color:#8A7D6E;font-size:13px;cursor:pointer;margin-bottom:-1px">Earned</button>
-    <button class="badge-tab" data-filter="locked" onclick="filterBadges('locked',this)" style="padding:10px 20px;border:none;border-bottom:2px solid transparent;background:transparent;color:#8A7D6E;font-size:13px;cursor:pointer;margin-bottom:-1px">Locked</button>
+  <div style="display:flex;border-bottom:1px solid #e8e6e0;margin-bottom:24px">
+    <button class="badge-tab" data-filter="all" onclick="filterBadges('all',this)" style="padding:10px 20px;border:none;border-bottom:2px solid #c9a84c;background:transparent;color:#c9a84c;font-weight:700;font-size:13px;cursor:pointer;margin-bottom:-1px">All Badges</button>
+    <button class="badge-tab" data-filter="earned" onclick="filterBadges('earned',this)" style="padding:10px 20px;border:none;border-bottom:2px solid transparent;background:transparent;color:#6b6b68;font-size:13px;cursor:pointer;margin-bottom:-1px">Earned</button>
+    <button class="badge-tab" data-filter="locked" onclick="filterBadges('locked',this)" style="padding:10px 20px;border:none;border-bottom:2px solid transparent;background:transparent;color:#6b6b68;font-size:13px;cursor:pointer;margin-bottom:-1px">Locked</button>
   </div>
 
   <div id="badge-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px"></div>
@@ -72,11 +51,11 @@ function filterBadges(f, btn) {
   badgeFilter = f;
   document.querySelectorAll('.badge-tab').forEach(b => {
     b.style.borderBottom = '2px solid transparent';
-    b.style.color = '#8A7D6E';
+    b.style.color = '#6b6b68';
     b.style.fontWeight = '400';
   });
-  btn.style.borderBottom = '2px solid #C4522A';
-  btn.style.color = '#C4522A';
+  btn.style.borderBottom = '2px solid #c9a84c';
+  btn.style.color = '#c9a84c';
   btn.style.fontWeight = '700';
   renderBadges();
 }
@@ -90,7 +69,7 @@ function renderBadges() {
     { label:'TOTAL',  value: BADGES.length },
     { label:'EARNED', value: earned.length },
     { label:'LOCKED', value: locked.length },
-  ].map(s => `<div style="flex:1;padding:16px 20px;border:1px solid #D5CABF;border-radius:12px;background:#F3EDE0">
+  ].map(s => `<div style="flex:1;padding:16px 20px;border:1px solid #e8e6e0;border-radius:12px;background:#ffffff">
     <div class="caption">${s.label}</div>
     <div class="mono" style="font-size:28px;font-weight:700">${s.value}</div>
   </div>`).join('');
@@ -105,20 +84,20 @@ function renderBadges() {
   document.getElementById('badge-grid').innerHTML = shown.map(b => {
     const pct = Math.min((b.progress / b.threshold) * 100, 100);
     return `<div class="${b.earned ? 'batik-bg' : ''}" style="padding:20px;border-radius:12px;
-      border:${b.earned ? '1.5px solid #1E5C3A' : '1px solid #D5CABF'};
-      background:${b.earned ? '#1E5C3A' : '#F3EDE0'};
-      color:${b.earned ? '#fff' : '#2A2118'};position:relative;overflow:hidden">
-      ${b.earned ? `<div style="position:absolute;top:12px;right:12px;font-size:9px;font-family:'JetBrains Mono',monospace;letter-spacing:0.08em;color:rgba(255,255,255,0.45)">EARNED</div>` : ''}
+      border:${b.earned ? '1.5px solid #2d7a4f' : '1px solid #e8e6e0'};
+      background:${b.earned ? '#2d7a4f' : '#ffffff'};
+      color:${b.earned ? '#fff' : '#141413'};position:relative;overflow:hidden">
+      ${b.earned ? `<div style="position:absolute;top:12px;right:12px;font-size:9px;font-family:'Inter',monospace;letter-spacing:0.08em;color:rgba(255,255,255,0.45)">EARNED</div>` : ''}
       <div style="font-size:28px;margin-bottom:12px">${b.icon}</div>
       <div style="font-size:15px;font-weight:700;margin-bottom:4px">${b.name}</div>
       <div style="font-size:12px;opacity:0.7;line-height:1.55;margin-bottom:12px">${b.desc}</div>
-      <div style="font-size:11px;font-family:'JetBrains Mono',monospace;color:${b.earned ? 'rgba(255,255,255,0.45)' : '#8A7D6E'};margin-bottom:${b.earned ? 4 : 10}px">${b.milestone}</div>
+      <div style="font-size:11px;font-family:'Inter',monospace;color:${b.earned ? 'rgba(255,255,255,0.45)' : '#6b6b68'};margin-bottom:${b.earned ? 4 : 10}px">${b.milestone}</div>
       ${b.earned
-        ? `<div style="font-size:11px;font-family:'JetBrains Mono',monospace;color:rgba(255,255,255,0.4)">${b.date}</div>`
-        : `<div style="height:4px;background:#EDE5D4;border-radius:4px;margin-bottom:6px;overflow:hidden">
-             <div style="height:100%;width:${pct}%;background:#D98A2E;border-radius:4px"></div>
+        ? `<div style="font-size:11px;font-family:'Inter',monospace;color:rgba(255,255,255,0.4)">${b.date}</div>`
+        : `<div style="height:4px;background:#f5e9c4;border-radius:4px;margin-bottom:6px;overflow:hidden">
+             <div style="height:100%;width:${pct}%;background:#c9a84c;border-radius:4px"></div>
            </div>
-           <div style="font-size:11px;font-family:'JetBrains Mono',monospace;color:#8A7D6E">${b.progress} / ${b.threshold} — ${Math.round(pct)}%</div>`
+           <div style="font-size:11px;font-family:'Inter',monospace;color:#6b6b68">${b.progress} / ${b.threshold} — ${Math.round(pct)}%</div>`
       }
     </div>`;
   }).join('');
@@ -127,23 +106,6 @@ function renderBadges() {
 // ── Init ──────────────────────────────────────────────────────
 renderBadges();
 </script>
-<script>
-// Nav routing: maps data-navigate keys to Spring routes
-(function () {
-  var ROUTES = {
-    checkin: '/CheckInPage',
-    badges: '/BadgePage',
-    rewards: '/RewardPage',
-    challenges: '/ChallengePage',
-    admin: '/AdminChallengePage'
-  };
-  document.getElementById('nav-menu').addEventListener('click', function (e) {
-    var btn = e.target.closest('[data-navigate]');
-    if (!btn) return;
-    var key = btn.getAttribute('data-navigate');
-    if (ROUTES[key]) window.location.href = ROUTES[key];
-  });
-})();
-</script>
+  <div th:replace="~{fragments/footer :: global}"></div>
 </body>
 </html>

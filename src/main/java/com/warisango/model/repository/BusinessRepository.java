@@ -1,7 +1,12 @@
 package com.warisango.model.repository;
 
 import com.google.api.core.ApiFuture;
-import com.google.cloud.firestore.*;
+import com.google.cloud.firestore.DocumentSnapshot;
+import com.google.cloud.firestore.Firestore;
+import com.google.cloud.firestore.GeoPoint;
+import com.google.cloud.firestore.ListenerRegistration;
+import com.google.cloud.firestore.QueryDocumentSnapshot;
+import com.google.cloud.firestore.QuerySnapshot;
 import com.warisango.dto.HeritageBusinessDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -133,7 +138,8 @@ public class BusinessRepository {
                 doc.getString("description"),
                 latitude,
                 longitude,
-                doc.getDouble("averageRating")
+                doc.getDouble("averageRating"),
+                getCheckInPoints(doc)
         );
         dto.setCategory(doc.getString("category"));
 
@@ -153,16 +159,15 @@ public class BusinessRepository {
         double lng = geoPoint != null ? geoPoint.getLongitude() : 0.0;
         String businessId = document.getString("businessId");
 
-        return new HeritageBusinessDTO(
-                businessId == null || businessId.isBlank() ? document.getId() : businessId,
-                document.getString("name"),
-                document.getString("address"),
-                document.getString("state"),
-                document.getString("city"),
-                document.getString("description"),
-                lat,
-                lng,
-                document.getDouble("averageRating")
-        );
+        HeritageBusinessDTO dto = toDto(document, lat, lng);
+        if (businessId != null && !businessId.isBlank()) {
+            dto.setBusinessId(businessId);
+        }
+        return dto;
+    }
+
+    private int getCheckInPoints(DocumentSnapshot doc) {
+        Long points = doc.getLong("checkInPoints");
+        return points != null && points > 0 ? points.intValue() : 50;
     }
 }
