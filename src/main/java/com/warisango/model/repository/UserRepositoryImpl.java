@@ -1,6 +1,7 @@
 package com.warisango.model.repository;
 
 import com.google.api.core.ApiFuture;
+import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
@@ -9,7 +10,10 @@ import com.warisango.model.User;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Reads display names from the root-level Tourists and Users collections.
@@ -57,6 +61,37 @@ public class UserRepositoryImpl implements UserRepository {
         } catch (Exception e) {
             throw new RuntimeException("Failed to save user: " + user.getUid(), e);
         }
+    }
+
+    @Override
+    public DocumentSnapshot getUser(String userId)
+            throws ExecutionException, InterruptedException {
+
+        return getUserRef(userId).get().get();
+    }
+
+    @Override
+    public DocumentReference getUserRef(String userId) {
+        return firestore.collection(USERS_COLLECTION).document(userId);
+    }
+
+    @Override
+    public int getOrCreateCurrentPoints(String userId)
+            throws ExecutionException, InterruptedException {
+
+        DocumentReference userReference = getUserRef(userId);
+        DocumentSnapshot userDocument = userReference.get().get();
+
+        if (!userDocument.exists()) {
+            Map<String, Object> userData = new HashMap<>();
+            userData.put("userId", userId);
+            userData.put("currentPoints", 0L);
+            userReference.set(userData).get();
+            return 0;
+        }
+
+        Long currentPoints = userDocument.getLong("currentPoints");
+        return currentPoints == null ? 0 : currentPoints.intValue();
     }
 
     @Override
