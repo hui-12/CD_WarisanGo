@@ -8,11 +8,19 @@
 .review-page,
 .review-detail-page,
 .review-form-page {
+    width: 100%;
     max-width: 1280px;
     margin: 0 auto;
-    padding: 32px 24px 48px;
+    padding: clamp(22px, 3vw, 32px) clamp(14px, 3vw, 24px) clamp(36px, 4vw, 48px);
     color: #141413;
     font-family: 'Inter', Arial, sans-serif;
+    box-sizing: border-box;
+}
+
+.review-page *,
+.review-detail-page *,
+.review-form-page * {
+    box-sizing: border-box;
 }
 
 /* ---------- Shared page headings ---------- */
@@ -104,7 +112,7 @@
 
 .review-business {
     display: grid;
-    grid-template-columns: minmax(300px, 1.15fr) minmax(260px, .85fr);
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr);
     overflow: hidden;
     margin-bottom: 24px;
     border: 1.5px solid #141413;
@@ -157,7 +165,7 @@
 
 .review-summary-grid {
     display: grid;
-    grid-template-columns: .8fr 1.2fr;
+    grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr);
     gap: 22px;
     margin-bottom: 30px;
 }
@@ -497,6 +505,7 @@
 /* ---------- Detail ---------- */
 
 .review-detail-shell {
+    width: 100%;
     overflow: hidden;
     border: 1.5px solid #141413;
     border-radius: 10px;
@@ -505,7 +514,7 @@
 
 .review-detail-business {
     display: grid;
-    grid-template-columns: 230px 1fr;
+    grid-template-columns: minmax(0, 230px) minmax(0, 1fr);
     background: #141413;
 }
 
@@ -518,6 +527,7 @@
 }
 
 .review-detail-business-copy {
+    min-width: 0;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -529,6 +539,7 @@
 }
 
 .review-detail-business-name {
+    overflow-wrap: anywhere;
     margin: 0;
     color: #faf9f5;
     font-family: 'Fraunces', Georgia, serif;
@@ -543,6 +554,7 @@
 }
 
 .review-detail-body {
+    min-width: 0;
     padding: 28px;
 }
 
@@ -579,6 +591,7 @@
 }
 
 .review-detail-text {
+    overflow-wrap: anywhere;
     margin: 20px 0 0;
     color: #333331;
     font-family: 'Fraunces', Georgia, serif;
@@ -658,6 +671,7 @@ body.review-photo-viewer-open {
 
 .review-detail-actions {
     display: flex;
+    flex-wrap: wrap;
     gap: 17px;
     align-items: center;
     margin-top: 20px;
@@ -691,6 +705,8 @@ body.review-photo-viewer-open {
 }
 
 .review-comment-full {
+    min-width: 0;
+    overflow-wrap: anywhere;
     padding: 10px;
     border: 1px solid #e8e6e0;
     border-radius: 8px;
@@ -756,6 +772,8 @@ body.review-photo-viewer-open {
 
 .review-comment-form,
 .review-comment-edit-form {
+    width: 100%;
+    min-width: 0;
     display: grid;
     gap: 6px;
     margin-top: 12px;
@@ -772,7 +790,10 @@ body.review-photo-viewer-open {
 }
 
 .review-comment-textarea {
+    display: block;
     width: 100%;
+    max-width: 100%;
+    min-width: 0;
     min-height: 64px;
     padding: 8px 9px;
     border: 1px solid #141413;
@@ -843,6 +864,8 @@ body.review-photo-viewer-open {
 
 .review-bottom-actions {
     display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
     justify-content: space-between;
     gap: 8px;
     flex-wrap: wrap;
@@ -1106,6 +1129,10 @@ body.review-photo-viewer-open {
         height: 220px;
     }
 
+    .review-detail-body {
+        padding: clamp(20px, 4vw, 28px);
+    }
+
     .review-summary-grid {
         grid-template-columns: 1fr;
     }
@@ -1140,6 +1167,29 @@ body.review-photo-viewer-open {
 
     .review-detail-text {
         font-size: 18px;
+    }
+
+    .review-detail-actions {
+        align-items: flex-start;
+        gap: 10px 14px;
+    }
+
+    .review-detail-photos {
+        grid-template-columns: repeat(auto-fill, 140px);
+    }
+
+    .review-detail-photos img {
+        width: 140px;
+        height: 140px;
+    }
+
+    .review-bottom-actions {
+        justify-content: stretch;
+    }
+
+    .review-bottom-actions .review-btn-primary,
+    .review-bottom-actions .review-btn-outline {
+        flex: 1 1 160px;
     }
 
     .review-form-actions {
