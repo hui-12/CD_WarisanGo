@@ -3,24 +3,29 @@ package com.warisango.service;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 class VideoAudioServiceTests {
 
     @Test
-    void createsTikTokDownloadCommandWithoutYouTubeArguments() {
+    void delegatesTikTokDownloadToBrowserService() {
         String videoUrl = "https://www.tiktok.com/@warisango/video/123456";
+        Path mediaFile = Path.of("video.mp4");
+        TikTokMediaDownloadService tikTokService = mock(TikTokMediaDownloadService.class);
+        when(tikTokService.download(videoUrl)).thenReturn(mediaFile);
+        VideoAudioService service = new VideoAudioService(tikTokService);
 
-        List<String> command = VideoAudioService.createDownloadCommand(videoUrl, "audio.%(ext)s");
+        Path result = service.downloadAudio(videoUrl);
 
-        assertTrue(command.contains("bestaudio/best"));
-        assertTrue(command.contains("--cookies-from-browser"));
-        assertTrue(command.stream().anyMatch(argument -> argument.startsWith("chromium:")));
-        assertFalse(command.contains("youtube:player_client=android"));
-        assertEquals(videoUrl, command.getLast());
+        assertEquals(mediaFile, result);
+        verify(tikTokService).download(videoUrl);
     }
 
     @Test

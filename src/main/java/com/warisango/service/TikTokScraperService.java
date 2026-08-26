@@ -27,6 +27,7 @@ public class TikTokScraperService {
 
     private static final Logger logger = LoggerFactory.getLogger(TikTokScraperService.class);
     static final Path PROFILE_PATH = Path.of(".tiktok-profile").toAbsolutePath().normalize();
+    static final Object PROFILE_LOCK = new Object();
     private static final long VERIFICATION_TIMEOUT_MILLISECONDS = 120_000;
     private static final String VIDEO_LINK_SELECTOR = "a[href*='/video/']";
     private static final String CHALLENGE_SELECTOR = String.join(", ",
@@ -41,7 +42,13 @@ public class TikTokScraperService {
      * Runs one visible, persistent TikTok search at a time because Chromium does not permit concurrent use of the
      * same user-data directory.
      */
-    public synchronized List<TikTokVideoDTO> search(TikTokSearchRequest request) {
+    public List<TikTokVideoDTO> search(TikTokSearchRequest request) {
+        synchronized (PROFILE_LOCK) {
+            return searchWithBrowser(request);
+        }
+    }
+
+    private List<TikTokVideoDTO> searchWithBrowser(TikTokSearchRequest request) {
         String encodedKeyword = URLEncoder.encode(request.keyword().trim(), StandardCharsets.UTF_8);
         String searchUrl = "https://www.tiktok.com/search/video?q=" + encodedKeyword;
 

@@ -24,6 +24,11 @@ public class VideoAudioService {
 
     private static final Logger logger =
             LoggerFactory.getLogger(VideoAudioService.class);
+    private final TikTokMediaDownloadService tikTokMediaDownloadService;
+
+    public VideoAudioService(TikTokMediaDownloadService tikTokMediaDownloadService) {
+        this.tikTokMediaDownloadService = tikTokMediaDownloadService;
+    }
 
     /**
      * Downloads the audio track from a supported video URL into a temporary file.
@@ -34,6 +39,10 @@ public class VideoAudioService {
     public Path downloadAudio(String videoUrl) {
 
         validateVideoUrl(videoUrl);
+
+        if (isTikTokUrl(videoUrl)) {
+            return tikTokMediaDownloadService.download(videoUrl);
+        }
 
         Path outputDirectory = null;
 
@@ -237,25 +246,24 @@ public class VideoAudioService {
     }
 
     static List<String> createDownloadCommand(String videoUrl, String outputTemplate) {
-        boolean isTikTok = videoUrl.contains("tiktok.com/");
         List<String> command = new ArrayList<>(List.of("yt-dlp", "--no-playlist"));
-
-        if (isTikTok) {
-            command.addAll(List.of(
-                    "--cookies-from-browser",
-                    "chromium:" + TikTokScraperService.PROFILE_PATH,
-                    "-f",
-                    "bestaudio/best"));
-        } else {
-            command.addAll(List.of(
-                    "--extractor-args", "youtube:player_client=android",
-                    "-f", "18"));
-        }
+        command.addAll(List.of(
+                "--extractor-args", "youtube:player_client=android",
+                "-f", "18"));
 
         command.addAll(List.of(
                 "--extract-audio", "--audio-format", "m4a", "--audio-quality", "0",
                 "-o", outputTemplate, videoUrl));
         return command;
+    }
+
+    private boolean isTikTokUrl(String videoUrl) {
+        try {
+            String host = new URI(videoUrl).getHost();
+            return host != null && host.toLowerCase(Locale.ROOT).contains("tiktok.com");
+        } catch (URISyntaxException exception) {
+            return false;
+        }
     }
 
     private String extractionFailureMessage(String processOutput) {
