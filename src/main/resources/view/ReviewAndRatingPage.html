@@ -9,6 +9,11 @@
 
 <main class="review-page">
 
+    <a class="review-back-link"
+       th:href="@{/business/{id}(id=${business.businessId})}">
+        &larr; Back to Business
+    </a>
+
     <section class="review-business">
 
         <img class="review-business-image"
@@ -36,9 +41,9 @@
                     Write Review
                 </a>
 
-                <a class="review-btn-outline"
-                   th:href="@{/directory}">
-                    Back to Directory
+                <a class="review-btn-outline review-business-back-link"
+                   th:href="@{/business/{id}(id=${business.businessId})}">
+                    ← Back to Business
                 </a>
             </div>
 
