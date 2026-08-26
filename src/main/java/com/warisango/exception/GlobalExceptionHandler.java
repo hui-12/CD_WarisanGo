@@ -47,6 +47,15 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponse("Unable to save the discovery record."));
     }
 
+    @ExceptionHandler(RoleAccessDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleRoleAccessDenied(
+            RoleAccessDeniedException exception) {
+
+        logger.warn("Login role rejected: {}", exception.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(new ErrorResponse(exception.getMessage()));
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleUnexpected(Exception exception) {
         logger.error("Unexpected application error.", exception);

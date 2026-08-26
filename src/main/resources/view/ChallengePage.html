@@ -28,13 +28,12 @@
 </main>
 </div>
 <script>
-const CH_USER_ID = localStorage.getItem('warisangoUserId') || 'demo-user';
 let challenges = [];
 
 async function loadChallenges() {
   const container = document.getElementById('challenges-list');
   try {
-    const response = await fetch(`/api/challenges?userId=${encodeURIComponent(CH_USER_ID)}`);
+    const response = await fetch('/api/challenges');
     if (!response.ok) throw new Error('Unable to load challenges');
     challenges = await response.json();
     renderChallenges();
@@ -80,13 +79,13 @@ function renderChallenges() {
 }
 
 async function joinChallenge(id) {
-  const response = await fetch(`/api/challenges/${encodeURIComponent(id)}/join?userId=${encodeURIComponent(CH_USER_ID)}`, {method:'POST'});
+  const response = await fetch(`/api/challenges/${encodeURIComponent(id)}/join`, {method:'POST'});
   if (!response.ok) { alert('Unable to join challenge.'); return; }
   await loadChallenges();
 }
 
 async function claimChallenge(id) {
-  const response = await fetch(`/api/challenges/${encodeURIComponent(id)}/claim?userId=${encodeURIComponent(CH_USER_ID)}`, {method:'POST'});
+  const response = await fetch(`/api/challenges/${encodeURIComponent(id)}/claim`, {method:'POST'});
   const result = await response.json();
   if (!response.ok || !result.success) { alert(result.message || 'Unable to claim challenge.'); return; }
   document.getElementById('done-title').textContent = challenges.find(c => c.id === id)?.title || 'Challenge';

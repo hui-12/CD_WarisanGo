@@ -47,6 +47,7 @@ D:\CD_WarisanGo\src\main\java\com\warisango\exception\AIProcessingException.java
 D:\CD_WarisanGo\src\main\java\com\warisango\exception\FirebasePersistenceException.java
 D:\CD_WarisanGo\src\main\java\com\warisango\exception\GlobalExceptionHandler.java
 D:\CD_WarisanGo\src\main\java\com\warisango\exception\ProhibitedContentException.java
+D:\CD_WarisanGo\src\main\java\com\warisango\exception\RoleAccessDeniedException.java
 D:\CD_WarisanGo\src\main\java\com\warisango\model\AIRecord.java
 D:\CD_WarisanGo\src\main\java\com\warisango\model\Business.java
 D:\CD_WarisanGo\src\main\java\com\warisango\model\ExtractedBusiness.java

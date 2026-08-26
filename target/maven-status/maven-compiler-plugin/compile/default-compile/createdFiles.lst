@@ -19,6 +19,7 @@ com\warisango\model\service\AIExtractionService.class
 com\warisango\WarisangoApplication.class
 com\warisango\dto\CommentLikeDTO.class
 com\warisango\model\service\PointsService.class
+com\warisango\exception\RoleAccessDeniedException.class
 com\warisango\model\service\ReviewPhotoStorageService$StoredPhoto.class
 com\warisango\config\FirebaseConfig.class
 com\warisango\model\repository\ReviewRepository.class

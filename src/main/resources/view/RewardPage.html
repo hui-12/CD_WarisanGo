@@ -64,8 +64,8 @@
   </div>
 </main>
 </div>
-<script>
-const RW_USER_ID = localStorage.getItem('warisangoUserId') || 'demo-user';
+<script th:inline="javascript">
+const RW_USER_ID = /*[[${#authentication.name}]]*/ '';
 const RW_TIERS = [
   { name:'Bronze', min:0, max:499, color:'#c9a84c' },
   { name:'Silver', min:500, max:999, color:'#8A9BA8' },
@@ -97,7 +97,7 @@ function renderCurrentPoints(points) {
 }
 
 async function loadCurrentPoints() {
-  const response = await fetch(`/api/user/points?userId=${encodeURIComponent(RW_USER_ID)}`);
+  const response = await fetch('/api/user/points');
   if (!response.ok) throw new Error('Unable to load points');
   const data = await response.json();
   renderCurrentPoints(Number(data.currentPoints || 0));
@@ -106,7 +106,7 @@ async function loadCurrentPoints() {
 async function loadHistory() {
   const container = document.getElementById('rw-history');
   try {
-    const response = await fetch(`/api/points/history?userId=${encodeURIComponent(RW_USER_ID)}`);
+    const response = await fetch('/api/points/history');
     if (!response.ok) throw new Error('Unable to load history');
     const rows = await response.json();
     if (!rows.length) {

@@ -13,7 +13,7 @@ public class ChallengeService {
     private static final String CHALLENGES = "Challenges";
     private static final String USER_CHALLENGES = "UserChallenges";
     private static final String CHECKINS = "CheckIns";
-    private static final String USERS = "Users";
+    private static final String USERS = "users";
     private static final String HISTORY = "PointHistory";
 
     public List<Map<String,Object>> getChallenges(String userId) throws Exception {
@@ -77,9 +77,10 @@ public class ChallengeService {
             if (Boolean.TRUE.equals(uc.getBoolean("completed"))) throw new IllegalStateException("Challenge already completed.");
             if (progress < target) throw new IllegalStateException("Challenge requirements are not completed.");
             DocumentSnapshot user = tx.get(userRef).get();
-            int current = user.exists() && user.getLong("currentPoints") != null ? user.getLong("currentPoints").intValue() : 0;
+            int current = user.exists() && user.getLong("totalPoints") != null
+                    ? user.getLong("totalPoints").intValue() : 0;
             int updated = current + reward;
-            Map<String,Object> u = new HashMap<>(); u.put("userId", userId); u.put("currentPoints", updated);
+            Map<String,Object> u = new HashMap<>(); u.put("userId", userId); u.put("totalPoints", updated);
             tx.set(userRef, u, SetOptions.merge());
             tx.set(ucRef, Map.of("completed", true, "completedAt", FieldValue.serverTimestamp()), SetOptions.merge());
             DocumentReference h = db.collection(HISTORY).document();

@@ -6,7 +6,6 @@ import com.warisango.model.service.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -36,11 +35,7 @@ public class AuthController {
     public ResponseEntity<User> loginUser(@Valid @RequestBody LoginRequest loginRequest,
                                           HttpServletRequest request,
                                           HttpServletResponse response) {
-        User authenticatedUser = authService.authenticateAndProcessUser(loginRequest);
-
-        if ("admin".equalsIgnoreCase(authenticatedUser.getRole())) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
+        User authenticatedUser = authService.authenticateTourist(loginRequest);
 
         saveAuthenticatedUser(authenticatedUser, request, response);
         return ResponseEntity.ok(authenticatedUser);
@@ -50,11 +45,7 @@ public class AuthController {
     public ResponseEntity<User> loginAdmin(@Valid @RequestBody LoginRequest loginRequest,
                                            HttpServletRequest request,
                                            HttpServletResponse response) {
-        User authenticatedUser = authService.authenticateAndProcessUser(loginRequest);
-
-        if (!"admin".equalsIgnoreCase(authenticatedUser.getRole())) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
+        User authenticatedUser = authService.authenticateAdmin(loginRequest);
 
         saveAuthenticatedUser(authenticatedUser, request, response);
         return ResponseEntity.ok(authenticatedUser);

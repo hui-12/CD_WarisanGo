@@ -16,7 +16,7 @@ import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
 /**
- * Reads display names from the root-level Tourists and Users collections.
+ * Reads and writes user data from the root-level users collection.
  *
  * Reviews and Comments intentionally keep touristId as their relationship key.
  * This repository only resolves the name needed by the UI.
@@ -24,9 +24,8 @@ import java.util.concurrent.ExecutionException;
 @Repository
 public class UserRepositoryImpl implements UserRepository {
 
-    private static final String AUTH_USERS_COLLECTION = "users";
+    private static final String USERS_COLLECTION = "users";
     private static final String TOURISTS_COLLECTION = "Tourists";
-    private static final String USERS_COLLECTION = "Users";
 
     private final Firestore firestore;
 
@@ -38,7 +37,7 @@ public class UserRepositoryImpl implements UserRepository {
     public Optional<User> findById(String uid) {
         try {
             DocumentSnapshot document = firestore
-                    .collection(AUTH_USERS_COLLECTION)
+                    .collection(USERS_COLLECTION)
                     .document(uid)
                     .get()
                     .get();
@@ -54,7 +53,7 @@ public class UserRepositoryImpl implements UserRepository {
     public void save(User user) {
         try {
             firestore
-                    .collection(AUTH_USERS_COLLECTION)
+                    .collection(USERS_COLLECTION)
                     .document(user.getUid())
                     .set(user)
                     .get();
@@ -85,13 +84,13 @@ public class UserRepositoryImpl implements UserRepository {
         if (!userDocument.exists()) {
             Map<String, Object> userData = new HashMap<>();
             userData.put("userId", userId);
-            userData.put("currentPoints", 0L);
+            userData.put("totalPoints", 0L);
             userReference.set(userData).get();
             return 0;
         }
 
-        Long currentPoints = userDocument.getLong("currentPoints");
-        return currentPoints == null ? 0 : currentPoints.intValue();
+        Long totalPoints = userDocument.getLong("totalPoints");
+        return totalPoints == null ? 0 : totalPoints.intValue();
     }
 
     @Override
@@ -153,7 +152,7 @@ public class UserRepositoryImpl implements UserRepository {
         }
 
         // Also support data whose document id is different but userId is stored
-        // as a field, without changing the existing Users collection design.
+        // as a field, without changing the existing users collection design.
         ApiFuture<QuerySnapshot> query = firestore
                 .collection(USERS_COLLECTION)
                 .whereEqualTo("userId", userId)

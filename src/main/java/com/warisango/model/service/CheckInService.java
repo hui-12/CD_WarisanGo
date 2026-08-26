@@ -17,7 +17,7 @@ import java.util.concurrent.ExecutionException;
 @Service
 public class CheckInService {
     private static final String BUSINESS_COLLECTION = "HeritageBusinesses";
-    private static final String USER_COLLECTION = "Users";
+    private static final String USER_COLLECTION = "users";
     private static final String CHECKIN_COLLECTION = "CheckIns";
     private static final String HISTORY_COLLECTION = "PointHistory";
     private static final double MAX_DISTANCE_METERS = 50.0;
@@ -86,7 +86,7 @@ public class CheckInService {
                 int currentPoints = 0;
 
                 if (userSnapshot.exists()) {
-                    Long value = userSnapshot.getLong("currentPoints");
+                    Long value = userSnapshot.getLong("totalPoints");
                     if (value != null) {
                         currentPoints = value.intValue();
                     }
@@ -96,7 +96,7 @@ public class CheckInService {
 
                 Map<String, Object> userData = new HashMap<>();
                 userData.put("userId", request.getUserId());
-                userData.put("currentPoints", updatedPoints);
+                userData.put("totalPoints", updatedPoints);
                 transaction.set(userRef, userData, com.google.cloud.firestore.SetOptions.merge());
 
                 DocumentReference checkInRef = db.collection(CHECKIN_COLLECTION).document();
@@ -147,7 +147,7 @@ public class CheckInService {
         if (!snapshot.exists()) {
             return 0;
         }
-        Long points = snapshot.getLong("currentPoints");
+        Long points = snapshot.getLong("totalPoints");
         return points == null ? 0 : points.intValue();
     }
 

@@ -5,14 +5,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 /* ============================================================
-   USER
-   ============================================================ */
-
-const HOME_USER_ID =
-    localStorage.getItem('warisangoUserId') || 'demo-user';
-
-
-/* ============================================================
    TIER CONFIGURATION
    ============================================================ */
 
@@ -69,9 +61,7 @@ async function loadHomePoints() {
 
     try {
 
-        const response = await fetch(
-            `/api/user/points?userId=${encodeURIComponent(HOME_USER_ID)}`
-        );
+        const response = await fetch('/api/user/points');
 
 
         if (!response.ok) {

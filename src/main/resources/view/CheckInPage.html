@@ -26,7 +26,6 @@
 // This project does not currently have a real authentication
 // flow. For now, a browser user ID is stored locally.
 // Replace this with the authenticated user's ID later.
-const USER_ID = localStorage.getItem('warisangoUserId') || 'demo-user';
 const MAX_DISTANCE_METERS = 50;
 const URL_BUSINESS_ID = new URLSearchParams(window.location.search).get('businessId');
 
@@ -226,7 +225,6 @@ async function submitCheckIn(biz, userLat, userLng, distanceMeters, accuracy) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        userId: USER_ID,
         businessId: biz.id,
         userLatitude: userLat,
         userLongitude: userLng,

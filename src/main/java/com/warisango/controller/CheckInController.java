@@ -6,6 +6,7 @@ import com.warisango.dto.UserPointsDTO;
 import com.warisango.model.repository.UserRepository;
 import com.warisango.model.service.CheckInService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.concurrent.ExecutionException;
@@ -22,8 +23,8 @@ public class CheckInController {
     }
 
     @GetMapping("/user/points")
-    public ResponseEntity<UserPointsDTO> getPoints(
-            @RequestParam(defaultValue = "demo-user") String userId) {
+    public ResponseEntity<UserPointsDTO> getPoints(Authentication authentication) {
+        String userId = authentication.getName();
         try {
             int points = userRepository.getOrCreateCurrentPoints(userId);
             return ResponseEntity.ok(new UserPointsDTO(userId, points));
@@ -36,7 +37,11 @@ public class CheckInController {
     }
 
     @PostMapping("/checkin")
-    public ResponseEntity<CheckInResponse> checkIn(@RequestBody CheckInRequest request) {
+    public ResponseEntity<CheckInResponse> checkIn(
+            @RequestBody CheckInRequest request,
+            Authentication authentication) {
+
+        request.setUserId(authentication.getName());
         CheckInResponse response = checkInService.processCheckIn(request);
         return ResponseEntity.ok(response);
     }

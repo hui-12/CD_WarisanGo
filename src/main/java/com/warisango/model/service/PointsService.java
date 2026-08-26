@@ -9,7 +9,7 @@ import java.util.concurrent.ExecutionException;
 
 @Service
 public class PointsService {
-    private static final String USERS = "Users";
+    private static final String USERS = "users";
     private static final String HISTORY = "PointHistory";
 
     public int getCurrentPoints(String userId) throws ExecutionException, InterruptedException {
@@ -18,11 +18,11 @@ public class PointsService {
         if (!snap.exists()) {
             Map<String,Object> data = new HashMap<>();
             data.put("userId", userId);
-            data.put("currentPoints", 0L);
+            data.put("totalPoints", 0L);
             ref.set(data).get();
             return 0;
         }
-        Long points = snap.getLong("currentPoints");
+        Long points = snap.getLong("totalPoints");
         return points == null ? 0 : points.intValue();
     }
 
@@ -33,12 +33,12 @@ public class PointsService {
 
         int newPoints = db.runTransaction(tx -> {
             DocumentSnapshot user = tx.get(userRef).get();
-            int current = user.exists() && user.getLong("currentPoints") != null
-                    ? user.getLong("currentPoints").intValue() : 0;
+            int current = user.exists() && user.getLong("totalPoints") != null
+                    ? user.getLong("totalPoints").intValue() : 0;
             int updated = current + points;
             Map<String,Object> userData = new HashMap<>();
             userData.put("userId", userId);
-            userData.put("currentPoints", updated);
+            userData.put("totalPoints", updated);
             tx.set(userRef, userData, SetOptions.merge());
 
             DocumentReference historyRef = db.collection(HISTORY).document();
@@ -80,7 +80,7 @@ public class PointsService {
         QuerySnapshot snap = db.collection(USERS).get().get();
         List<Map<String,Object>> result = new ArrayList<>();
         for (QueryDocumentSnapshot doc : snap.getDocuments()) {
-            Long p = doc.getLong("currentPoints");
+            Long p = doc.getLong("totalPoints");
             if (p == null) continue;
             Map<String,Object> row = new HashMap<>();
             row.put("userId", doc.getId());

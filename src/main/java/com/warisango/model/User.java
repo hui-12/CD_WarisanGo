@@ -7,6 +7,7 @@ public class User {
     private String avatar;
     private String role;
     private int totalPoints;
+    private String tierStatus;
 
     public User() {} // Required for Firestore data mapping
 
@@ -16,7 +17,8 @@ public class User {
         this.name = name;
         this.avatar = avatar;
         this.role = role;
-        this.totalPoints = 0; // Default initialization
+        this.totalPoints = 0;
+        this.tierStatus = "Bronze";
     }
 
     // --- Getters and Setters ---
@@ -67,5 +69,13 @@ public class User {
 
     public void setTotalPoints(int totalPoints) {
         this.totalPoints = totalPoints;
+    }
+
+    public String getTierStatus() {
+        return tierStatus;
+    }
+
+    public void setTierStatus(String tierStatus) {
+        this.tierStatus = tierStatus == null ? null : tierStatus.trim();
     }
 }
