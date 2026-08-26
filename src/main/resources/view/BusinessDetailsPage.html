@@ -95,9 +95,14 @@
               </p>
               <h2>Visitor Review</h2>
             </div>
-            <span class="review-highlight-likes"
-                  th:text="${'♥ ' + featuredReview.likeCount}">
-              ♥ 0
+            <span class="review-highlight-rating"
+                  th:switch="${featuredReview.rating}">
+              <span th:case="5">🤩 5/5</span>
+              <span th:case="4">🙂 4/5</span>
+              <span th:case="3">😐 3/5</span>
+              <span th:case="2">😕 2/5</span>
+              <span th:case="1">😞 1/5</span>
+              <span th:case="*">😐 0/5</span>
             </span>
           </div>
 
