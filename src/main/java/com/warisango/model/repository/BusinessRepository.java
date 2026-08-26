@@ -21,7 +21,7 @@ import java.util.function.Consumer;
 @Repository
 public class BusinessRepository {
 
-    private static final String COLLECTION_NAME = "HeritageBusinesses";
+    private static final String COLLECTION_NAME = "heritageBusinesses";
     private static final Logger logger = LoggerFactory.getLogger(BusinessRepository.class);
     private final Firestore firestore;
 

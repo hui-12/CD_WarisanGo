@@ -8,6 +8,7 @@ import com.google.cloud.firestore.GeoPoint;
 import com.google.cloud.firestore.WriteBatch;
 import com.google.firebase.cloud.FirestoreClient;
 import com.warisango.exception.FirebasePersistenceException;
+import com.warisango.dto.HeritageBusinessUpdateRequest;
 import com.warisango.model.HeritageBusiness;
 import org.springframework.stereotype.Repository;
 
@@ -20,7 +21,7 @@ import java.util.Optional;
 @Repository
 public class HeritageBusinessRepository {
 
-    private static final String COLLECTION_NAME = "HeritageBusinesses";
+    private static final String COLLECTION_NAME = "heritageBusinesses";
 
     public List<HeritageBusiness> findByStatus(String status) {
         Firestore firestore = FirestoreClient.getFirestore();
@@ -108,6 +109,30 @@ public class HeritageBusinessRepository {
 
     public void reject(String businessId) {
         updateReviewStatus(businessId, "Rejected", "rejectAt");
+    }
+
+    public void updateBusiness(String businessId, HeritageBusinessUpdateRequest request) {
+        Firestore firestore = FirestoreClient.getFirestore();
+        Map<String, Object> updates = new LinkedHashMap<>();
+        updates.put("name", nullIfBlank(request.getName()));
+        updates.put("address", nullIfBlank(request.getAddress()));
+        updates.put("state", nullIfBlank(request.getState()));
+        updates.put("city", nullIfBlank(request.getCity()));
+        updates.put("description", nullIfBlank(request.getDescription()));
+        updates.put("location", toGeoPoint(request.getLatitude(), request.getLongitude()));
+        updates.put("operatingHour", nullIfBlank(request.getOperatingHour()));
+        updates.put("averageRating", request.getAverageRating());
+        updates.put("checkInPoints", request.getCheckInPoints() == null ? 50 : request.getCheckInPoints());
+        updates.put("sourceVideoLink", nullIfBlank(request.getSourceVideoLink()));
+
+        try {
+            firestore.collection(COLLECTION_NAME).document(businessId).update(updates).get();
+        } catch (InterruptedException exception) {
+            Thread.currentThread().interrupt();
+            throw new FirebasePersistenceException("Updating the heritage business was interrupted.", exception);
+        } catch (Exception exception) {
+            throw new FirebasePersistenceException("Unable to update the heritage business.", exception);
+        }
     }
 
     private void updateReviewStatus(
@@ -202,16 +227,29 @@ public class HeritageBusinessRepository {
                 document.getId(),
                 document.getString("name"),
                 document.getString("address"),
+                document.getString("state"),
                 document.getString("city"),
                 document.getString("description"),
                 location == null ? null : location.getLatitude(),
                 location == null ? null : location.getLongitude(),
+                document.getString("operatingHour"),
                 document.getString("sourceVideoLink"),
                 document.getString("status"),
                 document.getDouble("averageRating"),
+                document.getLong("checkInPoints") == null
+                        ? null
+                        : document.getLong("checkInPoints").intValue(),
                 createdAtInstant,
                 approveAtInstant,
                 rejectAtInstant
         );
+    }
+
+    private GeoPoint toGeoPoint(Double latitude, Double longitude) {
+        return latitude == null || longitude == null ? null : new GeoPoint(latitude, longitude);
+    }
+
+    private String nullIfBlank(String value) {
+        return value == null || value.isBlank() ? null : value.trim();
     }
 }

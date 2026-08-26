@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WarisanGo - Pending Heritage Businesses</title>
+    <link rel="stylesheet" th:href="@{/css/global.css}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/admin/admin.css}">
     <link rel="stylesheet" th:href="@{/css/admin/pending-list.css}">
@@ -12,12 +13,13 @@
 
 <body>
 
-<header th:replace="~{admin/fragments/navigation :: navigation('pending')}"></header>
+<div th:replace="~{fragments/fragments :: navbar('pending-list')}"></div>
 
-<main class="container py-4">
+<main class="container pending-page py-4">
 
     <div class="page-heading">
         <div>
+            <p class="module-eyebrow">Admin &middot; Discovery Module</p>
             <h1>Pending List</h1>
             <p>Review heritage businesses discovered by the AI workflow.</p>
         </div>
@@ -62,6 +64,8 @@
     </section>
 
 </main>
+
+<div th:replace="~{fragments/footer :: global}"></div>
 
 </body>
 

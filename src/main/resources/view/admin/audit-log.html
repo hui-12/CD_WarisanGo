@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WarisanGo - Audit Log</title>
+    <link rel="stylesheet" th:href="@{/css/global.css}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/admin/admin.css}">
     <link rel="stylesheet" th:href="@{/css/admin/audit-log.css}">
@@ -12,17 +13,26 @@
 
 <body>
 
-<header th:replace="~{admin/fragments/navigation :: navigation('audit')}"></header>
+<div th:replace="~{fragments/fragments :: navbar('audit-log')}"></div>
 
-<main class="container py-4">
+<main class="container audit-page py-4">
 
     <div class="audit-heading">
         <div>
+            <p class="module-eyebrow">Admin &middot; Discovery Module</p>
             <h1>Audit Log</h1>
             <p>Businesses that have been approved or rejected by an administrator.</p>
         </div>
         <span class="entry-count" th:text="|${#lists.size(entries)} records|">0 records</span>
     </div>
+
+    <section class="audit-summary" aria-label="Audit summary">
+        <article><span>Total Actions</span><strong th:text="${#lists.size(entries)}">0</strong></article>
+        <article class="approved-summary"><span>Approved</span>
+            <strong th:text="${#lists.size(entries.?[status == 'Approved'])}">0</strong></article>
+        <article class="rejected-summary"><span>Rejected</span>
+            <strong th:text="${#lists.size(entries.?[status == 'Rejected'])}">0</strong></article>
+    </section>
 
     <section class="audit-card" aria-labelledby="audit-records-heading">
         <h2 id="audit-records-heading" class="visually-hidden">Business review records</h2>
@@ -69,6 +79,8 @@
     </section>
 
 </main>
+
+<div th:replace="~{fragments/footer :: global}"></div>
 
 </body>
 

@@ -1,6 +1,7 @@
 package com.warisango.model.service;
 
 import com.warisango.dto.HeritageBusinessView;
+import com.warisango.dto.HeritageBusinessUpdateRequest;
 import com.warisango.exception.BusinessNotFoundException;
 import com.warisango.model.HeritageBusiness;
 import com.warisango.model.repository.HeritageBusinessRepository;
@@ -51,6 +52,11 @@ public class PendingHeritageBusinessService {
         heritageBusinessRepository.reject(businessId);
     }
 
+    public void update(String businessId, HeritageBusinessUpdateRequest request) {
+        requirePending(businessId);
+        heritageBusinessRepository.updateBusiness(businessId, request);
+    }
+
     private void requirePending(String businessId) {
         heritageBusinessRepository.findById(businessId)
                 .filter(item -> PENDING_STATUS.equals(item.status()))
@@ -62,13 +68,16 @@ public class PendingHeritageBusinessService {
                 business.businessId(),
                 business.name(),
                 business.address(),
+                business.state(),
                 business.city(),
                 business.description(),
                 business.latitude(),
                 business.longitude(),
+                business.operatingHour(),
                 business.sourceVideoLink(),
                 business.status(),
                 business.averageRating(),
+                business.checkInPoints(),
                 business.createdAt(),
                 business.approveAt(),
                 business.rejectAt()

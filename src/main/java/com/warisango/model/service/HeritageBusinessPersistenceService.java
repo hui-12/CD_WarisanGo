@@ -10,11 +10,19 @@ import org.springframework.stereotype.Service;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class HeritageBusinessPersistenceService {
 
     private static final String PENDING_STATUS = "Pending";
+    private static final int DEFAULT_CHECK_IN_POINTS = 50;
+    private static final Pattern COORDINATE_PATTERN = Pattern.compile(
+            "([+-]?\\d+(?:\\.\\d+)?)\\s*°?\\s*([NS])?\\s*,\\s*"
+                    + "([+-]?\\d+(?:\\.\\d+)?)\\s*°?\\s*([EW])?",
+            Pattern.CASE_INSENSITIVE
+    );
 
     private final HeritageBusinessRepository heritageBusinessRepository;
 
@@ -46,12 +54,15 @@ public class HeritageBusinessPersistenceService {
 
         Map<String, Object> document = new LinkedHashMap<>();
         document.put("address", nullIfBlank(business.address()));
-        document.put("averageRating", null);
+        document.put("averageRating", validRating(business.averageRating()));
+        document.put("checkInPoints", validCheckInPoints(business.checkInPoints()));
         document.put("city", nullIfBlank(business.city()));
         document.put("description", nullIfBlank(business.description()));
         document.put("location", parseLocation(business.location()));
         document.put("name", nullIfBlank(business.name()));
+        document.put("operatingHour", nullIfBlank(business.operatingHour()));
         document.put("sourceVideoLink", nullIfBlank(sourceVideoLink));
+        document.put("state", nullIfBlank(business.state()));
         document.put("status", PENDING_STATUS);
         document.put("approveAt", null);
         document.put("rejectAt", null);
@@ -63,14 +74,25 @@ public class HeritageBusinessPersistenceService {
             return null;
         }
 
-        String[] coordinates = location.split(",");
-        if (coordinates.length != 2) {
+        String normalizedLocation = location.trim()
+                .replace("[", "")
+                .replace("]", "")
+                .replace("°", "")
+                .replace("Â", "");
+        Matcher matcher = COORDINATE_PATTERN.matcher(normalizedLocation);
+        if (!matcher.matches()) {
             return null;
         }
 
         try {
-            double latitude = Double.parseDouble(coordinates[0].trim());
-            double longitude = Double.parseDouble(coordinates[1].trim());
+            double latitude = applyDirection(
+                    Double.parseDouble(matcher.group(1)),
+                    matcher.group(2)
+            );
+            double longitude = applyDirection(
+                    Double.parseDouble(matcher.group(3)),
+                    matcher.group(4)
+            );
 
             if (latitude < -90 || latitude > 90
                     || longitude < -180 || longitude > 180) {
@@ -81,6 +103,27 @@ public class HeritageBusinessPersistenceService {
         } catch (NumberFormatException exception) {
             return null;
         }
+    }
+
+    private double applyDirection(double coordinate, String direction) {
+        if (direction == null) {
+            return coordinate;
+        }
+        return "S".equalsIgnoreCase(direction) || "W".equalsIgnoreCase(direction)
+                ? -Math.abs(coordinate)
+                : Math.abs(coordinate);
+    }
+
+    private Double validRating(Double averageRating) {
+        return averageRating != null && averageRating >= 0 && averageRating <= 5
+                ? averageRating
+                : null;
+    }
+
+    private int validCheckInPoints(Integer checkInPoints) {
+        return checkInPoints != null && checkInPoints > 0
+                ? checkInPoints
+                : DEFAULT_CHECK_IN_POINTS;
     }
 
     private String nullIfBlank(String value) {

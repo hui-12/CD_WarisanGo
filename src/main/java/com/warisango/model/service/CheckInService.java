@@ -8,19 +8,53 @@ import com.google.cloud.firestore.GeoPoint;
 import com.google.firebase.cloud.FirestoreClient;
 import com.warisango.dto.CheckInRequest;
 import com.warisango.dto.CheckInResponse;
+import com.warisango.dto.RecentVisitDTO;
+import com.warisango.model.CheckInRecord;
+import com.warisango.model.repository.CheckInRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 @Service
 public class CheckInService {
-    private static final String BUSINESS_COLLECTION = "HeritageBusinesses";
+    private static final String BUSINESS_COLLECTION = "heritageBusinesses";
     private static final String USER_COLLECTION = "users";
     private static final String CHECKIN_COLLECTION = "CheckIns";
     private static final String HISTORY_COLLECTION = "PointHistory";
     private static final double MAX_DISTANCE_METERS = 50.0;
+    private static final int RECENT_VISIT_LIMIT = 5;
+    private static final DateTimeFormatter VISIT_DATE_FORMATTER = DateTimeFormatter
+            .ofPattern("dd MMM yyyy")
+            .withZone(ZoneId.of("Asia/Kuala_Lumpur"));
+
+    private final CheckInRepository checkInRepository;
+
+    public CheckInService(CheckInRepository checkInRepository) {
+        this.checkInRepository = checkInRepository;
+    }
+
+    public List<RecentVisitDTO> findRecentVisits(String userId) {
+        if (userId == null || userId.isBlank()) {
+            throw new IllegalArgumentException("Authenticated user ID is required.");
+        }
+
+        return checkInRepository.findByUserId(userId).stream()
+                .filter(record -> record.timestamp() != null)
+                .sorted(Comparator.comparing(CheckInRecord::timestamp).reversed())
+                .limit(RECENT_VISIT_LIMIT)
+                .map(record -> new RecentVisitDTO(
+                        record.businessName(),
+                        "",
+                        VISIT_DATE_FORMATTER.format(record.timestamp()),
+                        record.pointsEarned()))
+                .toList();
+    }
 
     public CheckInResponse processCheckIn(CheckInRequest request) {
         try {

@@ -22,6 +22,12 @@ document.addEventListener("DOMContentLoaded", function () {
     const videoList =
         document.getElementById("videoList");
 
+    const toggleVideoResults =
+        document.getElementById("toggleVideoResults");
+
+    const videoResultsContent =
+        document.getElementById("videoResultsContent");
+
     const processingSection =
         document.getElementById("processingSection");
 
@@ -333,6 +339,8 @@ document.addEventListener("DOMContentLoaded", function () {
         videoResultsSection.classList.remove(
             "d-none"
         );
+
+        setVideoResultsExpanded(true);
     }
 
     // PROCESS VIDEO
@@ -640,6 +648,20 @@ document.addEventListener("DOMContentLoaded", function () {
 
         }
     );
+
+    toggleVideoResults.addEventListener("click", function () {
+        const isExpanded = toggleVideoResults.getAttribute("aria-expanded") === "true";
+        setVideoResultsExpanded(!isExpanded);
+    });
+
+    function setVideoResultsExpanded(isExpanded) {
+        toggleVideoResults.setAttribute("aria-expanded", String(isExpanded));
+        videoResultsContent.hidden = !isExpanded;
+        toggleVideoResults.querySelector(".toggle-label").textContent =
+            isExpanded ? "Collapse videos" : "Expand videos";
+        toggleVideoResults.querySelector(".toggle-icon").innerHTML =
+            isExpanded ? "&#8963;" : "&#8964;";
+    }
 
     restoreActiveJob();
 

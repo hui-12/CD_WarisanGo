@@ -29,23 +29,19 @@
 <body>
 <div th:replace="~{fragments/fragments :: navbar('ai-discovery')}"></div>
 
-<header th:replace="~{admin/fragments/navigation :: navigation('discovery')}"></header>
-
-<div class="container py-4">
+<main class="container discovery-page py-4">
 
     <!-- ========================================= -->
     <!-- HEADER -->
     <!-- ========================================= -->
 
     <div class="page-header">
-
+        <p class="module-eyebrow">Admin &middot; Discovery Module</p>
         <h1>AI Heritage Discovery</h1>
-
         <p>
-            Search YouTube or TikTok videos and process supported videos
-            to discover Malaysian heritage food information.
+            Search video platforms for heritage food content. The AI pipeline transcribes selected videos,
+            extracts structured business information, and saves records for administrator review.
         </p>
-
     </div>
 
 
@@ -53,19 +49,14 @@
     <!-- SEARCH -->
     <!-- ========================================= -->
 
-    <section class="card shadow-sm search-card">
-
+    <section class="card search-card" aria-labelledby="search-heading">
         <div class="card-body">
-
-            <h4>Search Videos</h4>
-
+            <h2 id="search-heading">Search Heritage Videos</h2>
             <p class="text-muted">
                 Enter a keyword related to Malaysian heritage food, then
                 choose a source and configure the video search.
             </p>
-
-            <div class="row g-3 align-items-end">
-
+            <div class="row g-3 align-items-end search-fields">
                 <div class="col-md-3">
                     <label for="videoSource" class="form-label">Video source</label>
                     <select id="videoSource" class="form-select">
@@ -73,32 +64,22 @@
                         <option value="tiktok">TikTok</option>
                     </select>
                 </div>
-
                 <div class="col-md-6">
-
                     <label for="keyword" class="form-label">Search keyword</label>
-
                     <input
                             type="text"
                             id="keyword"
                             class="form-control"
-                            placeholder="Traditional Penang char kuey teow">
-
+                            placeholder="e.g. kopitiam heritage Ipoh, nasi kandar Penang">
                 </div>
-
                 <div class="col-md-3 d-grid">
-
                     <button
                             type="button"
                             id="searchButton"
-                            class="btn btn-primary">
-
+                            class="btn discovery-primary-button">
                         Search Videos
-
                     </button>
-
                 </div>
-
             </div>
 
             <div id="tikTokOptions" class="row g-3 mt-1 d-none">
@@ -117,7 +98,6 @@
             </div>
 
         </div>
-
     </section>
 
 
@@ -135,17 +115,24 @@
     <!-- VIDEO RESULTS -->
     <!-- ========================================= -->
 
-    <section
-            id="videoResultsSection"
-            class="mt-4 d-none">
-
-        <h3 id="resultsHeading">YouTube Results</h3>
-
-        <div
-                id="videoList"
-                class="row g-4">
+    <section id="videoResultsSection" class="results-panel mt-4 d-none" aria-labelledby="resultsHeading">
+        <div class="results-panel-header">
+            <div>
+                <p class="section-kicker">Search results</p>
+                <h2 id="resultsHeading">YouTube Results</h2>
+            </div>
+            <button id="toggleVideoResults"
+                    class="results-toggle"
+                    type="button"
+                    aria-expanded="true"
+                    aria-controls="videoResultsContent">
+                <span class="toggle-label">Collapse videos</span>
+                <span class="toggle-icon" aria-hidden="true">&#8963;</span>
+            </button>
         </div>
-
+        <div id="videoResultsContent" class="results-panel-content">
+            <div id="videoList" class="row g-4"></div>
+        </div>
     </section>
 
 
@@ -155,11 +142,14 @@
 
     <section
             id="processingSection"
-            class="card shadow-sm mt-4 d-none">
+            class="card processing-card mt-4 d-none">
 
         <div class="card-body">
 
-            <h3>AI Processing</h3>
+            <div class="processing-heading">
+                <span class="processing-indicator" aria-hidden="true"></span>
+                <h2>AI Processing Pipeline</h2>
+            </div>
 
             <div
                     id="processingStatus"
@@ -289,7 +279,7 @@
 
     <section
             id="transcriptSection"
-            class="card shadow-sm mt-4 d-none">
+            class="card output-card mt-4 d-none">
 
         <div class="card-body">
 
@@ -315,7 +305,7 @@
 
     <section
             id="resultSection"
-            class="card shadow-sm mt-4 d-none">
+            class="card output-card mt-4 d-none">
 
         <div class="card-body">
 
@@ -350,9 +340,9 @@
         </div>
 
     </section>
+</main>
 
-</div>
-
+<div th:replace="~{fragments/footer :: global}"></div>
 
 <script th:src="@{/js/admin/workflow.js}"></script>
 <script th:src="@{/js/admin/discovery.js}"></script>
