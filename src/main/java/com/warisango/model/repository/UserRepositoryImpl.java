@@ -5,9 +5,11 @@ import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.google.cloud.firestore.QuerySnapshot;
+import com.warisango.model.User;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Reads display names from the root-level Tourists and Users collections.
@@ -18,6 +20,7 @@ import java.util.List;
 @Repository
 public class UserRepositoryImpl implements UserRepository {
 
+    private static final String AUTH_USERS_COLLECTION = "users";
     private static final String TOURISTS_COLLECTION = "Tourists";
     private static final String USERS_COLLECTION = "Users";
 
@@ -25,6 +28,35 @@ public class UserRepositoryImpl implements UserRepository {
 
     public UserRepositoryImpl(Firestore firestore) {
         this.firestore = firestore;
+    }
+
+    @Override
+    public Optional<User> findById(String uid) {
+        try {
+            DocumentSnapshot document = firestore
+                    .collection(AUTH_USERS_COLLECTION)
+                    .document(uid)
+                    .get()
+                    .get();
+            return document.exists()
+                    ? Optional.ofNullable(document.toObject(User.class))
+                    : Optional.empty();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to retrieve user: " + uid, e);
+        }
+    }
+
+    @Override
+    public void save(User user) {
+        try {
+            firestore
+                    .collection(AUTH_USERS_COLLECTION)
+                    .document(user.getUid())
+                    .set(user)
+                    .get();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to save user: " + user.getUid(), e);
+        }
     }
 
     @Override
