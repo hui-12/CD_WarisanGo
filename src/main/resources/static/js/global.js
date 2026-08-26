@@ -7,16 +7,17 @@ document.addEventListener("click", (event) => {
         const target = navigateBtn.getAttribute("data-navigate");
         
         const routes = {
-            "home": "/",
+            "home": "/home",
             "directory": "/directory",
             "map": "/map",
             "saved": "/saved",
             "rewards": "/rewards",
             "badges": "/badges",
             "challenges": "/challenges",
-            "reports": "/admin/reports",
-            "checkin": "/CheckInPage",
-            "ac": "/AdminChallengePage",
+            "ai-discovery": "/ai-discovery",
+            "pending-list": "/admin/pending",
+            "audit-log": "/admin/audit-log",
+            "admin-challenges": "/admin/challenges",
             "profile": "/profile"
         };
         

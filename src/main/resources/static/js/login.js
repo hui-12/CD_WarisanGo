@@ -16,14 +16,32 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 provider.setCustomParameters({ prompt: 'select_account' });
+const loginButtons = document.querySelectorAll('[data-role]');
+const loginStatus = document.getElementById('login-status');
+const loginEndpoint = document.body.dataset.loginEndpoint;
+const loginRedirect = document.body.dataset.loginRedirect;
 
-const handleLogin = async () => {
+const setLoading = (isLoading) => {
+    loginButtons.forEach((button) => {
+        button.disabled = isLoading;
+    });
+};
+
+const showStatus = (message) => {
+    loginStatus.textContent = message;
+};
+
+const handleLogin = async (event) => {
+    const selectedRole = event.currentTarget.dataset.role;
+
     try {
+        setLoading(true);
+        showStatus(`Opening Google sign-in for ${selectedRole} access...`);
         await signOut(auth);
         const result = await signInWithPopup(auth, provider);
         const idToken = await result.user.getIdToken();
 
-        const response = await fetch('/api/auth/login', {
+        const response = await fetch(loginEndpoint, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -34,16 +52,23 @@ const handleLogin = async () => {
         });
 
         if (response.ok) {
-            const user = await response.json();
-            window.location.href = user.role === 'admin' ? '/ai-discovery' : '/';
+            await response.json();
+            window.location.href = loginRedirect;
         } else {
-            console.error("Authentication failed on the server.");
-            alert("Login failed. Please verify your credentials.");
+            showStatus('Login failed. Please verify that your account has access.');
         }
     } catch (error) {
-        console.error("Error during Google Sign-In:", error);
+        if (error.code !== 'auth/popup-closed-by-user') {
+            console.error('Error during Google Sign-In:', error);
+            showStatus('Google sign-in could not be completed. Please try again.');
+        } else {
+            showStatus('Sign-in was cancelled.');
+        }
+    } finally {
+        setLoading(false);
     }
 };
 
-document.getElementById('btn-login-tourist').addEventListener('click', handleLogin);
-document.getElementById('btn-login-admin').addEventListener('click', handleLogin);
+loginButtons.forEach((button) => {
+    button.addEventListener('click', handleLogin);
+});

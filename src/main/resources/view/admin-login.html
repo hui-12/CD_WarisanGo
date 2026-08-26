@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="~{fragments/fragments :: head('Restricted Access | WarisanGo')}"></th:block>
+    <link rel="stylesheet" href="/css/admin-login.css" th:href="@{/css/admin-login.css}">
+    <script type="module" src="/js/login.js" th:src="@{/js/login.js}" defer></script>
+</head>
+<body class="admin-login-page"
+      data-login-endpoint="/api/auth/admin-login"
+      data-login-redirect="/ai-discovery">
+    <main class="admin-login-shell">
+        <section class="admin-login-card" aria-labelledby="admin-login-title">
+            <div class="admin-login-mark" aria-hidden="true">WG</div>
+            <p class="admin-login-eyebrow">Restricted system</p>
+            <h1 id="admin-login-title">Curator access</h1>
+            <p class="admin-login-copy">
+                This entrance is reserved for authorised WarisanGo administrators.
+            </p>
+            <button class="admin-login-button" type="button" data-role="admin">
+                Authenticate with Google
+            </button>
+            <p id="login-status" class="admin-login-status" role="status" aria-live="polite"></p>
+        </section>
+    </main>
+</body>
+</html>

@@ -3,15 +3,16 @@ package com.warisango.controller;
 import com.warisango.dto.LoginRequest;
 import com.warisango.model.User;
 import com.warisango.model.service.AuthService;
-import jakarta.validation.Valid;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -37,6 +38,32 @@ public class AuthController {
                                           HttpServletResponse response) {
         User authenticatedUser = authService.authenticateAndProcessUser(loginRequest);
 
+        if ("admin".equalsIgnoreCase(authenticatedUser.getRole())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        saveAuthenticatedUser(authenticatedUser, request, response);
+        return ResponseEntity.ok(authenticatedUser);
+    }
+
+    @PostMapping("/admin-login")
+    public ResponseEntity<User> loginAdmin(@Valid @RequestBody LoginRequest loginRequest,
+                                           HttpServletRequest request,
+                                           HttpServletResponse response) {
+        User authenticatedUser = authService.authenticateAndProcessUser(loginRequest);
+
+        if (!"admin".equalsIgnoreCase(authenticatedUser.getRole())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        saveAuthenticatedUser(authenticatedUser, request, response);
+        return ResponseEntity.ok(authenticatedUser);
+    }
+
+    private void saveAuthenticatedUser(User authenticatedUser,
+                                       HttpServletRequest request,
+                                       HttpServletResponse response) {
+
         SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
         UsernamePasswordAuthenticationToken authentication = UsernamePasswordAuthenticationToken.authenticated(
             authenticatedUser.getUid(),
@@ -46,8 +73,7 @@ public class AuthController {
         securityContext.setAuthentication(authentication);
         SecurityContextHolder.setContext(securityContext);
         securityContextRepository.saveContext(securityContext, request, response);
-
-        return ResponseEntity.ok(authenticatedUser);
+        request.getSession(true).setAttribute("navbarUser", authenticatedUser);
     }
 
     @PostMapping("/logout")

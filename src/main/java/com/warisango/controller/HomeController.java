@@ -18,7 +18,7 @@ public class HomeController {
         this.businessService = businessService;
     }
 
-    @GetMapping({"/"})
+    @GetMapping("/home")
     public String home() {
         return "home";
     }
@@ -59,7 +59,7 @@ public class HomeController {
         return "ChallengePage";
     }
  
-    @GetMapping("/AdminChallengePage")
+    @GetMapping({"/AdminChallengePage", "/admin/challenges"})
     public String adminChallenges(Model model) {
         model.addAttribute("activePage", "admin");
         return "admin/AdminChallengePage";
