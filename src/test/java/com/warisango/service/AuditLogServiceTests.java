@@ -2,7 +2,8 @@ package com.warisango.service;
 
 import com.warisango.dto.AuditLogEntryView;
 import com.warisango.model.HeritageBusiness;
-import com.warisango.repository.HeritageBusinessRepository;
+import com.warisango.model.repository.HeritageBusinessRepository;
+import com.warisango.model.service.AuditLogService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

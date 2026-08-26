@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <th:block th:replace="~{fragments/fragments :: head('WarisanGo — Challenges')}"></th:block>
+  <link rel="stylesheet" href="/css/rewards.css" th:href="@{/css/rewards.css}">
+</head>
+<body>
+  <div th:replace="~{fragments/fragments :: navbar('challenges')}"></div>
+<div id="page-challenges" class="page active">
+<main>
+  <h1>Active Challenges</h1>
+  <p class="muted">Join limited-time challenges to earn bonus points and exclusive badges before they expire.</p>
+  <div class="batik-divider" style="margin:24px 0"></div>
+  <div id="challenges-list" style="display:flex;flex-direction:column;gap:12px"></div>
+  <!-- Completion modal -->
+  <div id="complete-modal" style="display:none" class="modal-overlay">
+    <div class="batik-bg modal-box" style="text-align:center;border:2px solid #2d7a4f">
+      <div style="font-size:52px;margin-bottom:16px">🎉</div>
+      <h2 style="font-family:'Fraunces',Georgia,serif;font-size:26px;margin-bottom:12px">Challenge Complete!</h2>
+      <p style="font-size:14px;color:#6b6b68;margin-bottom:20px">You completed <strong id="done-title" style="color:#141413"></strong> and earned:</p>
+      <div style="display:flex;justify-content:center;gap:32px;margin-bottom:28px">
+        <div><div id="done-pts" style="font-family:'Inter',monospace;font-size:26px;font-weight:700;color:#c9a84c"></div><div style="font-size:12px;color:#6b6b68">bonus points</div></div>
+        <div><div id="done-badge" style="font-size:28px"></div><div style="font-size:12px;color:#6b6b68">exclusive badge</div></div>
+      </div>
+      <button class="btn-primary" onclick="document.getElementById('complete-modal').style.display='none'">Awesome!</button>
+    </div>
+  </div>
+</main>
+</div>
+<script>
+let challenges = [];
+
+async function loadChallenges() {
+  const container = document.getElementById('challenges-list');
+  try {
+    const response = await fetch('/api/challenges');
+    if (!response.ok) throw new Error('Unable to load challenges');
+    challenges = await response.json();
+    renderChallenges();
+  } catch (e) {
+    console.error(e);
+    container.innerHTML = '<div class="card">Unable to load challenges from Firebase.</div>';
+  }
+}
+
+function renderChallenges() {
+  const container = document.getElementById('challenges-list');
+  if (!challenges.length) {
+    container.innerHTML = '<div class="card"><strong>No active challenges.</strong><p style="margin-top:8px;color:#6b6b68">Admin can publish a challenge from Admin Challenge.</p></div>';
+    return;
+  }
+  container.innerHTML = challenges.map(ch => {
+    const total = Number(ch.target || 1);
+    const progress = Math.min(Number(ch.progress || 0), total);
+    const pct = Math.min(100, progress / total * 100);
+    const joined = !!ch.joined;
+    const done = !!ch.done;
+    const reward = Number(ch.rewardPoints || 0);
+    return `<div class="card" style="padding:24px;border-radius:12px;display:grid;grid-template-columns:1fr auto;gap:24px;align-items:start">
+      <div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap">
+          <span style="font-size:16px;font-weight:700">${escapeHtml(ch.title || 'Challenge')}</span>
+          ${done ? '<span style="font-size:9px;color:#fff;background:#2d7a4f;border-radius:4px;padding:2px 8px">COMPLETED</span>' : ''}
+        </div>
+        <p style="font-size:13px;color:#6b6b68;margin-bottom:12px;line-height:1.55">${escapeHtml(ch.description || '')}</p>
+        <div style="font-size:12px;padding:8px 12px;border-radius:8px;margin-bottom:16px;line-height:1.55;background:#f5e9c4;color:#6b6b68">
+          <strong style="color:#141413">Requirements:</strong> ${escapeHtml(ch.requirement || '')}
+        </div>
+        ${joined ? `<div style="height:5px;background:#f5e9c4;border-radius:4px;margin-bottom:6px;overflow:hidden"><div style="height:100%;width:${pct}%;background:#c9a84c;border-radius:4px"></div></div><div style="font-size:11px;color:#6b6b68">${progress} / ${total} requirements met</div>` : '<div style="font-size:11px;color:#6b6b68">Join this challenge to start tracking progress.</div>'}
+      </div>
+      <div style="min-width:160px;text-align:right">
+        <div style="font-family:'Inter',monospace;font-size:20px;font-weight:700;color:#c9a84c">+${reward} pts</div>
+        <div style="font-size:12px;color:#6b6b68;margin:4px 0 10px">${escapeHtml(ch.badge || '')}</div>
+        <div style="font-size:11px;color:#6b6b68;margin-bottom:10px">Expires ${escapeHtml(ch.expiry || '—')}</div>
+        ${done ? '<button class="btn-secondary" disabled>Completed</button>' : !joined ? `<button class="btn-primary" onclick="joinChallenge('${escapeJs(ch.id)}')">Join Challenge</button>` : progress >= total ? `<button class="btn-primary" onclick="claimChallenge('${escapeJs(ch.id)}')">Claim Reward</button>` : '<button class="btn-secondary" disabled>In Progress</button>'}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function joinChallenge(id) {
+  const response = await fetch(`/api/challenges/${encodeURIComponent(id)}/join`, {method:'POST'});
+  if (!response.ok) { alert('Unable to join challenge.'); return; }
+  await loadChallenges();
+}
+
+async function claimChallenge(id) {
+  const response = await fetch(`/api/challenges/${encodeURIComponent(id)}/claim`, {method:'POST'});
+  const result = await response.json();
+  if (!response.ok || !result.success) { alert(result.message || 'Unable to claim challenge.'); return; }
+  document.getElementById('done-title').textContent = challenges.find(c => c.id === id)?.title || 'Challenge';
+  document.getElementById('done-pts').textContent = '+' + Number(result.pointsEarned || 0);
+  document.getElementById('done-badge').textContent = '🏅';
+  document.getElementById('complete-modal').style.display = 'flex';
+  await loadChallenges();
+}
+
+loadChallenges();
+</script>
+  <div th:replace="~{fragments/footer :: global}"></div>
+</body>
+</html>

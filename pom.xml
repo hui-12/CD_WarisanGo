@@ -94,7 +94,7 @@
 		<dependency>
 			<groupId>com.google.firebase</groupId>
 			<artifactId>firebase-admin</artifactId>
-			<version>9.4.2</version>
+			<version>9.10.0</version>
 		</dependency>
 		<dependency>
 			<groupId>com.google.auth</groupId>

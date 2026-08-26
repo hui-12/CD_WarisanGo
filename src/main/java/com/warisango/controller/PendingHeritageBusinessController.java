@@ -1,6 +1,6 @@
 package com.warisango.controller;
 
-import com.warisango.service.PendingHeritageBusinessService;
+import com.warisango.model.service.PendingHeritageBusinessService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;

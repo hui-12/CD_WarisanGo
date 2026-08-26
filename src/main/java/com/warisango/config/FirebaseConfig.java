@@ -1,12 +1,14 @@
 package com.warisango.config;
 
 import com.google.auth.oauth2.GoogleCredentials;
+import com.google.cloud.firestore.Firestore;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
-import jakarta.annotation.PostConstruct;
+import com.google.firebase.cloud.FirestoreClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 
@@ -24,8 +26,8 @@ public class FirebaseConfig {
     private static final Logger logger =
             LoggerFactory.getLogger(FirebaseConfig.class);
 
-    @PostConstruct
-    public void initialize() {
+    @Bean(destroyMethod = "delete")
+    public FirebaseApp firebaseApp() {
         try (InputStream serviceAccount = new ClassPathResource(
                 "firebase-service-account.json"
         ).getInputStream()) {
@@ -34,15 +36,23 @@ public class FirebaseConfig {
                     .setProjectId("warisango")
                     .build();
 
-            if (FirebaseApp.getApps().isEmpty()) {
-                FirebaseApp.initializeApp(options);
-                logger.info("FirebaseApp successfully initialized.");
+            if (!FirebaseApp.getApps().isEmpty()) {
+                return FirebaseApp.getInstance();
             }
+
+            FirebaseApp firebaseApp = FirebaseApp.initializeApp(options);
+            logger.info("Firebase initialized successfully for project: warisango");
+            return firebaseApp;
         } catch (IOException exception) {
             throw new IllegalStateException(
                     "Failed to initialize Firebase. Verify firebase-service-account.json.",
                     exception
             );
         }
+    }
+
+    @Bean
+    public Firestore firestore(FirebaseApp firebaseApp) {
+        return FirestoreClient.getFirestore(firebaseApp);
     }
 }

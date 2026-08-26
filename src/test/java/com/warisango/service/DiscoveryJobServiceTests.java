@@ -3,6 +3,8 @@ package com.warisango.service;
 import com.warisango.dto.DiscoveryJobStartResponse;
 import com.warisango.dto.DiscoveryJobStatusResponse;
 import com.warisango.dto.DiscoveryProcessResponse;
+import com.warisango.model.service.AIWorkflowService;
+import com.warisango.model.service.DiscoveryJobService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 

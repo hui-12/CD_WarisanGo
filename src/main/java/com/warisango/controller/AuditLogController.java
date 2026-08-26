@@ -1,6 +1,6 @@
 package com.warisango.controller;
 
-import com.warisango.service.AuditLogService;
+import com.warisango.model.service.AuditLogService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;

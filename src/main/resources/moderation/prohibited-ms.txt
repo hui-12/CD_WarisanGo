@@ -1,0 +1,120 @@
+# Bahasa Melayu / Malaysian chat profanity and insult list.
+# Expanded with common Malay, Manglish and Malaysian Chinese chat variants.
+# Keep one term or phrase per line. Review regional terms before production use.
+bodoh
+bangang
+sial
+celaka
+hampeh
+barua
+pukimak
+pantat
+laknat
+keparat
+bengap
+tolol
+goblok
+bangsat
+bajingan
+sundal
+pelacur
+jalang
+kimak
+cibai
+butoh
+lanjiao
+kanina
+niama
+anak haram
+haram jadah
+mampus
+pergi mampus
+tak guna
+otak batu
+kepala bapak
+pala bapak
+sialan
+
+# Common Malay insults and curse phrases.
+anjing
+anjing kau
+anak jadah
+anak haram
+badigol
+babi
+babi kau
+babi hutan
+bana
+bangang kau
+bengap kau
+bingai
+bodoh punya
+bodoh sial
+bongok
+buto
+buduh
+celaka kau
+gampang
+hanjing
+hawau
+jadah
+jahanam
+kaki botol
+kampang
+kepala buto
+kepala hotak
+kepala hotak kau
+kepala konek
+keparat kau
+kimak kau
+laknat kau
+mak kau
+mak kau punya puki
+mampus kau
+niama
+otak batu
+otak udang
+otak sial
+pala bana
+pala buto
+pantat kau
+pepek
+pergi mampus
+puki
+puki kau
+puki mak kau
+pukimak kau
+setan kau
+sohai
+sohai kia
+syaitan
+taik
+taik kau
+tahi
+tolol kau
+tongong
+tak guna
+tak berguna
+
+# Malaysian Chinese / Manglish variants often used in local chat.
+cibai kau
+kan ni na
+kanina kau
+lan jiao
+lanjiao kau
+lancau kau
+mak kau hijau
+niama kau
+pukima
+pukima kau
+sohai kau
+
+# Common spelling variations.
+anj1ng
+b4bi
+b0doh
+c1bai
+g4mpang
+l4ncau
+puk1mak
+s0hai

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:fragment="head(title)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title}">WarisanGo</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Global Styles (With static href fallback) -->
+    <link rel="stylesheet" href="/css/global.css" th:href="@{/css/global.css}">
+</head>
+<body>
+    <!-- Sticky Navbar Fragment -->
+    <header th:fragment="navbar(activePage)" class="navbar">
+        <div class="nav-container">
+            <a class="brand-logo"
+               th:href="${#authorization.expression('hasRole(''ADMIN'')')} ? @{/ai-discovery} : @{/home}">
+                <span class="brand-main">Warisan</span><span class="brand-accent">Go</span>
+                <span class="admin-badge" sec:authorize="hasRole('ADMIN')">ADMIN</span>
+            </a>
+
+            <nav class="nav-links" aria-label="Primary navigation" sec:authorize="hasRole('TOURIST')">
+                <a class="nav-item" th:classappend="${activePage == 'home'} ? ' active'" th:href="@{/home}">Home</a>
+                <a class="nav-item" th:classappend="${activePage == 'directory'} ? ' active'"
+                   th:href="@{/directory}">Directory</a>
+                <a class="nav-item" th:classappend="${activePage == 'map'} ? ' active'" th:href="@{/map}">Map</a>
+                <a class="nav-item" th:classappend="${activePage == 'saved'} ? ' active'" th:href="@{/saved}">Saved</a>
+                <a class="nav-item" th:classappend="${activePage == 'rewards'} ? ' active'"
+                   th:href="@{/rewards}">Rewards</a>
+                <a class="nav-item" th:classappend="${activePage == 'badges'} ? ' active'" th:href="@{/badges}">Badges</a>
+                <a class="nav-item" th:classappend="${activePage == 'challenges'} ? ' active'"
+                   th:href="@{/challenges}">Challenges</a>
+                <a class="nav-item" th:classappend="${activePage == 'profile'} ? ' active'"
+                   th:href="@{/profile}">Profile</a>
+            </nav>
+
+            <nav class="nav-links" aria-label="Admin navigation" sec:authorize="hasRole('ADMIN')">
+                <a class="nav-item" th:classappend="${activePage == 'ai-discovery'} ? ' active'"
+                   th:href="@{/ai-discovery}">AI Discovery</a>
+                <a class="nav-item" th:classappend="${activePage == 'pending-list'} ? ' active'"
+                   th:href="@{/admin/pending}">Pending List</a>
+                <a class="nav-item" th:classappend="${activePage == 'audit-log'} ? ' active'"
+                   th:href="@{/admin/audit-log}">Audit Log</a>
+                <a class="nav-item" th:classappend="${activePage == 'admin-challenges'} ? ' active'"
+                   th:href="@{/admin/challenges}">Challenges</a>
+            </nav>
+
+            <div class="nav-actions">
+                <a class="user-profile-btn" th:href="@{/profile}">
+                    <img class="avatar-img" alt="User avatar"
+                         th:src="${session.navbarUser != null and session.navbarUser.avatar != null}
+                                 ? ${session.navbarUser.avatar}
+                                 : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&amp;h=100&amp;fit=crop'">
+                    <span class="user-name"
+                          th:text="${session.navbarUser != null ? session.navbarUser.name : 'Profile'}">Profile</span>
+                </a>
+            </div>
+        </div>
+    </header>
+</body>
+</html>

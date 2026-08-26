@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <th:block th:replace="~{fragments/fragments :: head('WarisanGo — Check In')}"></th:block>
+  <link rel="stylesheet" href="/css/rewards.css" th:href="@{/css/rewards.css}">
+</head>
+<body>
+  <div th:replace="~{fragments/fragments :: navbar('checkin')}"></div>
+<main>
+  <h1>Check In at a Heritage Business</h1>
+  <p class="muted">Visit a heritage food business and confirm your GPS location within 50 metres to earn reward points.</p>
+  <div class="batik-divider" style="margin:24px 0"></div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;margin-bottom:24px" id="biz-grid">
+    <div class="card">Loading approved heritage businesses...</div>
+  </div>
+
+  <div id="ci-status"></div>
+</main>
+
+<script>
+// ============================================================
+// Firebase-backed Check In page
+// ============================================================
+// This project does not currently have a real authentication
+// flow. For now, a browser user ID is stored locally.
+// Replace this with the authenticated user's ID later.
+const MAX_DISTANCE_METERS = 50;
+const URL_BUSINESS_ID = new URLSearchParams(window.location.search).get('businessId');
+
+let BUSINESSES = [];
+let checkedIn = [];
+let selectedBiz = null;
+
+
+
+async function loadBusinesses() {
+  const grid = document.getElementById('biz-grid');
+
+  try {
+    const response = await fetch('/interactive-map/api/approved');
+    if (!response.ok) throw new Error('Unable to load approved businesses');
+
+    const data = await response.json();
+
+    BUSINESSES = data.map(biz => ({
+      id: biz.businessId,
+      name: biz.name || 'Unnamed business',
+      address: biz.address || '',
+      latitude: Number(biz.latitude),
+      longitude: Number(biz.longitude),
+      pts: Number(biz.checkInPoints || 50)
+    })).filter(biz =>
+      Number.isFinite(biz.latitude) &&
+      Number.isFinite(biz.longitude)
+    );
+
+    if (BUSINESSES.length === 0) {
+      grid.innerHTML = '<div class="card">No approved businesses with GPS locations are available.</div>';
+      return;
+    }
+
+    renderBizGrid();
+    if (URL_BUSINESS_ID) {
+      const selected = BUSINESSES.find(b => b.id === URL_BUSINESS_ID);
+      if (selected) selectBiz(selected.id);
+    }
+  } catch (error) {
+    console.error('loadBusinesses:', error);
+    grid.innerHTML = `
+      <div class="card" style="border-color:#c9a84c;background:#FDF0EB">
+        <strong>Unable to load businesses.</strong>
+        <div style="margin-top:6px;color:#6b6b68">Please make sure Firebase is connected and try again.</div>
+      </div>`;
+  }
+}
+
+function renderBizGrid() {
+  const grid = document.getElementById('biz-grid');
+
+  grid.innerHTML = BUSINESSES.map(biz => {
+    const done = checkedIn.includes(biz.id);
+    const active = selectedBiz === biz.id;
+
+    return `<button onclick="selectBiz('${escapeJs(biz.id)}')" style="text-align:left;padding:20px;border-radius:12px;
+      border:${active ? '2px solid #c9a84c' : '1px solid #e8e6e0'};
+      background:${done ? '#f5e9c4' : active ? '#c9a84c' : '#ffffff'};
+      color:${active ? '#fff' : done ? '#6b6b68' : '#141413'};
+      cursor:${done ? 'default' : 'pointer'};transition:all 0.15s;width:100%">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
+        <span style="font-size:14px;font-weight:600;line-height:1.3">${escapeHtml(biz.name)}</span>
+        ${done ? '<span style="font-size:9px;font-family:\'Inter\',monospace;color:#6b6b68;border:1px solid #e8e6e0;border-radius:4px;padding:2px 6px;flex-shrink:0;margin-left:6px">VISITED</span>' : ''}
+      </div>
+      <div style="font-size:12px;opacity:0.65;margin-bottom:10px">${escapeHtml(biz.address)}</div>
+      <div style="font-family:'Inter',monospace;font-size:12px;color:${active ? 'rgba(255,255,255,0.75)' : '#c9a84c'}">+${biz.pts} pts</div>
+    </button>`;
+  }).join('');
+}
+
+function selectBiz(id) {
+  if (checkedIn.includes(id)) return;
+
+  selectedBiz = id;
+  renderBizGrid();
+
+  const biz = BUSINESSES.find(b => b.id === id);
+  if (!biz) return;
+
+  document.getElementById('ci-status').innerHTML = `
+    <div class="card" style="background:#f5e9c4;margin-top:0">
+      <p style="font-size:14px;margin-bottom:16px">
+        Ready to check in at <strong>${escapeHtml(biz.name)}</strong>?
+        Your phone GPS location will be verified within 50 metres.
+      </p>
+      <div style="font-size:12px;color:#6b6b68;margin-bottom:16px">
+        Reward: <strong style="color:#c9a84c">+${biz.pts} points</strong>
+      </div>
+      <div style="display:flex;gap:10px">
+        <button class="btn-primary" onclick="doCheckIn('${escapeJs(id)}')">Check In</button>
+        <button class="btn-secondary" onclick="cancelCI()">Cancel</button>
+      </div>
+    </div>`;
+}
+
+function cancelCI() {
+  selectedBiz = null;
+  renderBizGrid();
+  document.getElementById('ci-status').innerHTML = '';
+}
+
+function doCheckIn(id) {
+  const biz = BUSINESSES.find(b => b.id === id);
+  if (!biz) return;
+
+  document.getElementById('ci-status').innerHTML = statusCard(
+      'loading',
+      'Detecting your location…',
+      'Please allow location access. Your GPS position will be checked against the business location.',
+      '', '', '', ''
+  );
+
+  if (!navigator.geolocation) {
+    document.getElementById('ci-status').innerHTML = statusCard(
+        'error',
+        'Location is not supported',
+        'Your browser does not provide GPS location services.',
+        'Cancel',
+        'cancelCI()', '', ''
+    );
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    async position => {
+      const userLat = position.coords.latitude;
+      const userLng = position.coords.longitude;
+      const accuracy = position.coords.accuracy;
+
+      // Client-side distance is shown to the user. The backend recalculates it
+      // from the same coordinates, so the browser value is never trusted.
+      const distanceMeters = calculateDistanceMeters(
+          userLat,
+          userLng,
+          biz.latitude,
+          biz.longitude
+      );
+
+      console.log('User GPS:', userLat, userLng);
+      console.log('Business GPS:', biz.latitude, biz.longitude);
+      console.log('GPS accuracy:', accuracy, 'm');
+      console.log('Distance:', distanceMeters, 'm');
+
+      if (distanceMeters > MAX_DISTANCE_METERS) {
+        document.getElementById('ci-status').innerHTML = statusCard(
+            'error',
+            `Move closer to ${escapeHtml(biz.name)}`,
+            `You are approximately ${Math.round(distanceMeters)} metres away. You must be within 50 metres to check in.`,
+            'Try Again',
+            `retryCI('${escapeJs(id)}')`,
+            'Change Business',
+            'cancelCI()'
+        );
+        return;
+      }
+
+      await submitCheckIn(biz, userLat, userLng, distanceMeters, accuracy);
+    },
+    error => {
+      console.error('GPS error:', error);
+
+      let message = 'Please enable location permission and try again.';
+      if (error.code === 1) message = 'Location permission was denied. Please allow location access for this website.';
+      if (error.code === 2) message = 'Your location could not be determined. Please check your phone GPS/location service.';
+      if (error.code === 3) message = 'Location detection timed out. Please try again.';
+
+      document.getElementById('ci-status').innerHTML = statusCard(
+          'error',
+          'Unable to detect your location',
+          message,
+          'Try Again',
+          `retryCI('${escapeJs(id)}')`,
+          'Cancel',
+          'cancelCI()'
+      );
+    },
+    {
+      enableHighAccuracy: true,
+      timeout: 15000,
+      maximumAge: 0
+    }
+  );
+}
+
+async function submitCheckIn(biz, userLat, userLng, distanceMeters, accuracy) {
+  document.getElementById('ci-status').innerHTML = statusCard(
+      'loading',
+      'Verifying check-in…',
+      `You are approximately ${Math.round(distanceMeters)} metres away. Saving your check-in and points to Firebase.`,
+      '', '', '', ''
+  );
+
+  try {
+    const response = await fetch('/api/checkin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        businessId: biz.id,
+        userLatitude: userLat,
+        userLongitude: userLng,
+        distanceMeters: distanceMeters,
+        gpsAccuracyMeters: accuracy
+      })
+    });
+
+    const result = await response.json();
+
+    if (!response.ok || !result.success) {
+      document.getElementById('ci-status').innerHTML = statusCard(
+          'warning',
+          'Check-in was not completed',
+          escapeHtml(result.message || 'The check-in could not be completed.'),
+          'Try Again',
+          `retryCI('${escapeJs(biz.id)}')`,
+          'Change Business',
+          'cancelCI()'
+      );
+      return;
+    }
+
+    // The backend response is now the source of truth for the balance.
+    checkedIn.push(biz.id);
+    selectedBiz = null;
+    renderBizGrid();
+
+    document.getElementById('ci-status').innerHTML = statusCard(
+        'success',
+        `+${result.pointsEarned} points awarded`,
+        `Check-in confirmed at ${escapeHtml(biz.name)}. You were ${Math.round(result.distanceMeters)} metres away. Your points have been saved to Firebase.`,
+        'Check In Somewhere Else',
+        'cancelCI()',
+        '', ''
+    );
+
+  } catch (error) {
+    console.error('submitCheckIn:', error);
+
+    document.getElementById('ci-status').innerHTML = statusCard(
+        'error',
+        'Unable to save check-in',
+        'The location was detected, but the server could not save the check-in. Please try again.',
+        'Try Again',
+        `retryCI('${escapeJs(biz.id)}')`,
+        'Cancel',
+        'cancelCI()'
+    );
+  }
+}
+
+function retryCI(id) {
+  document.getElementById('ci-status').innerHTML = '';
+  selectBiz(id);
+}
+
+function statusCard(type, title, body, a1label, a1fn, a2label, a2fn) {
+  const cfg = {
+    loading: { bg:'#ffffff', border:'#e8e6e0', icon:'⟳' },
+    error:   { bg:'#FDF0EB', border:'#c9a84c', icon:'✕' },
+    warning: { bg:'#FEF8EC', border:'#c9a84c', icon:'!' },
+    success: { bg:'#EAF3EE', border:'#2d7a4f', icon:'✓' }
+  }[type];
+
+  return `<div style="padding:24px;border:2px solid ${cfg.border};border-radius:12px;background:${cfg.bg}">
+    <div style="display:flex;gap:12px;align-items:flex-start">
+      <span style="font-size:18px;flex-shrink:0;color:${cfg.border}">${cfg.icon}</span>
+      <div>
+        <div style="font-size:15px;font-weight:700;margin-bottom:6px">${title}</div>
+        <div style="font-size:13px;color:#6b6b68;margin-bottom:${a1label ? 16 : 0}px">${body}</div>
+        ${a1label ? `<div style="display:flex;gap:10px">
+          <button class="btn-primary" onclick="${a1fn}">${a1label}</button>
+          ${a2label ? `<button class="btn-secondary" onclick="${a2fn}">${a2label}</button>` : ''}
+        </div>` : ''}
+      </div>
+    </div>
+  </div>`;
+}
+
+// Haversine formula. Result is the straight-line distance between two GPS points.
+function calculateDistanceMeters(lat1, lon1, lat2, lon2) {
+  const earthRadius = 6371000;
+  const toRadians = degrees => degrees * Math.PI / 180;
+
+  const dLat = toRadians(lat2 - lat1);
+  const dLon = toRadians(lon2 - lon1);
+  const a = Math.sin(dLat / 2) ** 2
+      + Math.cos(toRadians(lat1))
+      * Math.cos(toRadians(lat2))
+      * Math.sin(dLon / 2) ** 2;
+
+  return earthRadius * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+/*function escapeHtml(value) {
+  return String(value ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+}*/
+
+function escapeJs(value) {
+  return String(value ?? '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+}
+
+// ============================================================
+// Initial load
+// ============================================================
+(async function init() {
+  await loadBusinesses();
+})();
+</script>
+  <div th:replace="~{fragments/footer :: global}"></div>
+</body>
+</html>

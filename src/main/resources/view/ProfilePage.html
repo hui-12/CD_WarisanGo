@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="~{fragments/fragments :: head('WarisanGo - Profile')}"></th:block>
+    <link rel="stylesheet" th:href="@{/css/profile.css}">
+    <script defer th:src="@{/js/profile.js}"></script>
+</head>
+<body>
+    <div th:replace="~{fragments/fragments :: navbar('profile')}"></div>
+
+    <main class="profile-page">
+        <section class="profile-card">
+            <h1 class="profile-heading">Your profile</h1>
+            <div class="profile-summary">
+                <img class="profile-avatar"
+                     th:src="${user.avatar}"
+                     alt="Profile photo">
+                <div>
+                    <h2 class="profile-name" th:text="${user.name}">WarisanGo visitor</h2>
+                    <p class="profile-email" th:text="${user.email}">visitor@example.com</p>
+                </div>
+            </div>
+
+            <div class="profile-details">
+                <div class="profile-detail">
+                    <p class="profile-label">Account type</p>
+                    <p class="profile-value" th:text="${user.role}">tourist</p>
+                </div>
+                <div class="profile-detail">
+                    <p class="profile-label">Reward points</p>
+                    <p class="profile-value" th:text="${user.totalPoints}">0</p>
+                </div>
+            </div>
+
+            <button id="switch-account-button" class="switch-account-button" type="button">
+                Switch Google account
+            </button>
+        </section>
+    </main>
+
+    <div th:replace="~{fragments/footer :: global}"></div>
+</body>
+</html>

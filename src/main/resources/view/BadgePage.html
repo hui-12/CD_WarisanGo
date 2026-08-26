@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <th:block th:replace="~{fragments/fragments :: head('WarisanGo — Badges')}"></th:block>
+  <link rel="stylesheet" href="/css/rewards.css" th:href="@{/css/rewards.css}">
+</head>
+<body>
+  <div th:replace="~{fragments/fragments :: navbar('badges')}"></div>
+<div id="page-badges" class="page active">
+<main>
+  <div id="badge-notif" style="display:flex;align-items:center;justify-content:space-between;padding:12px 20px;background:#2d7a4f;color:#fff;border-radius:12px;margin-bottom:32px;font-size:13px">
+    <span>🔓 Silver Palate badge unlocked! You've reached 500 points.</span>
+    <button onclick="this.parentElement.style.display='none'" style="background:none;border:none;color:rgba(255,255,255,0.6);font-size:18px;cursor:pointer">×</button>
+  </div>
+
+  <h1>Your Achievement Badges</h1>
+  <p class="muted">Badges unlock automatically when you reach defined milestones.</p>
+  <div class="batik-divider" style="margin:24px 0"></div>
+
+  <!-- Stats -->
+  <div style="display:flex;gap:12px;margin-bottom:32px" id="badge-stats"></div>
+
+  <!-- Filter tabs -->
+  <div style="display:flex;border-bottom:1px solid #e8e6e0;margin-bottom:24px">
+    <button class="badge-tab" data-filter="all" onclick="filterBadges('all',this)" style="padding:10px 20px;border:none;border-bottom:2px solid #c9a84c;background:transparent;color:#c9a84c;font-weight:700;font-size:13px;cursor:pointer;margin-bottom:-1px">All Badges</button>
+    <button class="badge-tab" data-filter="earned" onclick="filterBadges('earned',this)" style="padding:10px 20px;border:none;border-bottom:2px solid transparent;background:transparent;color:#6b6b68;font-size:13px;cursor:pointer;margin-bottom:-1px">Earned</button>
+    <button class="badge-tab" data-filter="locked" onclick="filterBadges('locked',this)" style="padding:10px 20px;border:none;border-bottom:2px solid transparent;background:transparent;color:#6b6b68;font-size:13px;cursor:pointer;margin-bottom:-1px">Locked</button>
+  </div>
+
+  <div id="badge-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px"></div>
+</main>
+</div>
+<script>
+// ══════════════════════════════════════
+// PAGE 2: BADGES
+// ══════════════════════════════════════
+const BADGES = [
+  { id:1, name:'First Bite',          desc:'Complete your first heritage food check-in.',        milestone:'1 check-in',   threshold:1,    icon:'🍚', earned:true,  date:'14 Jul 2026', progress:1 },
+  { id:2, name:'Neighbourhood Regular',desc:'Check in at 5 different heritage food businesses.', milestone:'5 check-ins',  threshold:5,    icon:'🏘️', earned:true,  date:'18 Jul 2026', progress:5 },
+  { id:3, name:'Silver Palate',        desc:'Reach Silver tier (500 points).',                   milestone:'500 pts',      threshold:500,  icon:'🥈', earned:false, date:'', progress:320 },
+  { id:4, name:'Heritage Hunter',      desc:'Check in at 10 different heritage businesses.',      milestone:'10 check-ins', threshold:10,   icon:'🗺️', earned:false, date:'', progress:3 },
+  { id:5, name:'Golden Table',         desc:'Reach Gold tier (1,000 points).',                   milestone:'1,000 pts',    threshold:1000, icon:'🥇', earned:false, date:'', progress:320 },
+  { id:6, name:'Culinary Ambassador',  desc:'Check in at 25 different heritage businesses.',      milestone:'25 check-ins', threshold:25,   icon:'🎖️', earned:false, date:'', progress:3 },
+  { id:7, name:'Platinum Connoisseur', desc:'Reach Platinum tier (2,000 points).',               milestone:'2,000 pts',    threshold:2000, icon:'💎', earned:false, date:'', progress:320 },
+  { id:8, name:'Challenge Champion',   desc:'Complete your first limited-time challenge.',        milestone:'1 challenge',  threshold:1,    icon:'🏆', earned:false, date:'', progress:0 },
+];
+
+let badgeFilter = 'all';
+
+function filterBadges(f, btn) {
+  badgeFilter = f;
+  document.querySelectorAll('.badge-tab').forEach(b => {
+    b.style.borderBottom = '2px solid transparent';
+    b.style.color = '#6b6b68';
+    b.style.fontWeight = '400';
+  });
+  btn.style.borderBottom = '2px solid #c9a84c';
+  btn.style.color = '#c9a84c';
+  btn.style.fontWeight = '700';
+  renderBadges();
+}
+
+function renderBadges() {
+  const earned = BADGES.filter(b => b.earned);
+  const locked = BADGES.filter(b => !b.earned);
+  const shown  = badgeFilter === 'all' ? BADGES : badgeFilter === 'earned' ? earned : locked;
+
+  document.getElementById('badge-stats').innerHTML = [
+    { label:'TOTAL',  value: BADGES.length },
+    { label:'EARNED', value: earned.length },
+    { label:'LOCKED', value: locked.length },
+  ].map(s => `<div style="flex:1;padding:16px 20px;border:1px solid #e8e6e0;border-radius:12px;background:#ffffff">
+    <div class="caption">${s.label}</div>
+    <div class="mono" style="font-size:28px;font-weight:700">${s.value}</div>
+  </div>`).join('');
+
+  // Update tab labels
+  document.querySelectorAll('.badge-tab').forEach(b => {
+    const f = b.getAttribute('data-filter');
+    if (f === 'earned') b.textContent = `Earned (${earned.length})`;
+    if (f === 'locked') b.textContent = `Locked (${locked.length})`;
+  });
+
+  document.getElementById('badge-grid').innerHTML = shown.map(b => {
+    const pct = Math.min((b.progress / b.threshold) * 100, 100);
+    return `<div class="${b.earned ? 'batik-bg' : ''}" style="padding:20px;border-radius:12px;
+      border:${b.earned ? '1.5px solid #2d7a4f' : '1px solid #e8e6e0'};
+      background:${b.earned ? '#2d7a4f' : '#ffffff'};
+      color:${b.earned ? '#fff' : '#141413'};position:relative;overflow:hidden">
+      ${b.earned ? `<div style="position:absolute;top:12px;right:12px;font-size:9px;font-family:'Inter',monospace;letter-spacing:0.08em;color:rgba(255,255,255,0.45)">EARNED</div>` : ''}
+      <div style="font-size:28px;margin-bottom:12px">${b.icon}</div>
+      <div style="font-size:15px;font-weight:700;margin-bottom:4px">${b.name}</div>
+      <div style="font-size:12px;opacity:0.7;line-height:1.55;margin-bottom:12px">${b.desc}</div>
+      <div style="font-size:11px;font-family:'Inter',monospace;color:${b.earned ? 'rgba(255,255,255,0.45)' : '#6b6b68'};margin-bottom:${b.earned ? 4 : 10}px">${b.milestone}</div>
+      ${b.earned
+        ? `<div style="font-size:11px;font-family:'Inter',monospace;color:rgba(255,255,255,0.4)">${b.date}</div>`
+        : `<div style="height:4px;background:#f5e9c4;border-radius:4px;margin-bottom:6px;overflow:hidden">
+             <div style="height:100%;width:${pct}%;background:#c9a84c;border-radius:4px"></div>
+           </div>
+           <div style="font-size:11px;font-family:'Inter',monospace;color:#6b6b68">${b.progress} / ${b.threshold} — ${Math.round(pct)}%</div>`
+      }
+    </div>`;
+  }).join('');
+}
+
+// ── Init ──────────────────────────────────────────────────────
+renderBadges();
+</script>
+  <div th:replace="~{fragments/footer :: global}"></div>
+</body>
+</html>

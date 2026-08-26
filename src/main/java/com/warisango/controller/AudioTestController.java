@@ -1,7 +1,7 @@
 package com.warisango.controller;
 
 import com.warisango.dto.AudioExtractionRequest;
-import com.warisango.service.VideoAudioService;
+import com.warisango.model.service.VideoAudioService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

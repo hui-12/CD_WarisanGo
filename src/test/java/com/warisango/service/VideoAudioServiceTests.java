@@ -1,5 +1,4 @@
-package com.warisango.service;
-
+package com.warisango.model.service;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;

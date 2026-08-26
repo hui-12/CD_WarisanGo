@@ -1,5 +1,7 @@
 package com.warisango.service;
 
+import com.warisango.model.service.DiscoveryService;
+import com.warisango.model.service.VideoSearchService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

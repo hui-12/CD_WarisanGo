@@ -1,7 +1,7 @@
 package com.warisango.controller;
 
 import com.warisango.dto.TranscriptionRequest;
-import com.warisango.service.SpeechToTextService;
+import com.warisango.model.service.SpeechToTextService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
