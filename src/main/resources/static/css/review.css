@@ -354,6 +354,21 @@
     border-radius: 7px;
 }
 
+.review-photo-grid img.review-photo-open,
+.review-detail-photos img.review-photo-open {
+    cursor: zoom-in;
+    transition: transform .15s ease, box-shadow .15s ease;
+}
+
+.review-photo-grid img.review-photo-open:hover,
+.review-detail-photos img.review-photo-open:hover,
+.review-photo-grid img.review-photo-open:focus-visible,
+.review-detail-photos img.review-photo-open:focus-visible {
+    outline: 0;
+    transform: scale(1.03);
+    box-shadow: 0 4px 14px rgba(20, 20, 19, .18);
+}
+
 .review-item-actions {
     display: flex;
     gap: 17px;
@@ -585,6 +600,60 @@
     object-fit: cover;
     border: 1px solid #e8e6e0;
     border-radius: 7px;
+}
+
+.review-photo-viewer {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 28px;
+    background: rgba(20, 20, 19, .82);
+}
+
+.review-photo-viewer[hidden] {
+    display: none;
+}
+
+.review-photo-viewer-content {
+    position: relative;
+    max-width: 94vw;
+    max-height: 90vh;
+}
+
+.review-photo-viewer-content img {
+    display: block;
+    max-width: 94vw;
+    max-height: 86vh;
+    border: 1px solid rgba(255, 255, 255, .7);
+    border-radius: 8px;
+    background: #fff;
+    object-fit: contain;
+}
+
+.review-photo-viewer-close {
+    position: absolute;
+    top: -38px;
+    right: 0;
+    width: 30px;
+    height: 30px;
+    border: 1px solid rgba(255, 255, 255, .8);
+    border-radius: 50%;
+    background: #fff;
+    color: #141413;
+    font: 400 22px/1 Inter, Arial, sans-serif;
+    cursor: pointer;
+}
+
+.review-photo-viewer-close:hover,
+.review-photo-viewer-close:focus-visible {
+    background: #c9a84c;
+}
+
+body.review-photo-viewer-open {
+    overflow: hidden;
 }
 
 .review-detail-actions {
@@ -1776,9 +1845,9 @@
     font: 700 16px/1.15 Fraunces, Georgia, serif;
 }
 
-.review-highlight-likes {
+.review-highlight-rating {
     color: #8f6e20;
-    font: 600 10px Inter, Arial, sans-serif;
+    font: 700 11px Inter, Arial, sans-serif;
     white-space: nowrap;
 }
 
