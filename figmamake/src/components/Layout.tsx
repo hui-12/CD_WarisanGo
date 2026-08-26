@@ -7,6 +7,7 @@ export type Page =
   | 'directory'
   | 'business-detail'
   | 'map'
+  | 'saved'
   | 'rewards'
   | 'badges'
   | 'challenges'
@@ -29,6 +30,7 @@ const TOURIST_NAV: { label: string; page: Page }[] = [
   { label: 'Home', page: 'home' },
   { label: 'Directory', page: 'directory' },
   { label: 'Map', page: 'map' },
+  { label: 'Saved', page: 'saved' },
   { label: 'Rewards', page: 'rewards' },
   { label: 'Badges', page: 'badges' },
   { label: 'Challenges', page: 'challenges' },

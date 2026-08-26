@@ -55,6 +55,10 @@
       <article th:each="b : ${businesses}" class="business-card"
                th:attr="data-category=${b.category},data-state=${b.state},data-city=${b.city}">
         <div class="business-image-wrap">
+          <button class="save-btn indicator" th:data-id="${b.businessId}" aria-label="Save business" 
+                  style="position: absolute; top: 10px; right: 10px; z-index: 10; background: white; border: none; border-radius: 50%; padding: 8px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+              <span class="bookmark-icon">🔖</span>
+          </button>
           <img th:if="${not #lists.isEmpty(b.photos)}" th:src="${b.photos[0]}"
                th:alt="${b.name} + ' photo'" th:title="${b.name}" class="business-image"
                data-fallback-image="https://images.unsplash.com/photo-1559925393-8be0ec4767c8?auto=format&amp;fit=crop&amp;w=900&amp;q=85">

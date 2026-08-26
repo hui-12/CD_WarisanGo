@@ -49,6 +49,12 @@
             <strong th:text="${business.averageRating != null ? #numbers.formatDecimal(business.averageRating, 1, 1) : 'New'}">4.8</strong>
             <span>Approved heritage listing</span>
           </p>
+
+        <button id="detail-save-btn" class="btn-save" th:data-id="${business.businessId}" 
+                style="margin-top: 12px; padding: 8px 16px; border: 1px solid #ccc; border-radius: 6px; background: #fff; cursor: pointer; font-weight: 600;">
+            <span class="bookmark-icon">🔖</span> <span class="save-text">Save to Favorites</span>
+        </button>
+        
           <p class="business-summary" th:text="${business.description}">Business description</p>
         </header>
 

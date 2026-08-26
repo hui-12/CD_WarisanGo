@@ -28,6 +28,12 @@ public class HomeController {
     public String mapPage() {
         return "interactiveMap";
     }
+
+    @GetMapping("/saved")
+    public String savedPage(Model model) {
+        model.addAttribute("activePage", "saved");
+        return "SavedPage"; 
+    }
     
     @GetMapping({"/CheckInPage"})
     public String checkIn(Model model) {

@@ -10,6 +10,7 @@ document.addEventListener("click", (event) => {
             "home": "/",
             "directory": "/directory",
             "map": "/map",
+            "saved": "/saved",
             "rewards": "/rewards",
             "badges": "/badges",
             "challenges": "/challenges",
