@@ -8,10 +8,16 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 import java.util.UUID;
 
 /**
- * Handles audio extraction from YouTube videos.
+ * Handles audio extraction from supported video platforms.
  */
 @Service
 public class VideoAudioService {
@@ -20,9 +26,9 @@ public class VideoAudioService {
             LoggerFactory.getLogger(VideoAudioService.class);
 
     /**
-     * Downloads the audio track from a YouTube video into a temporary file.
+     * Downloads the audio track from a supported video URL into a temporary file.
      *
-     * @param videoUrl YouTube video URL
+     * @param videoUrl supported video URL
      * @return path of the temporary audio file
      */
     public Path downloadAudio(String videoUrl) {
@@ -33,7 +39,7 @@ public class VideoAudioService {
 
         try {
 
-            logger.info("Starting audio extraction from YouTube.");
+            logger.info("Starting audio extraction from supported video URL.");
 
             outputDirectory =
                     Files.createTempDirectory("warisango-audio-");
@@ -43,23 +49,8 @@ public class VideoAudioService {
                             "audio-" + UUID.randomUUID() + ".%(ext)s"
                     ).toString();
 
-            ProcessBuilder processBuilder =
-                new ProcessBuilder(
-                        "yt-dlp",
-                        "--no-playlist",
-                        "--extractor-args",
-                        "youtube:player_client=android",
-                        "-f",
-                        "18",
-                        "--extract-audio",
-                        "--audio-format",
-                        "m4a",
-                        "--audio-quality",
-                        "0",
-                        "-o",
-                        outputTemplate,
-                        videoUrl
-                );
+            ProcessBuilder processBuilder = new ProcessBuilder(
+                    createDownloadCommand(videoUrl, outputTemplate));
 
             processBuilder.redirectErrorStream(true);
 
@@ -85,7 +76,7 @@ public class VideoAudioService {
                 cleanupDirectory(outputDirectory);
 
                 throw new AIProcessingException(
-                        "Unable to extract audio from YouTube."
+                        extractionFailureMessage(processOutput)
                 );
             }
 
@@ -124,7 +115,7 @@ public class VideoAudioService {
             );
 
             throw new AIProcessingException(
-                    "Unable to extract audio from YouTube.",
+                    "Unable to start yt-dlp. Install yt-dlp and ensure it is available on PATH.",
                     exception
             );
 
@@ -217,27 +208,66 @@ public class VideoAudioService {
     }
 
     /**
-     * Validates the supplied YouTube URL.
+     * Validates the supplied supported video URL.
      *
-     * @param videoUrl YouTube video URL
+     * @param videoUrl supported video URL
      */
     private void validateVideoUrl(String videoUrl) {
 
         if (videoUrl == null || videoUrl.isBlank()) {
 
             throw new AIProcessingException(
-                    "YouTube video URL cannot be empty."
+                    "Video URL cannot be empty."
             );
         }
 
-        if (!videoUrl.startsWith("https://www.youtube.com/")
-                && !videoUrl.startsWith("https://youtube.com/")
-                && !videoUrl.startsWith("https://youtu.be/")) {
+        try {
+            URI uri = new URI(videoUrl);
+            String host = uri.getHost() == null ? "" : uri.getHost().toLowerCase(Locale.ROOT);
+            Set<String> supportedHosts = Set.of(
+                    "www.youtube.com", "youtube.com", "youtu.be",
+                    "www.tiktok.com", "tiktok.com", "m.tiktok.com", "vm.tiktok.com");
 
-            throw new AIProcessingException(
-                    "Invalid YouTube URL."
-            );
+            if (!"https".equalsIgnoreCase(uri.getScheme()) || !supportedHosts.contains(host)) {
+                throw new AIProcessingException("Only YouTube and TikTok video URLs are supported.");
+            }
+        } catch (URISyntaxException exception) {
+            throw new AIProcessingException("Invalid video URL.", exception);
         }
+    }
+
+    static List<String> createDownloadCommand(String videoUrl, String outputTemplate) {
+        boolean isTikTok = videoUrl.contains("tiktok.com/");
+        List<String> command = new ArrayList<>(List.of("yt-dlp", "--no-playlist"));
+
+        if (isTikTok) {
+            command.addAll(List.of(
+                    "--cookies-from-browser",
+                    "chromium:" + TikTokScraperService.PROFILE_PATH,
+                    "-f",
+                    "bestaudio/best"));
+        } else {
+            command.addAll(List.of(
+                    "--extractor-args", "youtube:player_client=android",
+                    "-f", "18"));
+        }
+
+        command.addAll(List.of(
+                "--extract-audio", "--audio-format", "m4a", "--audio-quality", "0",
+                "-o", outputTemplate, videoUrl));
+        return command;
+    }
+
+    private String extractionFailureMessage(String processOutput) {
+        String lowercaseOutput = processOutput.toLowerCase(Locale.ROOT);
+        if (lowercaseOutput.contains("ffmpeg")
+                && (lowercaseOutput.contains("not found") || lowercaseOutput.contains("not installed"))) {
+            return "FFmpeg is required to convert the downloaded video audio.";
+        }
+        if (lowercaseOutput.contains("unexpected response from webpage request")) {
+            return "TikTok rejected the yt-dlp webpage request. Refresh the TikTok browser session and retry.";
+        }
+        return "Unable to extract audio from the video.";
     }
 
     public void deleteAudioFile(Path audioFile) {

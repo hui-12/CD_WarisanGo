@@ -39,7 +39,7 @@
         <h1>AI Heritage Discovery</h1>
 
         <p>
-            Search YouTube videos and process selected videos
+            Search YouTube or TikTok videos and process supported videos
             to discover Malaysian heritage food information.
         </p>
 
@@ -58,19 +58,28 @@
 
             <p class="text-muted">
                 Enter a keyword related to Malaysian heritage food, then
-                choose a YouTube video to process.
+                choose a source and configure the video search.
             </p>
 
-            <div class="row g-3">
+            <div class="row g-3 align-items-end">
 
-                <div class="col-md-9">
+                <div class="col-md-3">
+                    <label for="videoSource" class="form-label">Video source</label>
+                    <select id="videoSource" class="form-select">
+                        <option value="youtube">YouTube</option>
+                        <option value="tiktok">TikTok</option>
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+
+                    <label for="keyword" class="form-label">Search keyword</label>
 
                     <input
                             type="text"
                             id="keyword"
                             class="form-control"
-                            placeholder="Exp: Best-traditional-Penang-char-kuey-teow-in
-                                        -Malaysia(Replace-spaces-with-dashes)">
+                            placeholder="Traditional Penang char kuey teow">
 
                 </div>
 
@@ -87,6 +96,21 @@
 
                 </div>
 
+            </div>
+
+            <div id="tikTokOptions" class="row g-3 mt-1 d-none">
+                <div class="col-md-4">
+                    <label for="maximumVideos" class="form-label">Maximum videos</label>
+                    <input id="maximumVideos" class="form-control" type="number" min="1" max="50" value="12">
+                </div>
+                <div class="col-md-4">
+                    <label for="scrollCount" class="form-label">Scroll count</label>
+                    <input id="scrollCount" class="form-control" type="number" min="1" max="20" value="5">
+                </div>
+                <div class="col-md-4">
+                    <label for="waitTime" class="form-label">Wait time (milliseconds)</label>
+                    <input id="waitTime" class="form-control" type="number" min="500" max="10000" step="100" value="1500">
+                </div>
             </div>
 
         </div>
@@ -112,9 +136,7 @@
             id="videoResultsSection"
             class="mt-4 d-none">
 
-        <h3>
-            YouTube Results
-        </h3>
+        <h3 id="resultsHeading">YouTube Results</h3>
 
         <div
                 id="videoList"
@@ -142,6 +164,13 @@
 
                 Waiting for video...
 
+            </div>
+
+            <div class="progress processing-progress" role="progressbar"
+                 aria-label="Video processing progress" aria-valuemin="0" aria-valuemax="100">
+                <div id="processingProgressBar"
+                     class="progress-bar progress-bar-striped progress-bar-animated"
+                     >0%</div>
             </div>
 
 

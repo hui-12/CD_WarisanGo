@@ -187,3 +187,16 @@
     }
 
 }
+
+.processing-progress {
+    height: 22px;
+    margin-bottom: 20px;
+}
+
+#processingProgressBar {
+    width: 0;
+}
+
+.tiktok-video-link {
+    overflow-wrap: anywhere;
+}

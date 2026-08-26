@@ -47,11 +47,28 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponse("Unable to access heritage businesses."));
     }
 
+    @ExceptionHandler(TikTokScrapingException.class)
+    public ResponseEntity<ErrorResponse> handleTikTokScraping(
+            TikTokScrapingException exception) {
+
+        logger.warn("TikTok scraping request failed: {}", exception.getMessage());
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(new ErrorResponse(exception.getMessage()));
+    }
+
     @ExceptionHandler(BusinessNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleBusinessNotFound(
             BusinessNotFoundException exception) {
 
         logger.warn("Heritage business lookup failed: {}", exception.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ErrorResponse(exception.getMessage()));
+    }
+
+    @ExceptionHandler(DiscoveryJobNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleDiscoveryJobNotFound(
+            DiscoveryJobNotFoundException exception) {
+
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(new ErrorResponse(exception.getMessage()));
     }

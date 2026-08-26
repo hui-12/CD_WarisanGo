@@ -116,6 +116,7 @@ public class AIExtractionService {
                 - Never return an empty array. If no businesses are found, return 
                 an array with a single object with all fields set to null.
                 - Do not invent information.
+                - Only return longitude and latitude for the location field, otherwise return null.
 
                 Required JSON format:
 

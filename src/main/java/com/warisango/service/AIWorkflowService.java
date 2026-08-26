@@ -5,6 +5,7 @@ import com.warisango.dto.DiscoveryProcessResponse;
 import org.springframework.stereotype.Service;
 
 import java.nio.file.Path;
+import java.util.function.BiConsumer;
 
 /**
  * Coordinates the complete server-side heritage discovery workflow.
@@ -30,9 +31,19 @@ public class AIWorkflowService {
     }
 
     public DiscoveryProcessResponse process(String videoUrl) {
+        return process(videoUrl, (progress, message) -> { });
+    }
+
+    public DiscoveryProcessResponse process(
+            String videoUrl,
+            BiConsumer<Integer, String> progressListener) {
+
         Path audioFile = videoAudioService.downloadAudio(videoUrl);
+        progressListener.accept(35, "Audio extraction completed.");
         String transcript = speechToTextService.transcribe(audioFile);
+        progressListener.accept(65, "Transcription completed.");
         AIExtractionResult extraction = aiExtractionService.extract(transcript);
+        progressListener.accept(90, "AI extraction completed. Saving result...");
         persistenceService.save(extraction, videoUrl);
 
         return new DiscoveryProcessResponse(
