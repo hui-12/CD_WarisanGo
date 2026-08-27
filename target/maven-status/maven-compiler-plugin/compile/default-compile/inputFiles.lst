@@ -1,12 +1,16 @@
+D:\CD_WarisanGo\src\main\java\com\warisango\config\BadgeDataInitializer.java
 D:\CD_WarisanGo\src\main\java\com\warisango\config\FirebaseConfig.java
+D:\CD_WarisanGo\src\main\java\com\warisango\config\HeritageBusinessDataInitializer.java
 D:\CD_WarisanGo\src\main\java\com\warisango\config\JacksonConfig.java
 D:\CD_WarisanGo\src\main\java\com\warisango\config\ReviewPhotoWebConfig.java
 D:\CD_WarisanGo\src\main\java\com\warisango\config\SecurityConfig.java
 D:\CD_WarisanGo\src\main\java\com\warisango\config\YoutubeConfig.java
+D:\CD_WarisanGo\src\main\java\com\warisango\controller\AdminBadgeController.java
 D:\CD_WarisanGo\src\main\java\com\warisango\controller\AdminController.java
 D:\CD_WarisanGo\src\main\java\com\warisango\controller\AIExtractionController.java
 D:\CD_WarisanGo\src\main\java\com\warisango\controller\AudioTestController.java
 D:\CD_WarisanGo\src\main\java\com\warisango\controller\AuthController.java
+D:\CD_WarisanGo\src\main\java\com\warisango\controller\BadgeController.java
 D:\CD_WarisanGo\src\main\java\com\warisango\controller\BusinessDirectoryController.java
 D:\CD_WarisanGo\src\main\java\com\warisango\controller\ChallengeApiController.java
 D:\CD_WarisanGo\src\main\java\com\warisango\controller\CheckInController.java
@@ -14,6 +18,7 @@ D:\CD_WarisanGo\src\main\java\com\warisango\controller\DiscoveryController.java
 D:\CD_WarisanGo\src\main\java\com\warisango\controller\HomeController.java
 D:\CD_WarisanGo\src\main\java\com\warisango\controller\InteractiveMapController.java
 D:\CD_WarisanGo\src\main\java\com\warisango\controller\LoginController.java
+D:\CD_WarisanGo\src\main\java\com\warisango\controller\PointsController.java
 D:\CD_WarisanGo\src\main\java\com\warisango\controller\ProfileController.java
 D:\CD_WarisanGo\src\main\java\com\warisango\controller\ReportController.java
 D:\CD_WarisanGo\src\main\java\com\warisango\controller\ReviewController.java
@@ -21,10 +26,13 @@ D:\CD_WarisanGo\src\main\java\com\warisango\controller\RewardController.java
 D:\CD_WarisanGo\src\main\java\com\warisango\controller\SessionService.java
 D:\CD_WarisanGo\src\main\java\com\warisango\controller\SpeechToTextController.java
 D:\CD_WarisanGo\src\main\java\com\warisango\controller\TestPageController.java
+D:\CD_WarisanGo\src\main\java\com\warisango\controller\VisitController.java
 D:\CD_WarisanGo\src\main\java\com\warisango\dto\AIExtractionRequest.java
 D:\CD_WarisanGo\src\main\java\com\warisango\dto\AIExtractionResponse.java
 D:\CD_WarisanGo\src\main\java\com\warisango\dto\AIExtractionResult.java
 D:\CD_WarisanGo\src\main\java\com\warisango\dto\AudioExtractionRequest.java
+D:\CD_WarisanGo\src\main\java\com\warisango\dto\BadgeDTO.java
+D:\CD_WarisanGo\src\main\java\com\warisango\dto\BadgeSummaryDTO.java
 D:\CD_WarisanGo\src\main\java\com\warisango\dto\CheckInRequest.java
 D:\CD_WarisanGo\src\main\java\com\warisango\dto\CheckInResponse.java
 D:\CD_WarisanGo\src\main\java\com\warisango\dto\CommentDTO.java
@@ -33,8 +41,10 @@ D:\CD_WarisanGo\src\main\java\com\warisango\dto\DiscoveryProcessResponse.java
 D:\CD_WarisanGo\src\main\java\com\warisango\dto\DiscoverySearchRequest.java
 D:\CD_WarisanGo\src\main\java\com\warisango\dto\ErrorResponse.java
 D:\CD_WarisanGo\src\main\java\com\warisango\dto\HeritageBusinessDTO.java
+D:\CD_WarisanGo\src\main\java\com\warisango\dto\LeaderboardEntryDTO.java
 D:\CD_WarisanGo\src\main\java\com\warisango\dto\LikeStatusDTO.java
 D:\CD_WarisanGo\src\main\java\com\warisango\dto\LoginRequest.java
+D:\CD_WarisanGo\src\main\java\com\warisango\dto\PointHistoryDTO.java
 D:\CD_WarisanGo\src\main\java\com\warisango\dto\ReportDTO.java
 D:\CD_WarisanGo\src\main\java\com\warisango\dto\ReviewDTO.java
 D:\CD_WarisanGo\src\main\java\com\warisango\dto\ReviewLikeDTO.java
@@ -43,6 +53,7 @@ D:\CD_WarisanGo\src\main\java\com\warisango\dto\TranscriptionRequest.java
 D:\CD_WarisanGo\src\main\java\com\warisango\dto\UserPointsDTO.java
 D:\CD_WarisanGo\src\main\java\com\warisango\dto\VideoDTO.java
 D:\CD_WarisanGo\src\main\java\com\warisango\dto\VideoProcessingRequest.java
+D:\CD_WarisanGo\src\main\java\com\warisango\dto\VisitDTO.java
 D:\CD_WarisanGo\src\main\java\com\warisango\exception\AIProcessingException.java
 D:\CD_WarisanGo\src\main\java\com\warisango\exception\FirebasePersistenceException.java
 D:\CD_WarisanGo\src\main\java\com\warisango\exception\GlobalExceptionHandler.java
@@ -50,6 +61,7 @@ D:\CD_WarisanGo\src\main\java\com\warisango\exception\ProhibitedContentException
 D:\CD_WarisanGo\src\main\java\com\warisango\exception\RoleAccessDeniedException.java
 D:\CD_WarisanGo\src\main\java\com\warisango\model\AIRecord.java
 D:\CD_WarisanGo\src\main\java\com\warisango\model\Business.java
+D:\CD_WarisanGo\src\main\java\com\warisango\model\CheckIn.java
 D:\CD_WarisanGo\src\main\java\com\warisango\model\ExtractedBusiness.java
 D:\CD_WarisanGo\src\main\java\com\warisango\model\repository\AdminRepository.java
 D:\CD_WarisanGo\src\main\java\com\warisango\model\repository\AdminRepositoryImpl.java
@@ -62,6 +74,7 @@ D:\CD_WarisanGo\src\main\java\com\warisango\model\repository\CommentLikeReposito
 D:\CD_WarisanGo\src\main\java\com\warisango\model\repository\CommentLikeRepositoryImpl.java
 D:\CD_WarisanGo\src\main\java\com\warisango\model\repository\CommentRepository.java
 D:\CD_WarisanGo\src\main\java\com\warisango\model\repository\CommentRepositoryImpl.java
+D:\CD_WarisanGo\src\main\java\com\warisango\model\repository\HeritageBusinessImageRepository.java
 D:\CD_WarisanGo\src\main\java\com\warisango\model\repository\PendingListingRepository.java
 D:\CD_WarisanGo\src\main\java\com\warisango\model\repository\PointsRepository.java
 D:\CD_WarisanGo\src\main\java\com\warisango\model\repository\ReportRepository.java
@@ -103,6 +116,8 @@ D:\CD_WarisanGo\src\main\java\com\warisango\model\service\TranscriptionService.j
 D:\CD_WarisanGo\src\main\java\com\warisango\model\service\UserService.java
 D:\CD_WarisanGo\src\main\java\com\warisango\model\service\VideoAudioService.java
 D:\CD_WarisanGo\src\main\java\com\warisango\model\service\VideoSearchService.java
+D:\CD_WarisanGo\src\main\java\com\warisango\model\service\VisitService.java
 D:\CD_WarisanGo\src\main\java\com\warisango\model\User.java
 D:\CD_WarisanGo\src\main\java\com\warisango\util\ReviewDateFormatter.java
+D:\CD_WarisanGo\src\main\java\com\warisango\util\TierCalculator.java
 D:\CD_WarisanGo\src\main\java\com\warisango\WarisangoApplication.java

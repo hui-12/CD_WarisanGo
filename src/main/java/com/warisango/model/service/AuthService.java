@@ -57,7 +57,7 @@ public class AuthService {
         Optional<User> existingUser = userRepository.findById(uid);
 
         if (existingUser.isPresent()) {
-            User user = existingUser.get();
+            User user = userRepository.initializeMissingProfileFields(existingUser.get());
             if (!assignedRole.equalsIgnoreCase(user.getRole())) {
                 user.setRole(assignedRole);
                 userRepository.save(user);

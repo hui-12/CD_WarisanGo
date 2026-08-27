@@ -82,7 +82,7 @@ public class ReviewController {
 
     @GetMapping("/{businessId}")
     public String reviewPage(@PathVariable String businessId, Model model) {
-        double averageRating = reviewService.getAverageRating(businessId);
+        Double averageRating = reviewService.getAverageRating(businessId);
         List<ReviewDTO> reviews = reviewService.getReviewsByBusiness(businessId);
         String currentUserId = reviewService.getCurrentTouristId();
         reviewLikeService.enrichReviews(reviews, currentUserId);
@@ -92,7 +92,7 @@ public class ReviewController {
         model.addAttribute("business", reviewService.getBusinessInformation(businessId));
         model.addAttribute("reviews", reviews);
         model.addAttribute("averageRating", averageRating);
-        model.addAttribute("averageRatingRounded", Math.round(averageRating));
+        model.addAttribute("averageRatingRounded", averageRating == null ? null : Math.round(averageRating));
         model.addAttribute("totalReviews", reviewService.getTotalReviews(businessId));
         model.addAttribute("ratingRows", reviewService.getRatingDistribution(businessId));
         model.addAttribute("currentUserId", currentUserId);

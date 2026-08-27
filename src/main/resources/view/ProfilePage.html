@@ -1,43 +1,78 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <th:block th:replace="~{fragments/fragments :: head('WarisanGo - Profile')}"></th:block>
-    <link rel="stylesheet" th:href="@{/css/profile.css}">
-    <script defer th:src="@{/js/profile.js}"></script>
+  <th:block th:replace="~{fragments/fragments :: head('WarisanGo - Profile')}"></th:block>
+  <link rel="stylesheet" th:href="@{/css/profile.css}">
+  <script defer th:src="@{/js/profile.js}"></script>
 </head>
 <body>
-    <div th:replace="~{fragments/fragments :: navbar('profile')}"></div>
-
-    <main class="profile-page">
-        <section class="profile-card">
-            <h1 class="profile-heading">Your profile</h1>
-            <div class="profile-summary">
-                <img class="profile-avatar"
-                     th:src="${user.avatar}"
-                     alt="Profile photo">
-                <div>
-                    <h2 class="profile-name" th:text="${user.name}">WarisanGo visitor</h2>
-                    <p class="profile-email" th:text="${user.email}">visitor@example.com</p>
-                </div>
-            </div>
-
-            <div class="profile-details">
-                <div class="profile-detail">
-                    <p class="profile-label">Account type</p>
-                    <p class="profile-value" th:text="${user.role}">tourist</p>
-                </div>
-                <div class="profile-detail">
-                    <p class="profile-label">Reward points</p>
-                    <p class="profile-value" th:text="${user.totalPoints}">0</p>
-                </div>
-            </div>
-
-            <button id="switch-account-button" class="switch-account-button" type="button">
-                Switch Google account
-            </button>
-        </section>
-    </main>
-
-    <div th:replace="~{fragments/footer :: global}"></div>
+<div th:replace="~{fragments/fragments :: navbar('profile')}"></div>
+<main class="profile-page" th:if="${user != null}">
+  <header class="profile-intro"><p>Profile</p><h1>My Account</h1></header>
+  <section class="profile-summary-card" aria-label="Account summary">
+    <img class="profile-avatar" th:if="${user.avatar != null and !user.avatar.isBlank()}" th:src="${user.avatar}" th:alt="${user.name + ' profile photo'}">
+    <div class="profile-avatar profile-avatar-fallback" th:unless="${user.avatar != null and !user.avatar.isBlank()}" th:text="${user.name != null and !user.name.isBlank() ? #strings.substring(user.name,0,1) : 'U'}">U</div>
+    <div class="profile-identity"><h2 th:text="${user.name ?: 'WarisanGo visitor'}">Visitor</h2><p th:text="${user.email ?: 'Email unavailable'}">Email</p></div>
+    <dl class="profile-statistics">
+      <div><dt th:text="${calculatedTier}">Bronze</dt><dd>Tier</dd></div>
+      <div><dt th:text="${#numbers.formatInteger(user.totalPoints,1,'COMMA')}">0</dt><dd>Points</dd></div>
+      <div><dt th:text="${visitCount}">0</dt><dd>Visits</dd></div>
+      <div><dt th:text="${badgeCount}">0</dt><dd>Badges</dd></div>
+    </dl>
+  </section>
+  <nav class="profile-tabs" aria-label="Profile sections">
+    <button class="profile-tab active" type="button" data-profile-tab="info">My Info</button>
+    <button class="profile-tab" type="button" data-profile-tab="history">Visit History</button>
+  </nav>
+  <p class="profile-message" th:if="${profileMessage}" th:text="${profileMessage}"></p>
+  <p class="profile-error" th:if="${profileError}" th:text="${profileError}"></p>
+  <section class="profile-tab-panel active" data-profile-panel="info">
+    <div class="profile-columns">
+      <form class="profile-panel" method="post" th:action="@{/profile}">
+        <div class="profile-panel-heading"><h2>Personal Information</h2><div class="profile-actions">
+          <button type="button" data-profile-edit>Edit</button><button class="primary" type="submit" data-profile-save hidden>Save</button><button type="button" data-profile-cancel hidden>Cancel</button>
+        </div></div>
+        <div class="profile-form-body">
+          <label>Username<input name="name" maxlength="80" required readonly th:value="${user.name}"></label>
+          <label>Gender<select name="gender" disabled>
+            <option value="" th:selected="${user.gender == null}">Not set</option><option value="Prefer not to say" th:selected="${user.gender == 'Prefer not to say'}">Prefer not to say</option>
+            <option value="Male" th:selected="${user.gender == 'Male'}">Male</option><option value="Female" th:selected="${user.gender == 'Female'}">Female</option>
+            <option value="Non-binary" th:selected="${user.gender == 'Non-binary'}">Non-binary</option><option value="Other" th:selected="${user.gender == 'Other'}">Other</option>
+          </select></label>
+          <label>About Me <span>(optional)</span><textarea name="aboutMe" maxlength="500" rows="4" readonly placeholder="Not set" th:text="${user.aboutMe}"></textarea></label>
+        </div>
+      </form>
+      <div class="profile-side-column">
+        <section class="profile-panel"><div class="profile-panel-heading"><h2>Account Details</h2></div><dl class="account-details">
+          <div><dt>Email</dt><dd th:text="${user.email ?: 'Not available'}">Email</dd></div><div><dt>Member Since</dt><dd th:text="${memberSince}">Date</dd></div>
+          <div><dt>Role</dt><dd class="capitalize" th:text="${user.role ?: 'tourist'}">Tourist</dd></div><div><dt>Current Tier</dt><dd th:text="${calculatedTier}">Bronze</dd></div>
+          <div><dt>Total Points</dt><dd th:text="${user.totalPoints}">0</dd></div>
+        </dl></section>
+        <section class="profile-panel"><div class="profile-panel-heading">
+          <h2 th:text="${'Badges Earned (' + badgeCount + ')'}">Badges Earned (0)</h2>
+        </div><p class="profile-placeholder">View all earned and locked achievements from the Badges page.</p></section>
+      </div>
+    </div>
+  </section>
+  <section class="profile-tab-panel" data-profile-panel="history" hidden>
+    <div class="profile-empty-state" th:if="${#lists.isEmpty(visits)}">
+      <span>⌖</span><h2>No visits yet</h2><p>Your completed check-ins will appear here.</p>
+    </div>
+    <div class="profile-visit-history" th:unless="${#lists.isEmpty(visits)}">
+      <a class="profile-visit-row" th:each="visit : ${visits}"
+         th:href="@{/business/{id}(id=${visit.businessId})}">
+        <img th:if="${visit.image != null}" th:src="${visit.image}" th:alt="${visit.businessName}">
+        <span class="profile-visit-image-fallback" th:unless="${visit.image != null}">⌖</span>
+        <span class="profile-visit-details">
+          <strong th:text="${visit.businessName}">Business</strong>
+          <small th:text="${visit.formattedVisitedAt()}">Date</small>
+        </span>
+        <span class="profile-visit-points" th:text="${'+' + visit.points + ' pts'}">+50 pts</span>
+      </a>
+    </div>
+  </section>
+  <div class="profile-logout"><button id="switch-account-button" type="button">Log Out</button></div>
+</main>
+<div th:replace="~{fragments/footer :: global}"></div>
 </body>
 </html>

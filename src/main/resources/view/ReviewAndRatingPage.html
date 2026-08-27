@@ -23,7 +23,7 @@
 
         <div class="review-business-copy">
 
-            <p class="review-kicker" th:text="${business.category}">
+            <p class="review-kicker">Heritage business</p>
                 Heritage Food
             </p>
 
@@ -61,19 +61,22 @@
 
             <div class="review-average-body">
 
-                <p class="review-average-number" th:text="${averageRating}">
+                <p class="review-average-number"
+                   th:text="${averageRating != null ? #numbers.formatDecimal(averageRating, 1, 1) : 'Not rated'}">
                     4.7
                 </p>
 
                 <div class="review-stars">
                     <span th:each="star : ${#numbers.sequence(1,5)}"
-                          th:classappend="${star <= averageRatingRounded} ? ' filled' : ''">
+                          th:classappend="${averageRatingRounded != null and star <= averageRatingRounded} ? ' filled' : ''">
                         ★
                     </span>
                 </div>
 
                 <p class="review-rating-meta">
-                    <span th:text="${totalReviews}">0</span> visitor reviews
+                    <span th:if="${totalReviews == 0}">Be the first to review</span>
+                    <span th:unless="${totalReviews == 0}"><span th:text="${totalReviews}">0</span>
+                        visitor reviews</span>
                 </p>
 
             </div>

@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * Handles CommentLikes toggle rules and display state.
+ * Handles commentLikes toggle rules and display state.
  */
 @Service
 public class CommentLikeService {

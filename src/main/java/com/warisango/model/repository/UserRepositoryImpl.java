@@ -6,7 +6,9 @@ import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.google.cloud.firestore.QuerySnapshot;
+import com.google.cloud.Timestamp;
 import com.warisango.model.User;
+import com.warisango.util.TierCalculator;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -59,6 +61,56 @@ public class UserRepositoryImpl implements UserRepository {
                     .get();
         } catch (Exception e) {
             throw new RuntimeException("Failed to save user: " + user.getUid(), e);
+        }
+    }
+
+    @Override
+    public User initializeMissingProfileFields(User user) {
+        try {
+            DocumentReference reference = getUserRef(user.getUid());
+            DocumentSnapshot document = reference.get().get();
+            Map<String, Object> missingFields = new HashMap<>();
+            putIfMissing(document, missingFields, "email", user.getEmail());
+            putIfMissing(document, missingFields, "name", user.getName());
+            putIfMissing(document, missingFields, "avatar", user.getAvatar());
+            putIfMissing(document, missingFields, "role", user.getRole());
+            putIfMissing(document, missingFields, "totalPoints", 0L);
+            Long storedPoints = document.getLong("totalPoints");
+            int totalPoints = storedPoints == null ? 0 : storedPoints.intValue();
+            String calculatedTier = TierCalculator.tierFor(totalPoints);
+            if (!calculatedTier.equalsIgnoreCase(String.valueOf(document.get("tierStatus")))) {
+                missingFields.put("tierStatus", calculatedTier);
+            }
+            putIfMissing(document, missingFields, "gender", null);
+            putIfMissing(document, missingFields, "aboutMe", null);
+            putIfMissing(document, missingFields, "createdAt", Timestamp.now());
+            if (!missingFields.isEmpty()) {
+                reference.update(missingFields).get();
+                return reference.get().get().toObject(User.class);
+            }
+            return user;
+        } catch (Exception exception) {
+            throw new RuntimeException("Failed to initialize profile fields: " + user.getUid(), exception);
+        }
+    }
+
+    @Override
+    public void updateProfile(String uid, String name, String gender, String aboutMe) {
+        try {
+            Map<String, Object> updates = new HashMap<>();
+            updates.put("name", name);
+            updates.put("gender", gender);
+            updates.put("aboutMe", aboutMe);
+            getUserRef(uid).update(updates).get();
+        } catch (Exception exception) {
+            throw new RuntimeException("Failed to update profile: " + uid, exception);
+        }
+    }
+
+    private void putIfMissing(DocumentSnapshot document, Map<String, Object> updates,
+                              String field, Object value) {
+        if (!document.contains(field)) {
+            updates.put(field, value);
         }
     }
 

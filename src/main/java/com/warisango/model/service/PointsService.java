@@ -1,95 +1,63 @@
 package com.warisango.model.service;
 
-import com.google.cloud.firestore.*;
-import com.google.firebase.cloud.FirestoreClient;
+import com.warisango.dto.LeaderboardEntryDTO;
+import com.warisango.dto.PointHistoryDTO;
+import com.warisango.model.repository.PointsRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
-import java.util.concurrent.ExecutionException;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
 @Service
 public class PointsService {
-    private static final String USERS = "users";
-    private static final String HISTORY = "PointHistory";
+    private final PointsRepository pointsRepository;
 
-    public int getCurrentPoints(String userId) throws ExecutionException, InterruptedException {
-        DocumentReference ref = FirestoreClient.getFirestore().collection(USERS).document(userId);
-        DocumentSnapshot snap = ref.get().get();
-        if (!snap.exists()) {
-            Map<String,Object> data = new HashMap<>();
-            data.put("userId", userId);
-            data.put("totalPoints", 0L);
-            ref.set(data).get();
-            return 0;
-        }
-        Long points = snap.getLong("totalPoints");
-        return points == null ? 0 : points.intValue();
+    public PointsService(PointsRepository pointsRepository) {
+        this.pointsRepository = pointsRepository;
+    }
+
+    public int getCurrentPoints(String userId) throws Exception {
+        return pointsRepository.getCurrentPoints(userId);
     }
 
     public int addPoints(String userId, int points, String type, String description, String referenceId)
-            throws ExecutionException, InterruptedException {
-        Firestore db = FirestoreClient.getFirestore();
-        DocumentReference userRef = db.collection(USERS).document(userId);
-
-        int newPoints = db.runTransaction(tx -> {
-            DocumentSnapshot user = tx.get(userRef).get();
-            int current = user.exists() && user.getLong("totalPoints") != null
-                    ? user.getLong("totalPoints").intValue() : 0;
-            int updated = current + points;
-            Map<String,Object> userData = new HashMap<>();
-            userData.put("userId", userId);
-            userData.put("totalPoints", updated);
-            tx.set(userRef, userData, SetOptions.merge());
-
-            DocumentReference historyRef = db.collection(HISTORY).document();
-            Map<String,Object> history = new HashMap<>();
-            history.put("userId", userId);
-            history.put("type", type);
-            history.put("description", description);
-            history.put("points", points);
-            history.put("referenceId", referenceId);
-            history.put("timestamp", FieldValue.serverTimestamp());
-            tx.set(historyRef, history);
-            return updated;
-        }).get();
-        return newPoints;
+            throws Exception {
+        String challengeId = "challenge".equalsIgnoreCase(type) ? referenceId : null;
+        return pointsRepository.addPoints(userId, points, type, challengeId);
     }
 
-    public List<Map<String,Object>> getHistory(String userId) throws ExecutionException, InterruptedException {
-        Firestore db = FirestoreClient.getFirestore();
-        QuerySnapshot snap = db.collection(HISTORY)
-                .whereEqualTo("userId", userId)
-                .get().get();
-        List<Map<String,Object>> result = new ArrayList<>();
-        for (QueryDocumentSnapshot doc : snap.getDocuments()) {
-            Map<String,Object> row = new HashMap<>();
-            row.put("id", doc.getId());
-            row.put("type", doc.getString("type"));
-            row.put("description", doc.getString("description"));
-            Long p = doc.getLong("points");
-            row.put("points", p == null ? 0 : p);
-            row.put("timestamp", doc.getTimestamp("timestamp") == null ? null : doc.getTimestamp("timestamp").toDate().toString());
-            result.add(row);
-        }
-        result.sort((a,b) -> String.valueOf(b.get("timestamp")).compareTo(String.valueOf(a.get("timestamp"))));
-        return result;
+    public List<PointHistoryDTO> getHistory(String userId) throws Exception {
+        return pointsRepository.findHistory(userId).stream()
+                .map(this::withDescription)
+                .sorted(Comparator.comparing(
+                        PointHistoryDTO::timestamp,
+                        Comparator.nullsLast(Comparator.reverseOrder())))
+                .toList();
     }
 
-    public List<Map<String,Object>> getLeaderboard() throws ExecutionException, InterruptedException {
-        Firestore db = FirestoreClient.getFirestore();
-        QuerySnapshot snap = db.collection(USERS).get().get();
-        List<Map<String,Object>> result = new ArrayList<>();
-        for (QueryDocumentSnapshot doc : snap.getDocuments()) {
-            Long p = doc.getLong("totalPoints");
-            if (p == null) continue;
-            Map<String,Object> row = new HashMap<>();
-            row.put("userId", doc.getId());
-            row.put("name", doc.getString("name") == null ? doc.getId() : doc.getString("name"));
-            row.put("points", p);
-            result.add(row);
+    public List<LeaderboardEntryDTO> getLeaderboard() throws Exception {
+        List<LeaderboardEntryDTO> sorted = pointsRepository.findTouristsForLeaderboard().stream()
+                .sorted(Comparator.comparingInt(LeaderboardEntryDTO::points).reversed()
+                        .thenComparing(LeaderboardEntryDTO::name, String.CASE_INSENSITIVE_ORDER))
+                .toList();
+        List<LeaderboardEntryDTO> ranked = new ArrayList<>();
+        for (int index = 0; index < sorted.size(); index++) {
+            ranked.add(sorted.get(index).withRank(index + 1));
         }
-        result.sort((a,b) -> Long.compare(((Number)b.get("points")).longValue(), ((Number)a.get("points")).longValue()));
-        for (int i=0; i<result.size(); i++) result.get(i).put("rank", i+1);
-        return result;
+        return ranked;
+    }
+
+    private PointHistoryDTO withDescription(PointHistoryDTO history) {
+        String type = history.type() == null ? "points" : history.type();
+        String label = switch (type.toLowerCase()) {
+            case "checkin" -> "Heritage business check-in";
+            case "challenge" -> "Challenge reward";
+            case "review" -> "Review reward";
+            case "badge" -> "Badge milestone reward";
+            default -> "Points activity";
+        };
+        return new PointHistoryDTO(history.transactionId(), type, label, history.points(), history.timestamp(),
+                history.relatedChallengeId());
     }
 }

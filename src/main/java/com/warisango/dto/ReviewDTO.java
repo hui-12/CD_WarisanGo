@@ -31,13 +31,13 @@ public class ReviewDTO {
     private List<String> photoUrls;
 
     /**
-     * Existing ReviewPhotos records used by the edit form.
-     * This is not stored inside the Reviews document.
+     * Existing reviewPhotos records used by the edit form.
+     * This is not stored inside the reviews document.
      */
     private List<ReviewPhotoDTO> photos;
 
     /**
-     * Display-only like state loaded from the root-level ReviewLikes collection.
+     * Display-only like state loaded from the root-level reviewLikes collection.
      */
     private int likeCount;
 

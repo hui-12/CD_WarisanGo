@@ -17,12 +17,12 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Firestore access for the root-level Comments collection.
+ * Firestore access for the root-level comments collection.
  */
 @Repository
 public class CommentRepositoryImpl implements CommentRepository {
 
-    private static final String COLLECTION = "Comments";
+    private static final String COLLECTION = "comments";
 
     private final Firestore firestore;
 

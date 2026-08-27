@@ -16,12 +16,12 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Firestore access for the root-level ReviewLikes collection.
+ * Firestore access for the root-level reviewLikes collection.
  */
 @Repository
 public class ReviewLikeRepositoryImpl implements ReviewLikeRepository {
 
-    private static final String COLLECTION = "ReviewLikes";
+    private static final String COLLECTION = "reviewLikes";
 
     private final Firestore firestore;
 

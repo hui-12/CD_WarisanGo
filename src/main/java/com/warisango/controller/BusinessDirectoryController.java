@@ -28,9 +28,6 @@ public class BusinessDirectoryController {
     @GetMapping({"/directory", "/business-directory"})
     public String showBusinessDirectory(Model model) {
         List<HeritageBusinessDTO> businesses = businessService.getApprovedBusinesses();
-        businesses.forEach(business -> business.setAverageRating(
-                reviewService.getCurrentAverageRating(business.getBusinessId())
-        ));
         model.addAttribute("businesses", businesses);
         return "BusinessDirectoryPage"; // must match src/main/resources/view/BusinessDirectoryPage.html
     }
@@ -44,10 +41,11 @@ public class BusinessDirectoryController {
             return "redirect:/directory";
         }
         HeritageBusinessDTO business = opt.get();
-        business.setAverageRating(reviewService.getCurrentAverageRating(id));
+        String businessId = business.getBusinessId();
 
         model.addAttribute("business", business);
-        model.addAttribute("featuredReview", reviewService.getFeaturedReview(id));
+        model.addAttribute("featuredReview", reviewService.getFeaturedReview(businessId));
+        model.addAttribute("totalReviews", reviewService.getTotalReviews(businessId));
         return "BusinessDetailsPage"; // must match file name
     }
 

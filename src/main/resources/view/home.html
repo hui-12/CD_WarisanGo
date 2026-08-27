@@ -27,7 +27,9 @@
       <div class="hero-left">
         <p class="hero-subtitle">WELCOME BACK</p>
         <h1 class="hero-title">
-          <span id="hero-user-firstname">Diddy</span>,<br>
+          <span id="hero-user-firstname"
+                th:text="${currentUser != null and currentUser.name != null and !currentUser.name.isBlank()
+                          ? currentUser.name : 'Explorer'}">Explorer</span>,<br>
           <em class="italic-accent">good to see you.</em>
         </h1>
         <p class="hero-description">
@@ -43,7 +45,12 @@
       <div class="tier-widget">
         <p class="widget-label">YOUR TIER</p>
 
-        <p id="tier-name" class="tier-name">Loading...</p>
+        <p id="tier-name"
+           class="tier-name"
+           th:text="${currentUser != null and currentUser.tierStatus != null
+                     and !currentUser.tierStatus.isBlank() ? currentUser.tierStatus : 'Bronze'}"
+           th:attr="data-tier=${currentUser != null and currentUser.tierStatus != null
+                     and !currentUser.tierStatus.isBlank() ? currentUser.tierStatus : 'Bronze'}">Bronze</p>
 
         <p class="tier-points">
           <span id="user-points">0</span>
@@ -70,7 +77,7 @@
       <section class="content-card">
         <div class="card-header">
           <h2 class="card-title">This Week's Visits</h2>
-          <span id="visit-count" class="badge-text">2 check-ins</span>
+          <span id="visit-count" class="badge-text">Loading...</span>
         </div>
         
         <div id="visits-list-container" class="visits-container">
@@ -83,10 +90,10 @@
         <!-- Active Challenge Widget -->
         <div id="active-challenge-widget" class="challenge-widget">
           <p class="widget-label">ACTIVE CHALLENGE</p>
-          <h3 id="challenge-title" class="challenge-title">Kopitiam Explorer</h3>
+          <h3 id="challenge-title" class="challenge-title">Loading challenges...</h3>
           <div class="challenge-progress-header">
             <span class="sub-label">Progress</span>
-            <span id="challenge-progress-count" class="challenge-count">2/3</span>
+            <span id="challenge-progress-count" class="challenge-count">0/0</span>
           </div>
           <div class="progress-bar-bg-dark">
             <div id="challenge-progress-bar" class="progress-bar-fill gold-bg"></div>
@@ -104,7 +111,7 @@
               <span class="quick-link-icon">🏅</span>
               <div class="quick-link-text">
                 <div class="link-label">My Badges</div>
-                <div class="link-sub">3 earned</div>
+                <div id="home-badges-earned" class="link-sub">Loading...</div>
               </div>
               <span class="link-arrow">→</span>
             </button>
@@ -112,7 +119,7 @@
               <span class="quick-link-icon">🏆</span>
               <div class="quick-link-text">
                 <div class="link-label">Leaderboard</div>
-                <div class="link-sub">You are #5</div>
+                <div id="home-leaderboard-rank" class="link-sub">Loading...</div>
               </div>
               <span class="link-arrow">→</span>
             </button>
@@ -143,7 +150,7 @@
           <div class="feature-icon">🔍</div>
           <h3 class="feature-title">Discover Heritage Businesses</h3>
           <p class="feature-desc">
-            Browse our curated directory of century-old kopitiams, traditional restaurants, and street food stalls — all verified and approved by our heritage team. Filter by state, city, or category.
+            Browse our curated directory of century-old kopitiams, traditional restaurants, and street food stalls — all verified and approved by our heritage team. Filter by state or city.
           </p>
           <button class="btn-card-action" data-navigate="directory">Browse Directory →</button>
         </div>

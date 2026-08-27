@@ -19,7 +19,7 @@ import java.util.Map;
 @Repository
 public class ReviewRepositoryImpl implements ReviewRepository {
 
-    private static final String COLLECTION = "Reviews";
+    private static final String COLLECTION = "reviews";
 
     private final Firestore firestore;
 
@@ -336,7 +336,7 @@ public class ReviewRepositoryImpl implements ReviewRepository {
 
 
         /*
-         * Your Reviews collection does not have
+         * The reviews collection does not have
          * touristName.
          *
          * We will connect this to Tourists/Users
@@ -355,7 +355,7 @@ public class ReviewRepositoryImpl implements ReviewRepository {
 
 
         /*
-         * ReviewPhotoService enriches this DTO from the root-level ReviewPhotos collection.
+         * ReviewPhotoService enriches this DTO from the root-level reviewPhotos collection.
          */
         review.setPhotoUrls(
                 new ArrayList<>()
@@ -534,6 +534,19 @@ public class ReviewRepositoryImpl implements ReviewRepository {
                     "Failed to generate next review ID.",
                     e
             );
+        }
+    }
+
+    @Override
+    public int countByTouristId(String touristId) {
+        try {
+            return firestore.collection(COLLECTION)
+                    .whereEqualTo("touristId", touristId)
+                    .get()
+                    .get()
+                    .size();
+        } catch (Exception exception) {
+            throw new RuntimeException("Failed to count reviews for tourist: " + touristId, exception);
         }
     }
 }

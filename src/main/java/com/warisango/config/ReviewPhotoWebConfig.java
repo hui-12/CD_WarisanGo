@@ -9,7 +9,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 /**
- * Serves locally stored review photos through their ReviewPhotos.photoUrl values.
+ * Serves locally stored review photos through their reviewPhotos.photoUrl values.
  */
 @Configuration
 public class ReviewPhotoWebConfig implements WebMvcConfigurer {

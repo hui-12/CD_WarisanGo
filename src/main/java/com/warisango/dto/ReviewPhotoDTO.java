@@ -1,7 +1,7 @@
 package com.warisango.dto;
 
 /**
- * Carries a ReviewPhotos document between the review module layers.
+ * Carries a reviewPhotos document between the review module layers.
  */
 public class ReviewPhotoDTO {
 

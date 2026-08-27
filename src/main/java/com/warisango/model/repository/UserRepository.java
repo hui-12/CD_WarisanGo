@@ -16,6 +16,10 @@ public interface UserRepository {
 
     void save(User user);
 
+    User initializeMissingProfileFields(User user);
+
+    void updateProfile(String uid, String name, String gender, String aboutMe);
+
     String findDisplayNameByTouristId(String touristId);
 
     DocumentSnapshot getUser(String userId) throws ExecutionException, InterruptedException;

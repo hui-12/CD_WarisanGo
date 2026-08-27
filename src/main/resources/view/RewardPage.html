@@ -8,7 +8,7 @@
   <div th:replace="~{fragments/fragments :: navbar('rewards')}"></div>
 <div id="page-rewards" class="page active">
 <main>
-  <h1>Farah Hani's Rewards Dashboard</h1>
+  <h1 th:text="${dashboardTitle ?: 'My Rewards Dashboard'}">My Rewards Dashboard</h1>
   <div class="batik-divider" style="margin:24px 0"></div>
 
   <!-- Tier hero -->
@@ -24,7 +24,15 @@
     </div>
     <div style="display:grid;grid-template-rows:1fr 1fr;gap:12px">
       <div class="card"><div class="caption">LEADERBOARD RANK</div><div id="rw-rank" class="mono" style="font-size:28px;font-weight:700">Loading...</div><div id="rw-rank-total" style="font-size:12px;color:#6b6b68">Loading users</div></div>
-      <div class="card"><div class="caption">BADGES EARNED</div><div class="mono" style="font-size:28px;font-weight:700">2</div><div style="font-size:12px;color:#6b6b68">of 8 available</div></div>
+      <div class="card">
+        <div class="caption">BADGES EARNED</div>
+        <div style="display:flex;align-items:center;gap:10px;margin:5px 0">
+          <span id="rw-featured-badge-emoji" style="font-size:30px">🏅</span>
+          <div><div id="rw-badges-earned" class="mono" style="font-size:28px;font-weight:700">Loading...</div>
+          <strong id="rw-featured-badge-name" style="display:block;font-size:11px;color:#72583b">Loading badges</strong></div>
+        </div>
+        <div id="rw-badges-total" style="font-size:12px;color:#6b6b68">Loading available badges</div>
+      </div>
     </div>
   </div>
 
@@ -44,15 +52,7 @@
     </div>
   </div>
 
-  <div id="rw-history" style="display:none">
-    <div style="border:1px solid #e8e6e0;border-radius:12px;overflow:hidden">
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid #e8e6e0;background:#faf9f5"><div><div style="font-size:13px;font-weight:500;margin-bottom:2px">Check-in: Pak Ali's Nasi Lemak Corner</div><div style="font-size:11px;font-family:'Inter',monospace;color:#6b6b68">28 Jul 2026</div></div><div style="font-family:'Inter',monospace;font-size:14px;font-weight:700;color:#c9a84c">+50</div></div>
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid #e8e6e0;background:#ffffff"><div><div style="font-size:13px;font-weight:500;margin-bottom:2px">Challenge Bonus: Weekend Foodie Sprint</div><div style="font-size:11px;font-family:'Inter',monospace;color:#6b6b68">25 Jul 2026</div></div><div style="font-family:'Inter',monospace;font-size:14px;font-weight:700;color:#c9a84c">+150</div></div>
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid #e8e6e0;background:#faf9f5"><div><div style="font-size:13px;font-weight:500;margin-bottom:2px">Check-in: Roti Canai Warisan</div><div style="font-size:11px;font-family:'Inter',monospace;color:#6b6b68">22 Jul 2026</div></div><div style="font-family:'Inter',monospace;font-size:14px;font-weight:700;color:#c9a84c">+35</div></div>
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 20px;background:#ffffff"><div><div style="font-size:13px;font-weight:500;margin-bottom:2px">Check-in: Aunty Lim's Char Kway Teow</div><div style="font-size:11px;font-family:'Inter',monospace;color:#6b6b68">19 Jul 2026</div></div><div style="font-family:'Inter',monospace;font-size:14px;font-weight:700;color:#c9a84c">+40</div></div>
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 20px;background:#faf9f5"><div><div style="font-size:13px;font-weight:500;margin-bottom:2px">Badge Milestone: First Bite</div><div style="font-size:11px;font-family:'Inter',monospace;color:#6b6b68">14 Jul 2026</div></div><div style="font-family:'Inter',monospace;font-size:14px;font-weight:700;color:#c9a84c">+10</div></div>
-    </div>
-  </div>
+  <div id="rw-history" style="display:none"><div class="card">Loading point history...</div></div>
 
   <div id="rw-leaderboard" style="display:none">
     <div style="border:1px solid #e8e6e0;border-radius:12px;overflow:hidden">
@@ -151,6 +151,20 @@ async function loadLeaderboard() {
   } catch(e) { console.error(e); rowsEl.innerHTML='<div class="card">Unable to load leaderboard.</div>'; }
 }
 
+async function loadBadgeSummary() {
+  const response = await fetch('/api/badges/summary');
+  if (!response.ok) throw new Error('Unable to load badge summary');
+  const summary = await response.json();
+  document.getElementById('rw-badges-earned').textContent = Number(summary.earned || 0);
+  document.getElementById('rw-badges-total').textContent = `of ${Number(summary.total || 0)} available`;
+  const featured = summary.featuredBadge;
+  if (featured) {
+    document.getElementById('rw-featured-badge-emoji').textContent = featured.emoji || '🏅';
+    document.getElementById('rw-featured-badge-name').textContent
+      = `${featured.name}${featured.earned ? ' · Earned' : ' · Locked'}`;
+  }
+}
+
 function showRwTab(tab, btn) {
   ['overview','history','leaderboard'].forEach(t => document.getElementById('rw-'+t).style.display='none');
   document.getElementById('rw-'+tab).style.display='block';
@@ -162,6 +176,7 @@ function showRwTab(tab, btn) {
 
 loadCurrentPoints().catch(console.error);
 loadLeaderboard().catch(console.error);
+loadBadgeSummary().catch(console.error);
 </script>
   <div th:replace="~{fragments/footer :: global}"></div>
 </body>

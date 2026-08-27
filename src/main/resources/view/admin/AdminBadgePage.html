@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="~{fragments/fragments :: head('WarisanGo — Badge Management')}"></th:block>
+    <link rel="stylesheet" href="/css/admin-badges.css" th:href="@{/css/admin-badges.css}">
+</head>
+<body>
+<div th:replace="~{fragments/fragments :: navbar('admin-badges')}"></div>
+<main class="admin-badge-page">
+    <header class="admin-badge-header">
+        <div>
+            <p class="admin-badge-kicker">Rewards configuration</p>
+            <h1>Badge Management</h1>
+            <p>Create milestones whose progress and target are evaluated from Firebase.</p>
+        </div>
+        <button id="create-badge" class="primary-button" type="button">+ Create Badge</button>
+    </header>
+
+    <p id="badge-message" class="badge-message" hidden></p>
+    <section id="badge-list" class="badge-admin-grid" aria-live="polite">
+        <p class="badge-empty">Loading badges…</p>
+    </section>
+
+    <dialog id="badge-dialog" class="badge-dialog">
+        <form id="badge-form" method="dialog">
+            <div class="dialog-heading">
+                <h2 id="dialog-title">Create Badge</h2>
+                <button id="close-dialog" class="icon-button" type="button" aria-label="Close">×</button>
+            </div>
+            <input id="badge-id" type="hidden">
+            <div class="form-row">
+                <label>Name<input id="badge-name" required maxlength="80"></label>
+                <label>Emoji<input id="badge-emoji" required maxlength="12" placeholder="🏆"></label>
+            </div>
+            <label>Description<textarea id="badge-description" required maxlength="240" rows="3"></textarea></label>
+            <label>Unlock criteria shown to users
+                <input id="badge-unlock-criteria" required maxlength="120" placeholder="Check in at 3 businesses">
+            </label>
+            <div class="form-row">
+                <label>Progress source
+                    <select id="badge-criteria-type" required>
+                        <option value="checkInCount">Check-in count</option>
+                        <option value="reviewCount">Review count</option>
+                        <option value="pointsEarned">Total points</option>
+                        <option value="completedChallengeCount">Completed challenges</option>
+                    </select>
+                </label>
+                <label>Target<input id="badge-target" type="number" min="1" required value="1"></label>
+            </div>
+            <div class="dialog-actions">
+                <button class="secondary-button" id="cancel-badge" type="button">Cancel</button>
+                <button class="primary-button" type="submit">Save Badge</button>
+            </div>
+        </form>
+    </dialog>
+</main>
+<script src="/js/admin-badges.js" th:src="@{/js/admin-badges.js}" defer></script>
+<div th:replace="~{fragments/footer :: global}"></div>
+</body>
+</html>

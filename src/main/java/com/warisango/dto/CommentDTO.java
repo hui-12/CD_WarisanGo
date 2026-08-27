@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 /**
- * Carries comment data between the review detail page and the Comments collection.
+ * Carries comment data between the review detail page and the comments collection.
  */
 public class CommentDTO {
 
@@ -32,7 +32,7 @@ public class CommentDTO {
     private String updatedAt;
 
     /**
-     * Display-only like state loaded from the root-level CommentLikes collection.
+     * Display-only like state loaded from the root-level commentLikes collection.
      */
     private int likeCount;
 

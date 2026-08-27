@@ -185,3 +185,9 @@ input, textarea, select {
         display: none;
     }
 }
+.challenge-groups { display: flex; flex-direction: column; gap: 28px; }
+.challenge-group-heading { display: flex; align-items: center; gap: 9px; margin-bottom: 12px; }
+.challenge-group-heading h2 { margin: 0; font: 700 22px Fraunces,Georgia,serif; }
+.challenge-group-heading span { min-width: 24px; padding: 3px 7px; border-radius: 20px; background: #f5e9c4; color: #72583b; font-size: 11px; font-weight: 700; text-align: center; }
+.challenge-group-list { display: flex; flex-direction: column; gap: 12px; max-height: 520px; overflow-y: auto; }
+.challenge-group-empty { padding: 20px; color: #6b6b68; font-size: 13px; }

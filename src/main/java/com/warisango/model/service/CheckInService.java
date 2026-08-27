@@ -1,176 +1,91 @@
 package com.warisango.model.service;
 
-import com.google.cloud.firestore.DocumentReference;
-import com.google.cloud.firestore.DocumentSnapshot;
-import com.google.cloud.firestore.FieldValue;
-import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.GeoPoint;
-import com.google.firebase.cloud.FirestoreClient;
 import com.warisango.dto.CheckInRequest;
 import com.warisango.dto.CheckInResponse;
+import com.warisango.dto.HeritageBusinessDTO;
+import com.warisango.model.repository.BusinessRepository;
+import com.warisango.model.repository.CheckInRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
+import java.time.ZoneId;
 
 @Service
 public class CheckInService {
-    private static final String BUSINESS_COLLECTION = "HeritageBusinesses";
-    private static final String USER_COLLECTION = "users";
-    private static final String CHECKIN_COLLECTION = "CheckIns";
-    private static final String HISTORY_COLLECTION = "PointHistory";
+    private static final Logger logger = LoggerFactory.getLogger(CheckInService.class);
     private static final double MAX_DISTANCE_METERS = 50.0;
+    private static final boolean ENFORCE_DISTANCE_LIMIT = false;
+    private static final ZoneId CHECK_IN_TIME_ZONE = ZoneId.of("Asia/Kuala_Lumpur");
+
+    private final BusinessRepository businessRepository;
+    private final CheckInRepository checkInRepository;
+
+    public CheckInService(BusinessRepository businessRepository, CheckInRepository checkInRepository) {
+        this.businessRepository = businessRepository;
+        this.checkInRepository = checkInRepository;
+    }
 
     public CheckInResponse processCheckIn(CheckInRequest request) {
         try {
             validateRequest(request);
-
-            Firestore db = FirestoreClient.getFirestore();
-            DocumentReference businessRef = db.collection(BUSINESS_COLLECTION)
-                    .document(request.getBusinessId());
-            DocumentReference userRef = db.collection(USER_COLLECTION)
-                    .document(request.getUserId());
-
-            DocumentSnapshot business = businessRef.get().get();
-            if (!business.exists()) {
-                return failure("Business not found.", 0, request.getDistanceMeters());
+            HeritageBusinessDTO business = businessRepository.findByBusinessId(request.getBusinessId());
+            if (business == null) {
+                return failure("This approved business could not be found.", 0, request.getDistanceMeters());
             }
 
-            String status = business.getString("status");
-            if (status != null && !"APPROVED".equalsIgnoreCase(status)) {
-                return failure("This business is not available for check-in.", 0, request.getDistanceMeters());
+            double distance = GeoUtils.distanceMeters(
+                    request.getUserLatitude(), request.getUserLongitude(),
+                    business.getLatitude(), business.getLongitude());
+            if (ENFORCE_DISTANCE_LIMIT && distance > MAX_DISTANCE_METERS) {
+                int currentPoints = checkInRepository.getCurrentPoints(request.getUserId());
+                return failure("You must be within 50 metres to check in.", currentPoints, distance);
             }
 
-            GeoPoint location = business.getGeoPoint("location");
-            if (location == null) {
-                return failure("This business does not have a valid GPS location.", 0, request.getDistanceMeters());
+            if (hasCheckedInToday(request.getUserId(), business.getBusinessId())) {
+                int currentPoints = checkInRepository.getCurrentPoints(request.getUserId());
+                return failure("You have already checked in at this business today.", currentPoints, distance);
             }
 
-            // Recalculate the distance on the server. The value sent by the browser is not trusted.
-            double serverDistance = GeoUtils.distanceMeters(
-                    request.getUserLatitude(),
-                    request.getUserLongitude(),
-                    location.getLatitude(),
-                    location.getLongitude()
-            );
-
-            if (serverDistance > MAX_DISTANCE_METERS) {
-                int currentPoints = getCurrentPoints(userRef);
-                return failure(
-                        String.format("You are %.1f metres away. You must be within 50 metres to check in.", serverDistance),
-                        currentPoints,
-                        serverDistance
-                );
-            }
-
-            int checkInPoints = getCheckInPoints(business);
-
-            // A simple duplicate protection: one successful check-in per user/business.
-            // This can later be changed to a time-based cooldown if required.
-            boolean alreadyCheckedIn = !db.collection(CHECKIN_COLLECTION)
-                    .whereEqualTo("userId", request.getUserId())
-                    .whereEqualTo("businessId", request.getBusinessId())
-                    .limit(1)
-                    .get()
-                    .get()
-                    .isEmpty();
-
-            if (alreadyCheckedIn) {
-                int currentPoints = getCurrentPoints(userRef);
-                return failure("You have already checked in at this business.", currentPoints, serverDistance);
-            }
-
-            int newPoints = db.runTransaction(transaction -> {
-                DocumentSnapshot userSnapshot = transaction.get(userRef).get();
-                int currentPoints = 0;
-
-                if (userSnapshot.exists()) {
-                    Long value = userSnapshot.getLong("totalPoints");
-                    if (value != null) {
-                        currentPoints = value.intValue();
-                    }
-                }
-
-                int updatedPoints = currentPoints + checkInPoints;
-
-                Map<String, Object> userData = new HashMap<>();
-                userData.put("userId", request.getUserId());
-                userData.put("totalPoints", updatedPoints);
-                transaction.set(userRef, userData, com.google.cloud.firestore.SetOptions.merge());
-
-                DocumentReference checkInRef = db.collection(CHECKIN_COLLECTION).document();
-                Map<String, Object> checkInData = new HashMap<>();
-                checkInData.put("userId", request.getUserId());
-                checkInData.put("businessId", request.getBusinessId());
-                checkInData.put("businessName", business.getString("name"));
-                checkInData.put("pointsEarned", checkInPoints);
-                checkInData.put("distanceMeters", serverDistance);
-                checkInData.put("userLocation", new GeoPoint(
-                        request.getUserLatitude(), request.getUserLongitude()));
-                checkInData.put("businessLocation", location);
-                checkInData.put("timestamp", FieldValue.serverTimestamp());
-                transaction.set(checkInRef, checkInData);
-
-                DocumentReference historyRef = db.collection(HISTORY_COLLECTION).document();
-                Map<String, Object> historyData = new HashMap<>();
-                historyData.put("userId", request.getUserId());
-                historyData.put("type", "CHECK_IN");
-                historyData.put("description", "Check-in: " + business.getString("name"));
-                historyData.put("points", checkInPoints);
-                historyData.put("referenceId", request.getBusinessId());
-                historyData.put("timestamp", FieldValue.serverTimestamp());
-                transaction.set(historyRef, historyData);
-
-                return updatedPoints;
-            }).get();
-
-            return new CheckInResponse(
-                    true,
-                    "Check-in successful.",
-                    checkInPoints,
-                    newPoints,
-                    serverDistance
-            );
-
-        } catch (InterruptedException e) {
+            int points = business.getCheckInPoints() > 0 ? business.getCheckInPoints() : 50;
+            GeoPoint userLocation = new GeoPoint(request.getUserLatitude(), request.getUserLongitude());
+            int updatedPoints = checkInRepository.saveAndAwardPoints(
+                    request.getUserId(), business.getBusinessId(), userLocation, points);
+            return new CheckInResponse(true, "Check-in successful.", points, updatedPoints, distance);
+        } catch (InterruptedException exception) {
             Thread.currentThread().interrupt();
             return failure("The check-in operation was interrupted.", 0, request.getDistanceMeters());
-        } catch (ExecutionException | RuntimeException e) {
-            return failure("Unable to complete check-in. Please try again.", 0, request.getDistanceMeters());
+        } catch (Exception exception) {
+            String businessId = request == null ? null : request.getBusinessId();
+            logger.error("Unable to process check-in for business {}.", businessId, exception);
+            return failure("Unable to complete check-in. Please try again.", 0,
+                    request == null ? 0 : request.getDistanceMeters());
         }
     }
 
-    private int getCurrentPoints(DocumentReference userRef)
-            throws ExecutionException, InterruptedException {
-        DocumentSnapshot snapshot = userRef.get().get();
-        if (!snapshot.exists()) {
-            return 0;
-        }
-        Long points = snapshot.getLong("totalPoints");
-        return points == null ? 0 : points.intValue();
+    public int getCurrentPoints(String touristId) throws Exception {
+        return checkInRepository.getCurrentPoints(touristId);
     }
 
-    private int getCheckInPoints(DocumentSnapshot business) {
-        Long points = business.getLong("checkInPoints");
-        return points != null && points > 0 ? points.intValue() : 50;
+    public boolean hasCheckedInToday(String touristId, String businessId) throws Exception {
+        if (touristId == null || touristId.isBlank() || businessId == null || businessId.isBlank()) {
+            return false;
+        }
+        return checkInRepository.hasCheckedInToday(touristId, businessId, CHECK_IN_TIME_ZONE);
     }
 
     private void validateRequest(CheckInRequest request) {
         if (request == null || request.getUserId() == null || request.getUserId().isBlank()) {
-            throw new IllegalArgumentException("User ID is required.");
+            throw new IllegalArgumentException("Authenticated user ID is required.");
         }
         if (request.getBusinessId() == null || request.getBusinessId().isBlank()) {
             throw new IllegalArgumentException("Business ID is required.");
         }
-        if (!validCoordinate(request.getUserLatitude(), request.getUserLongitude())) {
-            throw new IllegalArgumentException("Invalid user GPS coordinates.");
+        if (request.getUserLatitude() < -90 || request.getUserLatitude() > 90
+                || request.getUserLongitude() < -180 || request.getUserLongitude() > 180) {
+            throw new IllegalArgumentException("Invalid GPS coordinates.");
         }
-    }
-
-    private boolean validCoordinate(double latitude, double longitude) {
-        return latitude >= -90 && latitude <= 90
-                && longitude >= -180 && longitude <= 180;
     }
 
     private CheckInResponse failure(String message, int currentPoints, double distanceMeters) {

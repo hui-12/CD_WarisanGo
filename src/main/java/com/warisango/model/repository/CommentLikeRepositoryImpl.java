@@ -16,12 +16,12 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Firestore access for the root-level CommentLikes collection.
+ * Firestore access for the root-level commentLikes collection.
  */
 @Repository
 public class CommentLikeRepositoryImpl implements CommentLikeRepository {
 
-    private static final String COLLECTION = "CommentLikes";
+    private static final String COLLECTION = "commentLikes";
 
     private final Firestore firestore;
 

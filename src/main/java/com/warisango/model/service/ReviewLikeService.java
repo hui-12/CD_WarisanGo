@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * Handles ReviewLikes toggle rules and display state.
+ * Handles reviewLikes toggle rules and display state.
  */
 @Service
 public class ReviewLikeService {
