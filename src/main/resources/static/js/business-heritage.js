@@ -78,7 +78,9 @@
     const showPhoto = (index) => {
       selectedIndex = (index + photos.length) % photos.length;
       featured.src = photos[selectedIndex];
-      featured.alt = thumbnails[selectedIndex].querySelector('img')?.alt || 'Business photo';
+      const photoTitle = thumbnails[selectedIndex].querySelector('img')?.alt || 'Business photo';
+      featured.alt = photoTitle;
+      featured.title = photoTitle;
       thumbnails.forEach((thumbnail, thumbnailIndex) => {
         const selected = thumbnailIndex === selectedIndex;
         thumbnail.classList.toggle('is-active', selected);

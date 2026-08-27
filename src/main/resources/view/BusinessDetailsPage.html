@@ -23,11 +23,13 @@
         <div class="gallery" id="photos">
           <div class="gallery-stage" tabindex="0" aria-label="Business photo gallery">
             <img th:if="${not #lists.isEmpty(business.photos)}" th:src="${business.photos[0]}"
-                 th:alt="${business.name} + ' photo'" class="gallery-featured" id="galleryFeatured"
+                 alt="Business photo" title="Business photo" th:alt="${business.name} + ' photo'"
+                 th:title="${business.name} + ' photo'" class="gallery-featured" id="galleryFeatured"
                  data-fallback-image="https://images.unsplash.com/photo-1559925393-8be0ec4767c8?auto=format&amp;fit=crop&amp;w=1200&amp;q=85">
             <img th:if="${#lists.isEmpty(business.photos)}"
                  src="https://images.unsplash.com/photo-1559925393-8be0ec4767c8?auto=format&amp;fit=crop&amp;w=1200&amp;q=85"
-                 th:alt="${business.name} + ' photo'" class="gallery-featured" id="galleryFeatured">
+                 alt="Business photo" title="Business photo" th:alt="${business.name} + ' photo'"
+                 th:title="${business.name} + ' photo'" class="gallery-featured" id="galleryFeatured">
             <button class="gallery-nav gallery-nav--previous" type="button" aria-label="Show previous photo"
                     th:if="${#lists.size(business.photos) > 1}" data-gallery-previous>‹</button>
             <button class="gallery-nav gallery-nav--next" type="button" aria-label="Show next photo"
@@ -38,7 +40,7 @@
                     th:attr="data-gallery-index=${stat.index},aria-current=${stat.index == 0 ? 'true' : 'false'}"
                     th:aria-label="${'Show photo ' + (stat.index + 1)}">
               <img th:src="${photo}" th:alt="${business.name} + ' gallery photo ' + (stat.index + 1)"
-                   class="gallery-thumb"
+                   title="Business gallery photo" th:title="${business.name} + ' gallery photo ' + (stat.index + 1)" class="gallery-thumb"
                    data-fallback-image="https://images.unsplash.com/photo-1559925393-8be0ec4767c8?auto=format&amp;fit=crop&amp;w=240&amp;q=80">
             </button>
           </div>
