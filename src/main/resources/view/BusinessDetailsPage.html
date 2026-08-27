@@ -4,24 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title th:text="${business.name} + ' - Details — WarisanGo'">Business Details — WarisanGo</title>
-
-  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-  <!-- Global Styles (With static href fallback) -->
   <link rel="stylesheet" href="/css/global.css" th:href="@{/css/global.css}">
-  <!-- Assignment + Tailwind compiled styles -->
-  <link rel="stylesheet" th:href="@{/css/bundle.css}" href="/css/bundle.css">
-  <link rel="stylesheet" th:href="@{/css/assignment.css}" href="/css/assignment.css">
-  <!-- Page-specific stylesheet -->
-  <link rel="stylesheet" th:href="@{/css/business-heritage.css}" href="/css/business-heritage.css">
-  <!-- Review highlight card styles -->
-  <link rel="stylesheet" th:href="@{/css/review.css}" href="/css/review.css">
+  <link rel="stylesheet" href="/css/bundle.css" th:href="@{/css/bundle.css}">
+  <link rel="stylesheet" href="/css/assignment.css" th:href="@{/css/assignment.css}">
+  <link rel="stylesheet" href="/css/business-heritage.css" th:href="@{/css/business-heritage.css}">
 </head>
 <body>
-  <!-- Navbar fragment -->
   <div th:replace="~{fragments/fragments :: navbar('directory')}"></div>
 
   <main class="detail-page">
@@ -30,44 +21,56 @@
     <section class="detail-layout" aria-labelledby="business-title">
       <div class="detail-main">
         <div class="gallery" id="photos">
-          <img th:if="${not #lists.isEmpty(business.imageUrls)}" th:src="${business.imageUrls[0]}"
-               th:alt="${business.name} + ' photo'" th:title="${business.name}" class="gallery-featured"
-               data-fallback-image="https://images.unsplash.com/photo-1559925393-8be0ec4767c8?auto=format&amp;fit=crop&amp;w=1200&amp;q=85">
-          <img th:if="${#lists.isEmpty(business.imageUrls)}"
-               src="https://images.unsplash.com/photo-1559925393-8be0ec4767c8?auto=format&amp;fit=crop&amp;w=1200&amp;q=85"
-               th:alt="${business.name} + ' photo'" th:title="${business.name}" class="gallery-featured">
-          <button class="gallery-control gallery-previous" type="button"
-                  th:if="${#lists.size(business.imageUrls) > 1}" aria-label="Previous photo">&#10094;</button>
-          <button class="gallery-control gallery-next" type="button"
-                  th:if="${#lists.size(business.imageUrls) > 1}" aria-label="Next photo">&#10095;</button>
-          <div class="gallery-thumbnails" th:if="${not #lists.isEmpty(business.imageUrls)}">
-            <button th:each="imageUrl, stat : ${business.imageUrls}" class="gallery-thumbnail-button"
-                    type="button" th:attr="data-gallery-index=${stat.index}"
+          <div class="gallery-stage" tabindex="0" aria-label="Business photo gallery">
+            <img th:if="${not #lists.isEmpty(business.photos)}" th:src="${business.photos[0]}"
+                 alt="Business photo" title="Business photo" th:alt="${business.name} + ' photo'"
+                 th:title="${business.name} + ' photo'" class="gallery-featured" id="galleryFeatured"
+                 data-fallback-image="https://images.unsplash.com/photo-1559925393-8be0ec4767c8?auto=format&amp;fit=crop&amp;w=1200&amp;q=85">
+            <img th:if="${#lists.isEmpty(business.photos)}"
+                 src="https://images.unsplash.com/photo-1559925393-8be0ec4767c8?auto=format&amp;fit=crop&amp;w=1200&amp;q=85"
+                 alt="Business photo" title="Business photo" th:alt="${business.name} + ' photo'"
+                 th:title="${business.name} + ' photo'" class="gallery-featured" id="galleryFeatured">
+            <button class="gallery-nav gallery-nav--previous" type="button" aria-label="Show previous photo"
+                    th:if="${#lists.size(business.photos) > 1}" data-gallery-previous>‹</button>
+            <button class="gallery-nav gallery-nav--next" type="button" aria-label="Show next photo"
+                    th:if="${#lists.size(business.photos) > 1}" data-gallery-next>›</button>
+          </div>
+          <div class="gallery-thumbnails" th:if="${not #lists.isEmpty(business.photos)}">
+            <button th:each="photo, stat : ${business.photos}" type="button" class="gallery-thumbnail"
+                    th:attr="data-gallery-index=${stat.index},aria-current=${stat.index == 0 ? 'true' : 'false'}"
                     th:aria-label="${'Show photo ' + (stat.index + 1)}">
-              <img th:src="${imageUrl}" th:alt="${business.name} + ' gallery photo'" class="gallery-thumb"
+              <img th:src="${photo}" th:alt="${business.name} + ' gallery photo ' + (stat.index + 1)"
+                   title="Business gallery photo" th:title="${business.name} + ' gallery photo ' + (stat.index + 1)" class="gallery-thumb"
                    data-fallback-image="https://images.unsplash.com/photo-1559925393-8be0ec4767c8?auto=format&amp;fit=crop&amp;w=240&amp;q=80">
             </button>
           </div>
         </div>
 
         <header class="business-title-block">
-          <p class="detail-kicker" th:text="${business.city + ', ' + business.state}">City, State</p>
+          <p class="detail-kicker"
+             th:text="${'Heritage food · ' + (business.city ?: 'Malaysia') + ', ' + (business.state ?: '')}">
+            Heritage food · Malaysia
+          </p>
           <h1 id="business-title" th:text="${business.name}">Business Name</h1>
           <p class="detail-rating" th:classappend="${business.averageRating == null} ? ' unrated'">
             <span aria-hidden="true" th:if="${business.averageRating != null}">★★★★★</span>
             <strong th:text="${business.averageRating != null ? #numbers.formatDecimal(business.averageRating, 1, 1) : 'Not rated yet'}">4.8</strong>
             <span>Approved heritage listing</span>
           </p>
-
           <p class="business-summary" th:text="${business.description}">Business description</p>
         </header>
+
+        <section class="detail-section">
+          <h2>Our Story</h2>
+          <p th:text="${business.description}">Business story</p>
+        </section>
 
         <section class="detail-section business-information">
           <h2>Business Information</h2>
           <dl>
-            <div><dt>Operating hours</dt><dd th:text="${business.operatingHour != null and !business.operatingHour.isBlank() ? business.operatingHour : 'Not provided'}">08:00 - 23:00</dd></div>
-            <div><dt>Rating</dt><dd th:text="${business.averageRating != null ? #numbers.formatDecimal(business.averageRating, 1, 1) + ' / 5' : 'Not rated yet'}">4.8 / 5</dd></div>
-            <div class="information-wide"><dt>Address</dt><dd th:text="${business.address}">Business address</dd></div>
+            <div><dt>Category</dt><dd>Heritage food</dd></div>
+            <div><dt>Rating</dt><dd th:text="${business.averageRating != null ? #numbers.formatDecimal(business.averageRating, 1, 1) + ' / 5' : 'New listing'}">4.8 / 5</dd></div>
+            <div class="information-wide"><dt>Address</dt><dd th:text="${business.address ?: 'Address not available'}">Business address</dd></div>
           </dl>
         </section>
 
@@ -85,85 +88,18 @@
       </div>
 
       <aside class="detail-sidebar" aria-label="Business details">
-        <section class="review-highlight-card" th:if="${featuredReview != null}">
-          <div class="review-highlight-heading">
-            <div>
-              <p class="review-highlight-kicker"
-                 th:text="${totalReviews + (totalReviews == 1 ? ' community review' : ' community reviews')}">
-                Community pick
-              </p>
-              <h2>Visitor Review</h2>
-            </div>
-            <span class="review-highlight-rating"
-                  th:switch="${featuredReview.rating}">
-              <span th:case="5">🤩 5/5</span>
-              <span th:case="4">🙂 4/5</span>
-              <span th:case="3">😐 3/5</span>
-              <span th:case="2">😕 2/5</span>
-              <span th:case="1">😞 1/5</span>
-              <span th:case="*">😐 0/5</span>
-            </span>
-          </div>
-
-          <a class="review-highlight-content"
-             th:href="@{/reviews/detail/{id}(id=${featuredReview.reviewId})}"
-             aria-label="Read featured review">
-            <div class="review-highlight-author">
-              <span class="review-highlight-avatar"
-                    th:text="${featuredReview.touristName != null and !featuredReview.touristName.isEmpty()
-                    ? #strings.substring(featuredReview.touristName, 0, 1).toUpperCase()
-                    : 'U'}">
-                U
-              </span>
-              <strong th:text="${featuredReview.touristName}">Visitor</strong>
-            </div>
-
-            <div class="review-highlight-stars" aria-label="Review rating">
-              <span th:each="star : ${#numbers.sequence(1, 5)}"
-                    th:classappend="${star <= featuredReview.rating} ? ' filled' : ''">
-                ★
-              </span>
-            </div>
-
-            <p class="review-highlight-text"
-               th:text="${featuredReview.reviewText}">
-              Read what visitors think about this heritage business.
-            </p>
-          </a>
-
-          <a class="review-highlight-link"
-             th:href="@{/reviews/{id}(id=${business.businessId})}">
-            See all reviews →
-          </a>
-        </section>
-
-        <section class="review-highlight-card review-highlight-empty"
-                 th:if="${featuredReview == null}">
-          <p class="review-highlight-kicker" th:text="${totalReviews + ' community reviews'}">Community reviews</p>
-          <h2>Be the first to share</h2>
-          <p th:text="${totalReviews == 0
-                       ? 'No reviews have been posted for this business yet.'
-                       : totalReviews + ' reviews have been posted for this business.'}">
-            No reviews have been posted for this business yet.
-          </p>
-          <a class="review-btn-primary"
-             th:href="@{/reviews/create/{id}(id=${business.businessId})}">
-            Write a Review
-          </a>
-        </section>
-
         <section class="sidebar-card">
           <h2>Heritage Details</h2>
           <dl class="sidebar-list">
             <div><dt>Operating hours</dt><dd th:text="${business.operatingHour != null and !business.operatingHour.isBlank() ? business.operatingHour : 'Not provided'}">08:00 - 23:00</dd></div>
             <div><dt>Status</dt><dd>Approved</dd></div>
-            <div><dt>Rating</dt><dd th:text="${business.averageRating != null ? #numbers.formatDecimal(business.averageRating, 1, 1) + ' / 5' : 'Not rated yet'}">4.8 / 5</dd></div>
-            <div><dt>State</dt><dd th:text="${business.state}">State</dd></div>
+            <div><dt>Rating</dt><dd th:text="${business.averageRating != null ? #numbers.formatDecimal(business.averageRating, 1, 1) + ' / 5' : 'New'}">4.8 / 5</dd></div>
+            <div><dt>State</dt><dd th:text="${business.state ?: 'Not available'}">State</dd></div>
           </dl>
         </section>
         <section class="sidebar-card">
           <h2>Location</h2>
-          <p class="sidebar-address" th:text="${business.address}">Business address</p>
+          <p class="sidebar-address" th:text="${business.address ?: 'Address not available'}">Business address</p>
           <a class="map-link" th:href="@{/map}">View on map →</a>
         </section>
       </aside>
@@ -171,9 +107,6 @@
   </main>
 
   <div th:replace="~{fragments/footer :: global}"></div>
-
-  <!-- Page-specific script -->
-  <script src="/js/check-in.js" th:src="@{/js/check-in.js}"></script>
   <script src="/js/business-heritage.js" th:src="@{/js/business-heritage.js}"></script>
 </body>
 </html>
