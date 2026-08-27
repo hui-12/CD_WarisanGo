@@ -69,6 +69,38 @@
     });
   }
 
+  function initializeGallery() {
+    const featuredImage = document.getElementById('galleryFeatured');
+    const thumbnailButtons = Array.from(document.querySelectorAll('.gallery-thumbnail'));
+    const galleryStage = document.querySelector('.gallery-stage');
+    if (!featuredImage || thumbnailButtons.length < 2 || !galleryStage) return;
+
+    const photoUrls = thumbnailButtons.map(button => button.querySelector('img')?.src).filter(Boolean);
+    let activeIndex = 0;
+
+    const showPhoto = (nextIndex) => {
+      activeIndex = (nextIndex + photoUrls.length) % photoUrls.length;
+      featuredImage.src = photoUrls[activeIndex];
+      thumbnailButtons.forEach((button, index) => {
+        button.setAttribute('aria-current', String(index === activeIndex));
+      });
+    };
+
+    document.querySelector('[data-gallery-previous]')?.addEventListener('click', () => showPhoto(activeIndex - 1));
+    document.querySelector('[data-gallery-next]')?.addEventListener('click', () => showPhoto(activeIndex + 1));
+    thumbnailButtons.forEach((button, index) => button.addEventListener('click', () => showPhoto(index)));
+    galleryStage.addEventListener('keydown', (event) => {
+      if (event.key === 'ArrowLeft') {
+        event.preventDefault();
+        showPhoto(activeIndex - 1);
+      }
+      if (event.key === 'ArrowRight') {
+        event.preventDefault();
+        showPhoto(activeIndex + 1);
+      }
+    });
+  }
+
   // Event wiring
   if(searchInput) searchInput.addEventListener('input', applyFilters);
   if(clearBtn) clearBtn.addEventListener('click', ()=>{ if(searchInput) searchInput.value=''; if(categoryFilter) categoryFilter.value=''; if(stateFilter) stateFilter.value=''; if(cityFilter) cityFilter.value=''; applyFilters(); });
@@ -78,6 +110,7 @@
   document.addEventListener('DOMContentLoaded', ()=>{
     populateFilters();
     ensureImageAccessibility();
+    initializeGallery();
     applyFilters();
   });
 

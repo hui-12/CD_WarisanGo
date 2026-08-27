@@ -16,7 +16,7 @@ import java.util.function.Consumer;
 @Repository
 public class BusinessRepository {
 
-    private static final String COLLECTION_NAME = "HeritageBusinesses";
+    private static final String COLLECTION_NAME = "heritageBusinesses";
     private static final Logger logger = LoggerFactory.getLogger(BusinessRepository.class);
     private final Firestore firestore;
 
@@ -25,14 +25,15 @@ public class BusinessRepository {
     }
 
     public List<HeritageBusinessDTO> findApprovedBusinesses() throws ExecutionException, InterruptedException {
-        ApiFuture<QuerySnapshot> future = firestore.collection(COLLECTION_NAME)
-                .whereEqualTo("status", "Approved")
-                .get();
+        ApiFuture<QuerySnapshot> future = firestore.collection(COLLECTION_NAME).get();
 
         List<QueryDocumentSnapshot> documents = future.get().getDocuments();
         List<HeritageBusinessDTO> list = new ArrayList<>();
 
         for (QueryDocumentSnapshot doc : documents) {
+            if (!isApproved(doc)) {
+                continue;
+            }
             GeoPoint geoPoint = doc.getGeoPoint("location");
             double lat = geoPoint != null ? geoPoint.getLatitude() : 0.0;
             double lng = geoPoint != null ? geoPoint.getLongitude() : 0.0;
@@ -72,8 +73,7 @@ public class BusinessRepository {
             document = snapshot.getDocuments().get(0);
         }
 
-        String status = document.getString("status");
-        if (status != null && !status.isBlank() && !"Approved".equalsIgnoreCase(status)) {
+        if (!isApproved(document)) {
             return null;
         }
 
@@ -83,7 +83,6 @@ public class BusinessRepository {
     // Real-time Firestore Snapshot Listener
     public ListenerRegistration addApprovedBusinessesListener(Consumer<List<HeritageBusinessDTO>> callback) {
         return firestore.collection(COLLECTION_NAME)
-                .whereEqualTo("status", "Approved")
                 .addSnapshotListener((snapshots, e) -> {
                     if (e != null || snapshots == null) {
                         return;
@@ -91,6 +90,9 @@ public class BusinessRepository {
 
                     List<HeritageBusinessDTO> list = new ArrayList<>();
                     for (QueryDocumentSnapshot doc : snapshots) {
+                        if (!isApproved(doc)) {
+                            continue;
+                        }
                         GeoPoint geoPoint = doc.getGeoPoint("location");
                         double lat = geoPoint != null ? geoPoint.getLatitude() : 0.0;
                         double lng = geoPoint != null ? geoPoint.getLongitude() : 0.0;
@@ -109,6 +111,9 @@ public class BusinessRepository {
             if (doc == null || !doc.exists()) {
                 return Optional.empty();
             }
+            if (!isApproved(doc)) {
+                return Optional.empty();
+            }
 
             GeoPoint geoPoint = doc.getGeoPoint("location");
             double lat = geoPoint != null ? geoPoint.getLatitude() : 0.0;
@@ -124,8 +129,9 @@ public class BusinessRepository {
     }
 
     private HeritageBusinessDTO toDto(DocumentSnapshot doc, double latitude, double longitude) {
+        String businessId = doc.getString("businessId");
         HeritageBusinessDTO dto = new HeritageBusinessDTO(
-                doc.getId(),
+                businessId == null || businessId.isBlank() ? doc.getId() : businessId,
                 doc.getString("name"),
                 doc.getString("address"),
                 doc.getString("state"),
@@ -145,6 +151,11 @@ public class BusinessRepository {
                     .toList());
         }
         return dto;
+    }
+
+    private boolean isApproved(DocumentSnapshot document) {
+        String status = document.getString("status");
+        return status != null && "approved".equalsIgnoreCase(status.trim());
     }
 
     private HeritageBusinessDTO toBusinessDTO(DocumentSnapshot document) {
