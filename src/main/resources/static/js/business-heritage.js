@@ -65,6 +65,51 @@
     });
   }
 
+  function setupGallery(){
+    const stage = document.querySelector('.gallery-stage');
+    const featured = document.getElementById('galleryFeatured');
+    const thumbnails = Array.from(document.querySelectorAll('.gallery-thumbnail'));
+    if (!stage || !featured || thumbnails.length < 2) return;
+
+    const photos = thumbnails.map(thumbnail => thumbnail.querySelector('img')?.src).filter(Boolean);
+    if (photos.length < 2) return;
+
+    let selectedIndex = 0;
+    const showPhoto = (index) => {
+      selectedIndex = (index + photos.length) % photos.length;
+      featured.src = photos[selectedIndex];
+      featured.alt = thumbnails[selectedIndex].querySelector('img')?.alt || 'Business photo';
+      thumbnails.forEach((thumbnail, thumbnailIndex) => {
+        const selected = thumbnailIndex === selectedIndex;
+        thumbnail.classList.toggle('is-active', selected);
+        thumbnail.setAttribute('aria-current', selected ? 'true' : 'false');
+      });
+    };
+
+    document.querySelector('[data-gallery-previous]')?.addEventListener('click', () => showPhoto(selectedIndex - 1));
+    document.querySelector('[data-gallery-next]')?.addEventListener('click', () => showPhoto(selectedIndex + 1));
+    thumbnails.forEach((thumbnail, index) => thumbnail.addEventListener('click', () => showPhoto(index)));
+
+    // The left and right halves of the photo act as previous and next controls.
+    stage.addEventListener('click', (event) => {
+      if (event.target.closest('.gallery-nav')) return;
+      const bounds = stage.getBoundingClientRect();
+      showPhoto(event.clientX - bounds.left < bounds.width / 2 ? selectedIndex - 1 : selectedIndex + 1);
+    });
+    stage.addEventListener('keydown', (event) => {
+      if (event.key === 'ArrowLeft') {
+        event.preventDefault();
+        showPhoto(selectedIndex - 1);
+      }
+      if (event.key === 'ArrowRight') {
+        event.preventDefault();
+        showPhoto(selectedIndex + 1);
+      }
+    });
+
+    showPhoto(0);
+  }
+
   // Event wiring
   if(searchInput) searchInput.addEventListener('input', applyFilters);
   if(searchButton) searchButton.addEventListener('click', applyFilters);
@@ -76,6 +121,7 @@
     populateFilters();
     ensureImageAccessibility();
     applyFilters();
+    setupGallery();
   });
 
 })();
