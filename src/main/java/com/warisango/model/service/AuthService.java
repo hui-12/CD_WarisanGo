@@ -58,8 +58,12 @@ public class AuthService {
 
         if (existingUser.isPresent()) {
             User user = userRepository.initializeMissingProfileFields(existingUser.get());
+            boolean identityChanged = synchronizeGoogleIdentity(user, decodedToken);
             if (!assignedRole.equalsIgnoreCase(user.getRole())) {
                 user.setRole(assignedRole);
+                identityChanged = true;
+            }
+            if (identityChanged) {
                 userRepository.save(user);
             }
             logger.info("User {} authenticated with role {}.", uid, assignedRole);
@@ -76,6 +80,27 @@ public class AuthService {
         );
         userRepository.save(newUser);
         return newUser;
+    }
+
+    private boolean synchronizeGoogleIdentity(User user, FirebaseToken decodedToken) {
+        boolean changed = false;
+        if (hasText(decodedToken.getEmail()) && !decodedToken.getEmail().equals(user.getEmail())) {
+            user.setEmail(decodedToken.getEmail());
+            changed = true;
+        }
+        if (hasText(decodedToken.getName()) && !decodedToken.getName().equals(user.getName())) {
+            user.setName(decodedToken.getName());
+            changed = true;
+        }
+        if (hasText(decodedToken.getPicture()) && !decodedToken.getPicture().equals(user.getAvatar())) {
+            user.setAvatar(decodedToken.getPicture());
+            changed = true;
+        }
+        return changed;
+    }
+
+    private boolean hasText(String value) {
+        return value != null && !value.isBlank();
     }
 
     public Optional<User> findUserByUid(String uid) {

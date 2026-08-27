@@ -17,6 +17,8 @@ export type Page =
   | 'pending-detail'
   | 'audit-log'
   | 'challenge-manage'
+  | 'reports'
+  | 'report-detail'
 
 interface Props {
   children: ReactNode

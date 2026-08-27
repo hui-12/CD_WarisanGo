@@ -140,6 +140,23 @@ public class BusinessRepository {
         document.getReference().update(update).get();
     }
 
+    public void updateReportedDetails(String businessId, Map<String, Object> corrections)
+            throws ExecutionException, InterruptedException {
+        DocumentSnapshot document = firestore.collection(COLLECTION_NAME).document(businessId).get().get();
+        if (!document.exists()) {
+            QuerySnapshot matches = firestore.collection(COLLECTION_NAME)
+                    .whereEqualTo("businessId", businessId)
+                    .limit(1)
+                    .get()
+                    .get();
+            if (matches.isEmpty()) {
+                throw new IllegalArgumentException("Business was not found.");
+            }
+            document = matches.getDocuments().get(0);
+        }
+        document.getReference().update(corrections).get();
+    }
+
     public List<HeritageBusinessDTO> findApprovedBusinesses() throws ExecutionException, InterruptedException {
         ApiFuture<QuerySnapshot> future = firestore.collection(COLLECTION_NAME).get();
 

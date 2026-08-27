@@ -1,12 +1,14 @@
 import { useState, useRef } from 'react'
-import type { Business } from '../data/mock'
-import { REVIEWS } from '../data/mock'
+import type { Business, BusinessReport, User } from '../data/mock'
+import { REVIEWS, REPORT_REASONS } from '../data/mock'
 
 interface Props {
   business: Business
   onBack: () => void
   savedIds?: Set<string>
   onToggleSave?: (id: string) => void
+  onSubmitReport?: (report: BusinessReport) => void
+  currentUser?: User | null
 }
 
 function StarRating({ rating, interactive = false, onRate }: { rating: number; interactive?: boolean; onRate?: (r: number) => void }) {
@@ -70,7 +72,7 @@ function BookmarkIcon({ filled }: { filled: boolean }) {
   )
 }
 
-export default function BusinessDetailPage({ business, onBack, savedIds = new Set(), onToggleSave }: Props) {
+export default function BusinessDetailPage({ business, onBack, savedIds = new Set(), onToggleSave, onSubmitReport, currentUser }: Props) {
   const isSaved = savedIds.has(business.id)
   const [activePhoto, setActivePhoto] = useState(0)
   const [checkinState, setCheckinState] = useState<'idle' | 'checking' | 'success'>('idle')
@@ -79,6 +81,10 @@ export default function BusinessDetailPage({ business, onBack, savedIds = new Se
   const [reviewText, setReviewText] = useState('')
   const [expandedComment, setExpandedComment] = useState<string | null>(null)
   const [commentText, setCommentText] = useState('')
+  const [showReportModal, setShowReportModal] = useState(false)
+  const [reportReason, setReportReason] = useState<string>(REPORT_REASONS[0])
+  const [reportDetails, setReportDetails] = useState('')
+  const [reportSubmitted, setReportSubmitted] = useState(false)
 
   const reviews = REVIEWS.filter(r => r.businessId === business.id)
 
@@ -94,8 +100,85 @@ export default function BusinessDetailPage({ business, onBack, savedIds = new Se
     setTimeout(() => setCheckinState('success'), 2000)
   }
 
+  const handleSubmitReport = () => {
+    if (!onSubmitReport) return
+    const report: BusinessReport = {
+      id: `rep${Date.now()}`,
+      businessId: business.id,
+      businessName: business.name,
+      touristId: currentUser?.id ?? 'u1',
+      touristName: currentUser?.name ?? 'Tourist',
+      touristAvatar: currentUser?.avatar ?? 'https://i.pravatar.cc/40?img=1',
+      reason: reportReason as BusinessReport['reason'],
+      details: reportDetails,
+      submittedAt: new Date().toISOString(),
+      status: 'pending',
+    }
+    onSubmitReport(report)
+    setReportSubmitted(true)
+    setTimeout(() => {
+      setShowReportModal(false)
+      setReportSubmitted(false)
+      setReportReason(REPORT_REASONS[0])
+      setReportDetails('')
+    }, 2000)
+  }
+
   return (
     <div style={{ fontFamily: "'Inter', Arial, sans-serif" }}>
+      {/* Report modal */}
+      {showReportModal && (
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(20,20,19,0.5)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+          <div style={{ backgroundColor: '#faf9f5', border: '1.5px solid #141413', borderRadius: 14, width: '100%', maxWidth: 460, overflow: 'hidden' }}>
+            <div style={{ padding: '14px 20px', borderBottom: '1.5px solid #141413', backgroundColor: '#141413', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontSize: 14, fontWeight: 600, color: '#faf9f5' }}>Report an Issue</span>
+              <button onClick={() => setShowReportModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#faf9f5', fontSize: 16, lineHeight: 1 }}>✕</button>
+            </div>
+            {reportSubmitted ? (
+              <div style={{ padding: '40px 24px', textAlign: 'center' }}>
+                <div style={{ fontSize: 36, marginBottom: 12 }}>✓</div>
+                <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: 20, fontWeight: 700, color: '#141413', marginBottom: 6 }}>Report Submitted</div>
+                <div style={{ fontSize: 13, color: '#6b6b68' }}>Our team will review your report shortly.</div>
+              </div>
+            ) : (
+              <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
+                <div>
+                  <div style={{ fontSize: 13, color: '#6b6b68', marginBottom: 12 }}>
+                    Reporting: <strong style={{ color: '#141413' }}>{business.name}</strong>
+                  </div>
+                  <label style={{ fontSize: 12, fontWeight: 600, color: '#141413', display: 'block', marginBottom: 6 }}>Reason *</label>
+                  <select
+                    value={reportReason}
+                    onChange={e => setReportReason(e.target.value)}
+                    style={{ width: '100%', padding: '9px 12px', border: '1.5px solid #141413', borderRadius: 8, fontSize: 13, fontFamily: "'Inter', Arial, sans-serif", backgroundColor: '#faf9f5', outline: 'none', appearance: 'none', cursor: 'pointer' }}
+                  >
+                    {REPORT_REASONS.map(r => <option key={r} value={r}>{r}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label style={{ fontSize: 12, fontWeight: 600, color: '#141413', display: 'block', marginBottom: 6 }}>Additional Details <span style={{ fontWeight: 400, color: '#6b6b68' }}>(optional)</span></label>
+                  <textarea
+                    value={reportDetails}
+                    onChange={e => setReportDetails(e.target.value)}
+                    rows={4}
+                    placeholder="Please describe the issue in detail..."
+                    style={{ width: '100%', padding: '10px 12px', border: '1.5px solid #141413', borderRadius: 8, fontSize: 13, fontFamily: "'Inter', Arial, sans-serif", backgroundColor: '#ffffff', outline: 'none', resize: 'vertical', boxSizing: 'border-box', lineHeight: 1.5 }}
+                  />
+                </div>
+                <div style={{ display: 'flex', gap: 10 }}>
+                  <button onClick={handleSubmitReport} style={{ flex: 1, padding: '11px', border: 'none', borderRadius: 8, background: '#141413', color: '#faf9f5', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: "'Inter', Arial, sans-serif" }}>
+                    Submit Report
+                  </button>
+                  <button onClick={() => setShowReportModal(false)} style={{ flex: 1, padding: '11px', border: '1.5px solid #141413', borderRadius: 8, background: 'none', color: '#141413', fontSize: 13, cursor: 'pointer', fontFamily: "'Inter', Arial, sans-serif" }}>
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', cursor: 'pointer', color: '#6b6b68', fontSize: 13, marginBottom: 24, padding: 0 }}>
         ← Back to Directory
       </button>
@@ -162,6 +245,20 @@ export default function BusinessDetailPage({ business, onBack, savedIds = new Se
                 </svg>
                 {isSaved ? 'Saved' : 'Save'}
               </button>
+              {onSubmitReport && (
+                <button
+                  onClick={() => setShowReportModal(true)}
+                  style={{
+                    flexShrink: 0, marginTop: 6,
+                    display: 'flex', alignItems: 'center', gap: 5,
+                    padding: '8px 14px', border: '1.5px solid #c0392b', borderRadius: 8,
+                    background: 'none', color: '#c0392b', fontSize: 12, fontWeight: 500,
+                    cursor: 'pointer', fontFamily: "'Inter', Arial, sans-serif", whiteSpace: 'nowrap',
+                  }}
+                >
+                  ⚑ Report
+                </button>
+              )}
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
               <StarRating rating={business.rating} />

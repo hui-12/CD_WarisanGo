@@ -13,6 +13,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.Map;
 
 @Service
 public class BusinessService {
@@ -53,6 +54,15 @@ public class BusinessService {
         } catch (Exception exception) {
             logger.error("Failed to update average rating for business {}.", businessId, exception);
             throw new IllegalStateException("Failed to update the business rating.", exception);
+        }
+    }
+
+    public void updateReportedDetails(String businessId, Map<String, Object> corrections) {
+        try {
+            businessRepository.updateReportedDetails(businessId, corrections);
+        } catch (Exception exception) {
+            logger.error("Failed to apply reported corrections for business {}.", businessId, exception);
+            throw new IllegalStateException("Failed to update the reported business.", exception);
         }
     }
 

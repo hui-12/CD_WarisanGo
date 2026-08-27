@@ -51,7 +51,14 @@
              th:text="${'Heritage food · ' + (business.city ?: 'Malaysia') + ', ' + (business.state ?: '')}">
             Heritage food · Malaysia
           </p>
-          <h1 id="business-title" th:text="${business.name}">Business Name</h1>
+          <div class="detail-title-row">
+            <h1 id="business-title" th:text="${business.name}">Business Name</h1>
+            <button class="detail-save-button" type="button" data-save-business
+                    th:attr="data-business-id=${business.businessId},aria-label=${'Save ' + business.name}">
+              <span class="bookmark-icon" aria-hidden="true"></span>
+              <span data-save-label>Save</span>
+            </button>
+          </div>
           <p class="detail-rating" th:classappend="${business.averageRating == null} ? ' unrated'">
             <span aria-hidden="true" th:if="${business.averageRating != null}">★★★★★</span>
             <strong th:text="${business.averageRating != null ? #numbers.formatDecimal(business.averageRating, 1, 1) : 'Not rated yet'}">4.8</strong>
@@ -85,6 +92,53 @@
           <button class="check-in-button" type="button" data-check-in-business
                   th:attr="data-business-id=${business.businessId}">Check In Here</button>
         </section>
+
+        <section class="detail-section community-reviews" aria-labelledby="community-reviews-title">
+          <div class="community-reviews-heading">
+            <div>
+              <p class="detail-kicker">Community</p>
+              <h2 id="community-reviews-title">Community Reviews</h2>
+              <p th:if="${totalReviews == 0}">Be the first to share your experience at this business.</p>
+              <p th:unless="${totalReviews == 0}">
+                Read <strong th:text="${totalReviews}">0</strong>
+                <span th:text="${totalReviews == 1 ? 'review' : 'reviews'}">reviews</span>
+                from the WarisanGo community.
+              </p>
+            </div>
+            <span class="community-review-count" th:text="${totalReviews}">0</span>
+          </div>
+          <div class="community-review-actions">
+            <a class="review-primary-link"
+               th:href="@{/reviews/{id}(id=${business.businessId})}">View Community Reviews</a>
+            <a class="review-secondary-link"
+               th:href="@{/reviews/create/{id}(id=${business.businessId})}">Write a Review</a>
+          </div>
+        </section>
+
+        <section id="report-business" class="detail-section business-report-panel"
+                 aria-labelledby="report-business-title">
+          <details th:open="${businessReportError != null}">
+            <summary id="report-business-title">Report incorrect business information</summary>
+            <p>Tell our admins if this listing is closed, outdated, incorrectly named, or shown in the wrong location.</p>
+            <p class="business-report-message" th:if="${businessReportMessage}" th:text="${businessReportMessage}"></p>
+            <p class="business-report-error" th:if="${businessReportError}" th:text="${businessReportError}"></p>
+            <form class="business-report-form" th:action="@{/business/{id}/report(id=${business.businessId})}" method="post">
+              <label for="business-report-reason">Reason</label>
+              <select id="business-report-reason" name="reason" required>
+                <option value="">Select a reason</option>
+                <option value="PERMANENTLY_CLOSED">Permanently Closed</option>
+                <option value="INCORRECT_LOCATION">Incorrect Location</option>
+                <option value="OUTDATED_INFO">Outdated Information</option>
+                <option value="NAME_ERROR">Business Name Error</option>
+                <option value="OTHER">Other</option>
+              </select>
+              <label for="business-report-details">What should we correct?</label>
+              <textarea id="business-report-details" name="details" rows="5" maxlength="1000" required
+                        placeholder="Explain what is incorrect and provide the correct information if known."></textarea>
+              <button type="submit">Submit Report</button>
+            </form>
+          </details>
+        </section>
       </div>
 
       <aside class="detail-sidebar" aria-label="Business details">
@@ -108,5 +162,6 @@
 
   <div th:replace="~{fragments/footer :: global}"></div>
   <script src="/js/business-heritage.js" th:src="@{/js/business-heritage.js}"></script>
+  <script src="/js/saved-listing-controls.js" th:src="@{/js/saved-listing-controls.js}"></script>
 </body>
 </html>

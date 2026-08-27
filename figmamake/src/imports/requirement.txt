@@ -41,3 +41,19 @@ FR5.3: The system shall allow tourists to edit to a submitted review.
 --- Reward and Badge Module ---
 
 Check the attached file reward and badge.pdf for the FR
+
+Module 7: Bookmark & Saved Listings Module
+FR7.1: The system shall allow tourists to bookmark or save any approved heritage business listing to their personal saved collection. 
+FR7.2: The system shall allow tourists to remove a business listing from their personal saved collection.
+FR7.3: The system shall display a dedicated "Saved Listings" page on the tourist's profile showing all bookmarked heritage businesses.
+FR7.4: The system shall allow tourists to filter their saved listings by category, state, and city.
+FR7.5: The system shall indicate on business listing cards and detail pages whether the tourist has already bookmarked that business.
+
+Module 8: Business Report & Data Correction Module
+FR8.1: The system shall allow tourists to submit a report for a heritage business detailing incorrect information (e.g., permanently closed, wrong business hours, wrong location, or name error).
+FR8.2: The system shall require tourists to select a report reason (e.g., Permanently Closed, Incorrect Location, Outdated Info, Other) and provide a text explanation when submitting a report.
+FR8.3: The system shall capture the tourist ID, business ID, timestamp, report reason, and details upon report submission.
+FR8.4: The system shall mark submitted business reports with a "Pending Review" status.
+FR8.5: The system shall display all pending reports in an admin review queue.  FR8.6: The system shall allow admins to view report details, business info, and user comments from the review queue.
+FR8.7: The system shall allow admins to resolve a report by updating the business listing details or dismissing the report.
+FR8.8: The system shall update the report status to "Resolved" or "Dismissed" after admin action and record the admin ID and timestamp.

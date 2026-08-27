@@ -10,7 +10,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const markersMap = new Map();
     const checkedInToday = new Set();
-    const visitedBusinesses = new Set();
     const listContainer = document.getElementById('locations-list');
     const locationsCountEl = document.getElementById('locations-count');
 
@@ -18,11 +17,48 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchInput = document.getElementById('map-search-input');
     const searchBtn = document.getElementById('map-search-btn');
     const stateSelect = document.getElementById('state-select');
+    const citySelect = document.getElementById('city-select');
     const radiusSelect = document.getElementById('radius-select');
     const sortSelect = document.getElementById('sort-select');
+    const clearFiltersButton = document.getElementById('map-clear-filters');
 
     // Master state store
     let rawLocations = [];
+    const savedBusinessIds = new Set();
+
+    const bookmarkSvg = `
+        <svg viewBox="0 0 24 28" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M4 2h16v23l-8-5-8 5z"></path>
+        </svg>`;
+
+    const updateSavedControls = businessId => {
+        const saved = savedBusinessIds.has(businessId);
+        document.querySelectorAll(`[data-map-save-business="${CSS.escape(businessId)}"]`).forEach(button => {
+            button.setAttribute('aria-pressed', String(saved));
+            button.setAttribute('aria-label', `${saved ? 'Remove' : 'Save'} this business`);
+            button.title = saved ? 'Remove from saved listings' : 'Save business';
+        });
+    };
+
+    const toggleSavedBusiness = async (businessId, button) => {
+        const wasSaved = savedBusinessIds.has(businessId);
+        button.disabled = true;
+        try {
+            const response = await fetch(`/api/saved-listings/${encodeURIComponent(businessId)}`, {
+                method: wasSaved ? 'DELETE' : 'POST',
+                headers: {'Accept': 'application/json'}
+            });
+            if (!response.ok) throw new Error('Unable to update saved listing.');
+            if (wasSaved) savedBusinessIds.delete(businessId);
+            else savedBusinessIds.add(businessId);
+            updateSavedControls(businessId);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            button.disabled = false;
+        }
+    };
 
     // --- User Location State ---
     let userMarker = null;
@@ -31,11 +67,20 @@ document.addEventListener('DOMContentLoaded', () => {
     let isInitialLocationSet = false; 
     let watchId = null;
 
+    const markSidebarCheckedInToday = businessId => {
+        const card = Array.from(document.querySelectorAll('.location-item-card'))
+            .find(item => item.dataset.businessId === businessId);
+        if (!card || card.querySelector('.map-visited-label')) return;
+        const label = document.createElement('span');
+        label.className = 'map-visited-label';
+        label.textContent = '✓ Checked In Today';
+        card.querySelector('.location-item-info')?.appendChild(label);
+    };
+
     window.addEventListener('warisango:check-in-complete', (event) => {
         if (event.detail?.businessId) {
             const businessId = event.detail.businessId;
             checkedInToday.add(businessId);
-            visitedBusinesses.add(businessId);
 
             const marker = markersMap.get(businessId);
             const popupContent = marker?.getPopup()?.getContent();
@@ -53,14 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
-            document.querySelectorAll('.location-item-card').forEach(card => {
-                if (card.dataset.businessId !== businessId
-                        || card.querySelector('.map-visited-label')) return;
-                const label = document.createElement('span');
-                label.className = 'map-visited-label';
-                label.textContent = '✓ Checked In';
-                card.querySelector('.location-item-info')?.appendChild(label);
-            });
+            markSidebarCheckedInToday(businessId);
         }
     });
 
@@ -237,14 +275,37 @@ document.addEventListener('DOMContentLoaded', () => {
         stateSelect.value = selectionStillExists ? selectedState : 'All';
     };
 
+    const populateCityDropdown = items => {
+        if (!citySelect) return;
+        const selectedCity = citySelect.value;
+        const selectedState = (stateSelect?.value || 'All').trim().toLowerCase();
+        const cities = [...new Set(items.filter(item => {
+            const state = (item.state || '').trim().toLowerCase();
+            return selectedState === 'all' || state === selectedState;
+        }).map(item => item.city?.trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+        citySelect.replaceChildren(new Option('All Cities', 'All'));
+        cities.forEach(city => citySelect.appendChild(new Option(city, city)));
+        citySelect.value = cities.includes(selectedCity) ? selectedCity : 'All';
+    };
+
     // ==========================================
     // --- UNIFIED FILTER & SORT PIPELINE ---
     // ==========================================
     const applyFilters = async () => {
         const query = (searchInput?.value || '').toLowerCase().trim();
         const selectedState = (stateSelect?.value || 'All').trim().toLowerCase();
+        const selectedCity = (citySelect?.value || 'All').trim().toLowerCase();
         const selectedRadius = parseFloat(radiusSelect?.value || '0');
         const selectedSort = sortSelect?.value || 'none';
+
+        if (clearFiltersButton) {
+            const hasActiveFilter = Boolean(query)
+                || selectedState !== 'all'
+                || selectedCity !== 'all'
+                || selectedRadius > 0
+                || selectedSort !== 'none';
+            clearFiltersButton.style.display = hasActiveFilter ? 'block' : '';
+        }
 
         let locationMissingNotice = false;
 
@@ -260,7 +321,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 (locState.includes(selectedState)) ||
                 (selectedState.includes(locState));
 
-            return matchesSearch && matchesState;
+            const locCity = (loc.city || '').trim().toLowerCase();
+            const matchesCity = selectedCity === 'all' || locCity === selectedCity;
+
+            return matchesSearch && matchesState && matchesCity;
         });
 
         // 2. Phase 2: Calculate Single Distance Whenever Location Is Available
@@ -384,7 +448,10 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 window.WarisanGoCheckIn.refreshStatus(loc.businessId, btnCheckIn, popupStatus)
                     .then(isCheckedIn => {
-                        if (isCheckedIn) checkedInToday.add(loc.businessId);
+                        if (isCheckedIn) {
+                            checkedInToday.add(loc.businessId);
+                            markSidebarCheckedInToday(loc.businessId);
+                        }
                     });
             }
 
@@ -403,9 +470,12 @@ document.addEventListener('DOMContentLoaded', () => {
             markersMap.set(loc.businessId, marker);
 
             // Create Sidebar Card
-            const card = document.createElement('button');
+            const card = document.createElement('div');
             card.className = 'location-item-card';
             card.dataset.businessId = loc.businessId;
+            card.tabIndex = 0;
+            card.setAttribute('role', 'button');
+            card.setAttribute('aria-label', `Show ${loc.name} on the map`);
 
             const itemInfo = document.createElement('div');
             itemInfo.className = 'location-item-info';
@@ -421,29 +491,59 @@ document.addEventListener('DOMContentLoaded', () => {
             itemInfo.appendChild(itemName);
             itemInfo.appendChild(itemMeta);
 
-            if (visitedBusinesses.has(loc.businessId)) {
+            if (checkedInToday.has(loc.businessId)) {
                 const visitedLabel = document.createElement('span');
                 visitedLabel.className = 'map-visited-label';
-                visitedLabel.textContent = '✓ Checked In';
+                visitedLabel.textContent = '✓ Checked In Today';
                 itemInfo.appendChild(visitedLabel);
             }
 
             const itemRating = document.createElement('div');
             itemRating.className = 'location-item-rating';
+
+            const savedIndicator = document.createElement('button');
+            savedIndicator.className = 'map-saved-indicator';
+            savedIndicator.type = 'button';
+            savedIndicator.dataset.mapSaveBusiness = loc.businessId;
+            savedIndicator.innerHTML = bookmarkSvg;
+            savedIndicator.setAttribute('aria-pressed', String(savedBusinessIds.has(loc.businessId)));
+            savedIndicator.setAttribute('aria-label',
+                `${savedBusinessIds.has(loc.businessId) ? 'Remove' : 'Save'} ${loc.name}`);
+            savedIndicator.addEventListener('click', event => {
+                event.stopPropagation();
+                toggleSavedBusiness(loc.businessId, savedIndicator);
+            });
             itemRating.textContent = `★ ${ratingDisplay}`;
 
-            card.appendChild(itemInfo);
-            card.appendChild(itemRating);
+            const itemActions = document.createElement('div');
+            itemActions.className = 'location-item-actions';
+            itemActions.appendChild(savedIndicator);
+            itemActions.appendChild(itemRating);
 
-            card.addEventListener('click', () => {
+            card.appendChild(itemInfo);
+            card.appendChild(itemActions);
+
+            const highlightSidebarEntry = () => {
                 document.querySelectorAll('.location-item-card').forEach(c => c.classList.remove('selected'));
                 card.classList.add('selected');
-                
+                card.scrollIntoView({block: 'nearest', behavior: 'smooth'});
+            };
+            const selectLocation = () => {
+                highlightSidebarEntry();
                 map.flyTo([loc.latitude, loc.longitude], 14, { duration: 1.2 });
                 marker.openPopup();
+            };
+            marker.on('click', highlightSidebarEntry);
+            card.addEventListener('click', selectLocation);
+            card.addEventListener('keydown', event => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    selectLocation();
+                }
             });
 
             listContainer.appendChild(card);
+            updateSavedControls(loc.businessId);
         });
 
         if (locationsCountEl) {
@@ -453,14 +553,38 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Filter Event Listeners ---
     if (radiusSelect) radiusSelect.addEventListener('change', applyFilters);
-    if (stateSelect) stateSelect.addEventListener('change', applyFilters);
+    if (stateSelect) stateSelect.addEventListener('change', () => {
+        populateCityDropdown(rawLocations);
+        applyFilters();
+    });
+    if (citySelect) citySelect.addEventListener('change', applyFilters);
     if (sortSelect) sortSelect.addEventListener('change', applyFilters);
     if (searchBtn) searchBtn.addEventListener('click', applyFilters);
     if (searchInput) {
+        searchInput.addEventListener('input', () => {
+            if (clearFiltersButton && searchInput.value.trim()) {
+                clearFiltersButton.style.display = 'block';
+            } else if (clearFiltersButton) {
+                const hasOtherFilter = stateSelect?.value !== 'All'
+                    || citySelect?.value !== 'All'
+                    || radiusSelect?.value !== '0'
+                    || sortSelect?.value !== 'none';
+                clearFiltersButton.style.display = hasOtherFilter ? 'block' : '';
+            }
+        });
         searchInput.addEventListener('keyup', (e) => {
             if (e.key === 'Enter') applyFilters();
         });
     }
+    if (clearFiltersButton) clearFiltersButton.addEventListener('click', () => {
+        if (searchInput) searchInput.value = '';
+        if (stateSelect) stateSelect.value = 'All';
+        populateCityDropdown(rawLocations);
+        if (citySelect) citySelect.value = 'All';
+        if (radiusSelect) radiusSelect.value = '0';
+        if (sortSelect) sortSelect.value = 'none';
+        applyFilters();
+    });
 
     // --- SSE Real-Time Stream Integration ---
     const eventSource = new EventSource('/interactive-map/api/stream');
@@ -468,6 +592,7 @@ document.addEventListener('DOMContentLoaded', () => {
     eventSource.addEventListener('business-update', (event) => {
         rawLocations = JSON.parse(event.data);
         populateStateDropdown(rawLocations);
+        populateCityDropdown(rawLocations);
         applyFilters();
     });
 
@@ -475,14 +600,14 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error('SSE connection error / disconnected:', error);
     };
 
-    fetch('/api/visits/business-ids')
-        .then(response => {
-            if (!response.ok) throw new Error('Unable to load visited businesses');
-            return response.json();
+    fetch('/api/saved-listings/ids', {headers: {'Accept': 'application/json'}})
+        .then(response => response.ok
+            ? response.json()
+            : Promise.reject(new Error('Unable to load saved listings.')))
+        .then(ids => {
+            ids.forEach(id => savedBusinessIds.add(id));
+            applyFilters();
         })
-        .then(businessIds => {
-            businessIds.forEach(businessId => visitedBusinesses.add(businessId));
-            if (rawLocations.length) applyFilters();
-        })
-        .catch(error => console.warn('Unable to load map check-in indicators:', error));
+        .catch(error => console.error(error));
+
 });

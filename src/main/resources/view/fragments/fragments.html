@@ -35,8 +35,6 @@
                 <a class="nav-item" th:classappend="${activePage == 'badges'} ? ' active'" th:href="@{/badges}">Badges</a>
                 <a class="nav-item" th:classappend="${activePage == 'challenges'} ? ' active'"
                    th:href="@{/challenges}">Challenges</a>
-                <a class="nav-item" th:classappend="${activePage == 'profile'} ? ' active'"
-                   th:href="@{/profile}">Profile</a>
             </nav>
 
             <nav class="nav-links" aria-label="Admin navigation" sec:authorize="hasRole('ADMIN')">
@@ -46,6 +44,8 @@
                    th:href="@{/admin/pending}">Pending List</a>
                 <a class="nav-item" th:classappend="${activePage == 'audit-log'} ? ' active'"
                    th:href="@{/admin/audit-log}">Audit Log</a>
+                <a class="nav-item" th:classappend="${activePage == 'business-reports'} ? ' active'"
+                   th:href="@{/admin/business-reports}">Reports</a>
                 <a class="nav-item" th:classappend="${activePage == 'admin-challenges'} ? ' active'"
                    th:href="@{/admin/challenges}">Challenges</a>
                 <a class="nav-item" th:classappend="${activePage == 'admin-badges'} ? ' active'"
@@ -54,14 +54,16 @@
 
             <div class="nav-actions">
                 <a class="user-profile-btn" th:href="@{/profile}">
-                    <img class="avatar-img" alt="User avatar"
-                         th:src="${session.navbarUser != null and session.navbarUser.avatar != null}
+                    <img class="avatar-img" alt="User avatar" referrerpolicy="no-referrer"
+                         th:src="${session.navbarUser != null and session.navbarUser.avatar != null
+                                 and !session.navbarUser.avatar.isBlank()}
                                  ? ${session.navbarUser.avatar}
                                  : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&amp;h=100&amp;fit=crop'">
                     <span class="user-name"
                           th:text="${session.navbarUser != null ? session.navbarUser.name : 'Profile'}">Profile</span>
                 </a>
             </div>
+
         </div>
     </header>
 </body>

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import Layout, { type Page } from './components/Layout'
-import { CURRENT_USER, ADMIN_USER, AI_RECORDS, type User, type Business, type AIRecord } from './data/mock'
+import { CURRENT_USER, ADMIN_USER, AI_RECORDS, INITIAL_REPORTS, type User, type Business, type AIRecord, type BusinessReport } from './data/mock'
 
 import LoginPage from './pages/LoginPage'
 import HomePage from './pages/HomePage'
@@ -18,6 +18,8 @@ import PendingListPage from './pages/admin/PendingListPage'
 import PendingDetailPage from './pages/admin/PendingDetailPage'
 import AuditLogPage from './pages/admin/AuditLogPage'
 import ChallengeManagePage from './pages/admin/ChallengeManagePage'
+import ReportsPage from './pages/admin/ReportsPage'
+import ReportDetailPage from './pages/admin/ReportDetailPage'
 
 export default function App() {
   const [user, setUser] = useState<User | null>(null)
@@ -26,6 +28,8 @@ export default function App() {
   const [selectedRecord, setSelectedRecord] = useState<AIRecord | null>(null)
   const [aiRecords, setAiRecords] = useState<AIRecord[]>(AI_RECORDS)
   const [savedIds, setSavedIds] = useState<Set<string>>(new Set(['b1', 'b3']))
+  const [reports, setReports] = useState<BusinessReport[]>(INITIAL_REPORTS)
+  const [selectedReport, setSelectedReport] = useState<BusinessReport | null>(null)
 
   const handleLogin = (role: 'tourist' | 'admin') => {
     setUser(role === 'admin' ? ADMIN_USER : CURRENT_USER)
@@ -36,6 +40,7 @@ export default function App() {
     setPage(p)
     if (p !== 'business-detail') setSelectedBusiness(null)
     if (p !== 'pending-detail') setSelectedRecord(null)
+    if (p !== 'report-detail') setSelectedReport(null)
   }
 
   const handleSelectBusiness = (b: Business) => {
@@ -65,6 +70,22 @@ export default function App() {
     if (selectedRecord?.id === id) {
       setSelectedRecord(prev => prev ? { ...prev, ...update } : prev)
     }
+  }
+
+  const handleAddReport = (report: BusinessReport) => {
+    setReports(prev => [report, ...prev])
+  }
+
+  const handleUpdateReport = (id: string, update: Partial<BusinessReport>) => {
+    setReports(prev => prev.map(r => r.id === id ? { ...r, ...update } : r))
+    if (selectedReport?.id === id) {
+      setSelectedReport(prev => prev ? { ...prev, ...update } : prev)
+    }
+  }
+
+  const handleSelectReport = (r: BusinessReport) => {
+    setSelectedReport(r)
+    setPage('report-detail')
   }
 
   const handleAddRecords = (records: AIRecord[]) => {
@@ -102,6 +123,8 @@ export default function App() {
               onBack={() => handleNavigate('directory')}
               savedIds={savedIds}
               onToggleSave={handleToggleSave}
+              onSubmitReport={handleAddReport}
+              currentUser={user}
             />
           )
           : (
@@ -159,6 +182,18 @@ export default function App() {
         return <AuditLogPage />
       case 'challenge-manage':
         return <ChallengeManagePage />
+      case 'reports':
+        return <ReportsPage reports={reports} onViewDetail={handleSelectReport} />
+      case 'report-detail':
+        return selectedReport
+          ? (
+            <ReportDetailPage
+              report={selectedReport}
+              onBack={() => handleNavigate('reports')}
+              onUpdateReport={handleUpdateReport}
+            />
+          )
+          : <ReportsPage reports={reports} onViewDetail={handleSelectReport} />
       default:
         return user.role === 'admin'
           ? <AIDiscoveryPage onNavigate={handleNavigate} onAddRecords={handleAddRecords} />

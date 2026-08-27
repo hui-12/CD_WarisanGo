@@ -1,38 +1,38 @@
 <!doctype html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Saved Businesses - WarisanGo</title>
-  
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/global.css" th:href="@{/css/global.css}">
-  <link rel="stylesheet" th:href="@{/css/bundle.css}" href="/css/bundle.css">
-  <link rel="stylesheet" th:href="@{/css/assignment.css}" href="/css/assignment.css">
-  <link rel="stylesheet" th:href="@{/css/business-heritage.css}" href="/css/business-heritage.css">
+  <th:block th:replace="~{fragments/fragments :: head('Saved Listings — WarisanGo')}"></th:block>
+  <link rel="stylesheet" href="/css/business-heritage.css" th:href="@{/css/business-heritage.css}">
+  <link rel="stylesheet" href="/css/saved-listings.css" th:href="@{/css/saved-listings.css}">
 </head>
 <body>
-  <!-- Navbar fragment with 'saved' active -->
-  <div th:replace="~{fragments/fragments :: navbar('saved')}"></div>
+<div th:replace="~{fragments/fragments :: navbar('saved')}"></div>
+<main class="saved-page">
+  <header class="saved-header">
+    <p class="saved-kicker">Your collection</p>
+    <h1>Saved Listings</h1>
+    <p id="saved-summary">Loading your saved heritage businesses…</p>
+  </header>
 
-  <main class="directory-page">
-    <section class="directory-intro">
-      <h1 id="directory-title">Your <em>Saved</em> Heritage Sites</h1>
-      <p class="intro-copy">A collection of your favorite living heritage locations across Malaysia.</p>
-    </section>
+  <section id="saved-filters" class="directory-toolbar" aria-label="Search and filter saved listings" hidden>
+    <div class="search-field">
+      <label class="sr-only" for="saved-search">Search saved businesses</label>
+      <input id="saved-search" type="search" placeholder="Search saved businesses..." autocomplete="off">
+      <button id="saved-search-button" class="search-button" type="button">Search</button>
+    </div>
+    <div class="filters">
+      <select id="saved-state" aria-label="Filter by state"><option value="">All States</option></select>
+      <select id="saved-city" aria-label="Filter by city"><option value="">All Cities</option></select>
+      <button id="saved-clear" class="clear-filters saved-clear" type="button">Clear filters</button>
+    </div>
+  </section>
 
-    <section id="saved-results" class="business-grid" aria-live="polite">
-      <!-- To be populated dynamically via JavaScript or Thymeleaf -->
-      <div id="empty-state" class="no-results hidden">
-        You haven't saved any heritage businesses yet. <a th:href="@{/directory}">Explore the directory</a> to find some!
-      </div>
-    </section>
-  </main>
-
-  <!-- Footer fragment -->
-  <div th:replace="~{fragments/footer :: global}"></div>
-  
-  <!-- Add a specific script here to load saved items from localStorage -->
-  <script src="/js/saved-businesses.js" th:src="@{/js/saved-businesses.js}"></script>
+  <p id="saved-result-count" class="saved-result-count" aria-live="polite"></p>
+  <section id="saved-results" class="business-grid" aria-live="polite">
+    <p class="saved-loading">Loading saved listings…</p>
+  </section>
+</main>
+<div th:replace="~{fragments/footer :: global}"></div>
+<script src="/js/saved-businesses.js" th:src="@{/js/saved-businesses.js}" defer></script>
 </body>
 </html>

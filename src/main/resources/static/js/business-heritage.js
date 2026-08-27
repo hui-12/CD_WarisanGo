@@ -27,6 +27,7 @@
     if(nr) nr.style.display = any ? 'none' : '';
     const resultCount = document.getElementById('resultCount');
     if (resultCount) resultCount.textContent = `${cards.filter(card => card.style.display !== 'none').length} heritage businesses found`;
+    if (clearBtn) clearBtn.style.display = q || st || ct ? 'block' : '';
   }
 
   function populateFilters(){
@@ -47,6 +48,21 @@
     }
     fill(stateFilter, states);
     fill(cityFilter, cities);
+  }
+
+  function populateCitiesForState(){
+    if(!resultsContainer || !cityFilter) return;
+    const selectedCity = cityFilter.value;
+    const selectedState = sanitizeText(stateFilter?.value || '');
+    const cities = new Set();
+    Array.from(resultsContainer.querySelectorAll('.business-card')).forEach(card=>{
+      if((!selectedState || sanitizeText(card.dataset.state) === selectedState) && card.dataset.city){
+        cities.add(card.dataset.city);
+      }
+    });
+    while(cityFilter.options.length>1) cityFilter.remove(1);
+    Array.from(cities).sort().forEach(city=>cityFilter.add(new Option(city, city)));
+    if(Array.from(cityFilter.options).some(option=>option.value===selectedCity)) cityFilter.value=selectedCity;
   }
 
   function ensureImageAccessibility(){
@@ -115,8 +131,15 @@
   // Event wiring
   if(searchInput) searchInput.addEventListener('input', applyFilters);
   if(searchButton) searchButton.addEventListener('click', applyFilters);
-  if(clearBtn) clearBtn.addEventListener('click', ()=>{ if(searchInput) searchInput.value=''; if(stateFilter) stateFilter.value=''; if(cityFilter) cityFilter.value=''; applyFilters(); });
-  [stateFilter, cityFilter].forEach(el=>{ if(el) el.addEventListener('change', applyFilters); });
+  if(clearBtn) clearBtn.addEventListener('click', ()=>{
+    if(searchInput) searchInput.value='';
+    if(stateFilter) stateFilter.value='';
+    populateCitiesForState();
+    if(cityFilter) cityFilter.value='';
+    applyFilters();
+  });
+  if(stateFilter) stateFilter.addEventListener('change', ()=>{ populateCitiesForState(); applyFilters(); });
+  if(cityFilter) cityFilter.addEventListener('change', applyFilters);
 
   // initialize on DOM ready
   document.addEventListener('DOMContentLoaded', ()=>{

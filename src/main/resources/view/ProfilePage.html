@@ -10,7 +10,9 @@
 <main class="profile-page" th:if="${user != null}">
   <header class="profile-intro"><p>Profile</p><h1>My Account</h1></header>
   <section class="profile-summary-card" aria-label="Account summary">
-    <img class="profile-avatar" th:if="${user.avatar != null and !user.avatar.isBlank()}" th:src="${user.avatar}" th:alt="${user.name + ' profile photo'}">
+    <img class="profile-avatar" referrerpolicy="no-referrer"
+         th:if="${user.avatar != null and !user.avatar.isBlank()}"
+         th:src="${user.avatar}" th:alt="${user.name + ' profile photo'}">
     <div class="profile-avatar profile-avatar-fallback" th:unless="${user.avatar != null and !user.avatar.isBlank()}" th:text="${user.name != null and !user.name.isBlank() ? #strings.substring(user.name,0,1) : 'U'}">U</div>
     <div class="profile-identity"><h2 th:text="${user.name ?: 'WarisanGo visitor'}">Visitor</h2><p th:text="${user.email ?: 'Email unavailable'}">Email</p></div>
     <dl class="profile-statistics">
