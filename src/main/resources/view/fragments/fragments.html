@@ -19,7 +19,8 @@
         <div class="nav-container">
             <button type="button" class="brand-logo" data-navigate="home">
                 <span class="brand-main">Warisan</span><span class="brand-accent">Go</span>
-                <span id="admin-badge" class="admin-badge hidden">ADMIN</span>
+                <span th:if="${currentUser != null and #strings.equalsIgnoreCase(currentUser.role, 'ADMIN')}"
+                      class="admin-badge">ADMIN MODE</span>
             </button>
 
             <nav class="nav-links" id="nav-menu">
@@ -33,10 +34,12 @@
             </nav>
 
             <div class="nav-actions">
-                <button type="button" id="role-toggle-btn" class="btn-role-switch" data-action="toggle-role">→ Admin View</button>
+                <button th:if="${currentUser != null and #strings.equalsIgnoreCase(currentUser.role, 'ADMIN')}"
+                        type="button" class="btn-role-switch admin-workspace" data-navigate="admin">Admin workspace</button>
                 <button type="button" class="user-profile-btn" data-navigate="profile">
-                    <img id="user-avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop" alt="User Avatar" class="avatar-img">
-                    <span id="user-name" class="user-name">Diddy</span>
+                    <img th:src="${currentUser != null and currentUser.avatar != null and !currentUser.avatar.isBlank() ? currentUser.avatar : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop'}"
+                         alt="User avatar" class="avatar-img">
+                    <span class="user-name" th:text="${currentUser != null ? currentUser.name : 'WarisanGo visitor'}">WarisanGo visitor</span>
                 </button>
             </div>
         </div>

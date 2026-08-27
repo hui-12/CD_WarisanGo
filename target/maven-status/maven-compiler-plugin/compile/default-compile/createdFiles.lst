@@ -15,6 +15,7 @@ com\warisango\controller\LoginController.class
 com\warisango\controller\VideoController.class
 com\warisango\controller\InteractiveMapController.class
 com\warisango\controller\HomeController.class
+com\warisango\controller\ProfileController.class
 com\warisango\exception\AIProcessingException.class
 com\warisango\config\SecurityConfig.class
 com\warisango\model\repository\UserRepository.class

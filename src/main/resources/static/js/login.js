@@ -35,7 +35,7 @@ const handleLogin = async () => {
 
         if (response.ok) {
             const user = await response.json();
-            window.location.href = user.role === 'admin' ? '/ai-discovery' : '/';
+            window.location.href = user.role.trim().toUpperCase() === 'ADMIN' ? '/ai-discovery' : '/';
         } else {
             console.error("Authentication failed on the server.");
             alert("Login failed. Please verify your credentials.");
@@ -46,4 +46,3 @@ const handleLogin = async () => {
 };
 
 document.getElementById('btn-login-tourist').addEventListener('click', handleLogin);
-document.getElementById('btn-login-admin').addEventListener('click', handleLogin);

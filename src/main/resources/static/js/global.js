@@ -13,7 +13,8 @@ document.addEventListener("click", (event) => {
             "rewards": "/rewards",
             "badges": "/badges",
             "challenges": "/challenges",
-            "profile": "/profile"
+            "profile": "/profile",
+            "admin": "/ai-discovery"
         };
         
         if (routes[target]) {

@@ -1,15 +1,10 @@
-const switchAccountButton = document.getElementById('switch-account-button');
-
-switchAccountButton.addEventListener('click', async () => {
-    try {
-        const response = await fetch('/api/auth/logout', { method: 'POST' });
-        if (!response.ok) {
-            throw new Error('Unable to end the current session.');
-        }
-
-        window.location.href = '/login';
-    } catch (error) {
-        console.error('Account switch failed:', error);
-        alert('Unable to switch accounts. Please try again.');
-    }
-});
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js';
+import { getAuth, signOut } from 'https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js';
+const app=initializeApp({apiKey:'AIzaSyBXQ0QR6fkW5cwbnUqkFF78-0-zeGeFu5M',authDomain:'warisango.firebaseapp.com',projectId:'warisango',appId:'1:880767167288:web:9e352fe9321030d6302fcd'}),auth=getAuth(app);
+const form=document.getElementById('profile-form'),dialog=document.getElementById('confirm-dialog'),cooldown=document.getElementById('cooldown-dialog'),name=document.getElementById('display-name'),avatar=document.getElementById('avatar-preview'),notice=document.getElementById('profile-notice');
+const setError=(id,message='')=>document.getElementById(id).textContent=message;
+const valid=()=>{const ok=/^[A-Za-z0-9 ]{3,30}$/.test(name.value.trim());setError('name-error',ok?'':'Use 3–30 letters, numbers, and spaces only.');return ok;};
+name.addEventListener('input',valid);form.addEventListener('submit',event=>{event.preventDefault();if(valid())dialog.showModal();});
+dialog.addEventListener('close',async()=>{if(dialog.returnValue!=='confirm')return;const response=await fetch('/api/profile',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({displayName:name.value.trim()})}),payload=await response.json();if(!response.ok){if(payload.remainingDays){document.getElementById('cooldown-message').textContent=`You can only change your display name once every 30 days. You have ${payload.remainingDays} day(s) remaining.`;cooldown.showModal();return;}setError('name-error',payload.message);return;}notice.className='notice success';notice.textContent='Profile saved successfully.';});
+document.getElementById('avatar-file').addEventListener('change',async event=>{const file=event.target.files[0];if(!file)return;if(!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size>5*1024*1024){setError('avatar-error','Choose a JPG, PNG, or WebP image no larger than 5 MB.');return;}const data=new FormData();data.append('file',file);const response=await fetch('/api/profile/upload-avatar',{method:'POST',body:data}),payload=await response.json();if(!response.ok){setError('avatar-error',payload.message||'Image upload failed.');return;}avatar.src=payload.avatarUrl;notice.className='notice success';notice.textContent='Profile picture updated.';});
+document.getElementById('logout-button').addEventListener('click',async()=>{await signOut(auth);await fetch('/api/auth/logout',{method:'POST'});location.assign('/login');});

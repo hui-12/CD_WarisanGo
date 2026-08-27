@@ -7,6 +7,7 @@ public class User {
     private String avatar;
     private String role;
     private int totalPoints;
+    private Long lastNameChangeTimestamp;
 
     public User() {} // Required for Firestore data mapping
 
@@ -67,5 +68,13 @@ public class User {
 
     public void setTotalPoints(int totalPoints) {
         this.totalPoints = totalPoints;
+    }
+
+    public Long getLastNameChangeTimestamp() {
+        return lastNameChangeTimestamp;
+    }
+
+    public void setLastNameChangeTimestamp(Long lastNameChangeTimestamp) {
+        this.lastNameChangeTimestamp = lastNameChangeTimestamp;
     }
 }
