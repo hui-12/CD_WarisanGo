@@ -20,14 +20,13 @@ import java.util.concurrent.ExecutionException;
 /**
  * Reads and writes user data from the root-level users collection.
  *
- * Reviews and Comments intentionally keep touristId as their relationship key.
- * This repository only resolves the name needed by the UI.
+ * Reviews and comments retain their existing touristId field for Firestore
+ * compatibility, but its value is now the authenticated Firebase user UID.
  */
 @Repository
 public class UserRepositoryImpl implements UserRepository {
 
     private static final String USERS_COLLECTION = "users";
-    private static final String TOURISTS_COLLECTION = "Tourists";
 
     private final Firestore firestore;
 
@@ -43,9 +42,15 @@ public class UserRepositoryImpl implements UserRepository {
                     .document(uid)
                     .get()
                     .get();
-            return document.exists()
-                    ? Optional.ofNullable(document.toObject(User.class))
-                    : Optional.empty();
+            if (!document.exists()) {
+                return Optional.empty();
+            }
+
+            User user = document.toObject(User.class);
+            if (user != null && isBlank(user.getUid())) {
+                user.setUid(uid);
+            }
+            return Optional.ofNullable(user);
         } catch (Exception e) {
             throw new RuntimeException("Failed to retrieve user: " + uid, e);
         }
@@ -70,6 +75,7 @@ public class UserRepositoryImpl implements UserRepository {
             DocumentReference reference = getUserRef(user.getUid());
             DocumentSnapshot document = reference.get().get();
             Map<String, Object> missingFields = new HashMap<>();
+            putIfMissing(document, missingFields, "uid", user.getUid());
             putIfMissing(document, missingFields, "email", user.getEmail());
             putIfMissing(document, missingFields, "name", user.getName());
             putIfMissing(document, missingFields, "avatar", user.getAvatar());
@@ -86,7 +92,14 @@ public class UserRepositoryImpl implements UserRepository {
             putIfMissing(document, missingFields, "createdAt", Timestamp.now());
             if (!missingFields.isEmpty()) {
                 reference.update(missingFields).get();
-                return reference.get().get().toObject(User.class);
+                User initializedUser = reference.get().get().toObject(User.class);
+                if (initializedUser != null && isBlank(initializedUser.getUid())) {
+                    initializedUser.setUid(user.getUid());
+                }
+                return initializedUser;
+            }
+            if (isBlank(user.getUid())) {
+                user.setUid(reference.getId());
             }
             return user;
         } catch (Exception exception) {
@@ -146,42 +159,16 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public String findDisplayNameByTouristId(String touristId) {
-        if (isBlank(touristId)) {
+    public String findDisplayNameByUserId(String userId) {
+        if (isBlank(userId)) {
             return "Visitor";
         }
 
         try {
-            DocumentSnapshot tourist = firestore
-                    .collection(TOURISTS_COLLECTION)
-                    .document(touristId)
-                    .get()
-                    .get();
-
-            if (tourist.exists()) {
-                String directName = firstText(tourist, "name", "displayName");
-                if (!isBlank(directName)) {
-                    return directName;
-                }
-
-                String userId = firstText(tourist, "userId", "userID");
-                String userName = findNameByUserId(userId);
-                if (!isBlank(userName)) {
-                    return userName;
-                }
-            }
-
-            // This fallback supports the development data where the user id and
-            // tourist id use the same numeric suffix (user_001/tourist_001).
-            String derivedUserId = deriveUserId(touristId);
-            String derivedName = findNameByUserId(derivedUserId);
-            if (!isBlank(derivedName)) {
-                return derivedName;
-            }
-
-            return touristId;
+            String displayName = findNameByUserId(userId);
+            return isBlank(displayName) ? userId : displayName;
         } catch (Exception e) {
-            throw new RuntimeException("Failed to resolve display name for tourist: " + touristId, e);
+            throw new RuntimeException("Failed to resolve display name for user: " + userId, e);
         }
     }
 
@@ -215,12 +202,6 @@ public class UserRepositoryImpl implements UserRepository {
         return documents.isEmpty()
                 ? ""
                 : firstText(documents.get(0), "name", "displayName");
-    }
-
-    private String deriveUserId(String touristId) {
-        return touristId.startsWith("tourist_")
-                ? "user_" + touristId.substring("tourist_".length())
-                : "";
     }
 
     private String firstText(DocumentSnapshot document, String... fields) {

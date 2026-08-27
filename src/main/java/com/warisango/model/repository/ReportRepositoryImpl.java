@@ -62,14 +62,14 @@ public class ReportRepositoryImpl implements ReportRepository {
 
     @Override
     public boolean existsByReporterAndTarget(
-            String reporterTouristId,
+            String reporterUserId,
             String targetType,
             String targetId) {
         String targetField = "COMMENT".equals(targetType) ? "commentId" : "reviewId";
 
         try {
             return !firestore.collection(COLLECTION)
-                    .whereEqualTo("reporterTouristId", reporterTouristId)
+                    .whereEqualTo("reporterTouristId", reporterUserId)
                     .whereEqualTo("targetType", targetType)
                     .whereEqualTo(targetField, targetId)
                     .limit(1)

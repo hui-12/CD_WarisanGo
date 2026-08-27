@@ -11,6 +11,7 @@ import com.warisango.model.service.ReviewLikeService;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -81,10 +82,12 @@ public class ReviewController {
     }
 
     @GetMapping("/{businessId}")
-    public String reviewPage(@PathVariable String businessId, Model model) {
+    public String reviewPage(@PathVariable String businessId,
+                             Model model,
+                             Authentication authentication) {
         Double averageRating = reviewService.getAverageRating(businessId);
         List<ReviewDTO> reviews = reviewService.getReviewsByBusiness(businessId);
-        String currentUserId = reviewService.getCurrentTouristId();
+        String currentUserId = authentication.getName();
         reviewLikeService.enrichReviews(reviews, currentUserId);
         Map<String, List<CommentDTO>> commentsByReview = commentService.getCommentPreviews(reviews);
         commentLikeService.enrichCommentMap(commentsByReview, currentUserId);
@@ -117,7 +120,8 @@ public class ReviewController {
             @Valid @ModelAttribute("review") ReviewDTO review,
             BindingResult bindingResult,
             @RequestParam(name = "photos", required = false) MultipartFile[] photos,
-            Model model) {
+            Model model,
+            Authentication authentication) {
 
         logger.info("POST /reviews/create businessId={}, photoParts={}",
                 review.getBusinessId(), photos == null ? 0 : photos.length);
@@ -130,7 +134,7 @@ public class ReviewController {
         }
 
         try {
-            reviewService.createReview(review, photos);
+            reviewService.createReview(review, photos, authentication.getName());
         } catch (ProhibitedContentException e) {
             addBusiness(model, review.getBusinessId());
             model.addAttribute("reviewError", e.getMessage());
@@ -154,14 +158,16 @@ public class ReviewController {
     }
 
     @GetMapping("/edit/{reviewId}")
-    public String editReviewPage(@PathVariable String reviewId, Model model) {
+    public String editReviewPage(@PathVariable String reviewId,
+                                 Model model,
+                                 Authentication authentication) {
         ReviewDTO review = reviewService.getReview(reviewId);
 
         if (review == null) {
             return "redirect:/reviews/BUS00";
         }
 
-        if (!reviewService.isReviewOwner(review, reviewService.getCurrentTouristId())) {
+        if (!reviewService.isReviewOwner(review, authentication.getName())) {
             return "redirect:/reviews/detail/" + reviewId;
         }
 
@@ -177,9 +183,10 @@ public class ReviewController {
             BindingResult bindingResult,
             @RequestParam(name = "removePhotoIds", required = false) List<String> removePhotoIds,
             @RequestParam(name = "photos", required = false) MultipartFile[] photos,
-            Model model) {
+            Model model,
+            Authentication authentication) {
 
-        String currentUserId = reviewService.getCurrentTouristId();
+        String currentUserId = authentication.getName();
         ReviewDTO existingReview = reviewService.getReview(review.getReviewId());
 
         logger.info("POST /reviews/update reviewId={}, photoParts={}, removePhotoParts={}",
@@ -243,7 +250,8 @@ public class ReviewController {
     public String reviewDetailPage(
             @PathVariable String reviewId,
             @RequestParam(name = "editComment", required = false) String editCommentId,
-            Model model) {
+            Model model,
+            Authentication authentication) {
         ReviewDTO review = reviewService.getReview(reviewId);
 
         if (review == null) {
@@ -251,7 +259,7 @@ public class ReviewController {
         }
 
         List<CommentDTO> comments = commentService.getCommentsByReview(reviewId);
-        String currentUserId = reviewService.getCurrentTouristId();
+        String currentUserId = authentication.getName();
         reviewLikeService.enrichReview(review, currentUserId);
         commentLikeService.enrichComments(comments, currentUserId);
         CommentDTO comment = new CommentDTO();
@@ -281,6 +289,7 @@ public class ReviewController {
                 comment,
                 commentEdit,
                 editingCommentId,
+                authentication,
                 null
         );
 
@@ -289,28 +298,30 @@ public class ReviewController {
 
     @PostMapping("/like/{reviewId}")
     @ResponseBody
-    public ResponseEntity<LikeStatusDTO> toggleReviewLike(@PathVariable String reviewId) {
+    public ResponseEntity<LikeStatusDTO> toggleReviewLike(@PathVariable String reviewId,
+                                                          Authentication authentication) {
         if (reviewService.getReview(reviewId) == null) {
             return ResponseEntity.notFound().build();
         }
 
         LikeStatusDTO status = reviewLikeService.toggleLike(
                 reviewId,
-                reviewService.getCurrentTouristId()
+                authentication.getName()
         );
         return ResponseEntity.ok(status);
     }
 
     @PostMapping("/comments/like/{commentId}")
     @ResponseBody
-    public ResponseEntity<LikeStatusDTO> toggleCommentLike(@PathVariable String commentId) {
+    public ResponseEntity<LikeStatusDTO> toggleCommentLike(@PathVariable String commentId,
+                                                           Authentication authentication) {
         if (commentService.getComment(commentId) == null) {
             return ResponseEntity.notFound().build();
         }
 
         LikeStatusDTO status = commentLikeService.toggleLike(
                 commentId,
-                reviewService.getCurrentTouristId()
+                authentication.getName()
         );
         return ResponseEntity.ok(status);
     }
@@ -319,7 +330,8 @@ public class ReviewController {
     public String createComment(
             @Valid @ModelAttribute("comment") CommentDTO comment,
             BindingResult bindingResult,
-            Model model) {
+            Model model,
+            Authentication authentication) {
 
         String reviewId = comment.getReviewId();
 
@@ -333,6 +345,8 @@ public class ReviewController {
             return "redirect:/reviews/BUS00";
         }
 
+        String currentUserId = authentication.getName();
+
         if (bindingResult.hasErrors()) {
             addReviewDetailModel(
                     model,
@@ -341,6 +355,7 @@ public class ReviewController {
                     comment,
                     emptyCommentEdit(reviewId),
                     null,
+                    authentication,
                     "Please correct the comment before submitting."
             );
             return "ReviewDetailPage";
@@ -349,7 +364,7 @@ public class ReviewController {
         try {
             commentService.createComment(
                     comment,
-                    reviewService.getCurrentTouristId(),
+                    currentUserId,
                     comment.getReplyToCommentId()
             );
         } catch (ProhibitedContentException e) {
@@ -360,6 +375,7 @@ public class ReviewController {
                     comment,
                     emptyCommentEdit(reviewId),
                     null,
+                    authentication,
                     e.getMessage()
             );
             return "ReviewDetailPage";
@@ -372,6 +388,7 @@ public class ReviewController {
                     comment,
                     emptyCommentEdit(reviewId),
                     null,
+                    authentication,
                     "The comment could not be saved. Please try again."
             );
             return "ReviewDetailPage";
@@ -384,7 +401,8 @@ public class ReviewController {
     public String updateComment(
             @Valid @ModelAttribute("commentEdit") CommentDTO commentEdit,
             BindingResult bindingResult,
-            Model model) {
+            Model model,
+            Authentication authentication) {
 
         if (commentEdit == null
                 || commentEdit.getCommentId() == null
@@ -399,7 +417,7 @@ public class ReviewController {
         }
 
         String reviewId = existingComment.getReviewId();
-        String currentUserId = reviewService.getCurrentTouristId();
+        String currentUserId = authentication.getName();
 
         if (!commentService.isCommentOwner(existingComment, currentUserId)) {
             return "redirect:/reviews/detail/" + reviewId;
@@ -419,6 +437,7 @@ public class ReviewController {
                     newCommentForReview(reviewId),
                     commentEdit,
                     existingComment.getCommentId(),
+                    authentication,
                     "Please correct the comment before saving."
             );
             return "ReviewDetailPage";
@@ -438,6 +457,7 @@ public class ReviewController {
                     newCommentForReview(reviewId),
                     commentEdit,
                     existingComment.getCommentId(),
+                    authentication,
                     e.getMessage()
             );
             return "ReviewDetailPage";
@@ -450,6 +470,7 @@ public class ReviewController {
                     newCommentForReview(reviewId),
                     commentEdit,
                     existingComment.getCommentId(),
+                    authentication,
                     "The comment could not be updated. Please try again."
             );
             return "ReviewDetailPage";
@@ -461,7 +482,8 @@ public class ReviewController {
     @PostMapping("/comments/delete/{commentId}")
     public String deleteComment(
             @PathVariable String commentId,
-            @RequestParam(name = "reviewId", required = false) String requestedReviewId) {
+            @RequestParam(name = "reviewId", required = false) String requestedReviewId,
+            Authentication authentication) {
 
         CommentDTO existingComment = commentService.getComment(commentId);
         String reviewId = existingComment == null
@@ -469,7 +491,7 @@ public class ReviewController {
                 : existingComment.getReviewId();
 
         if (existingComment != null) {
-            commentService.deleteComment(commentId, reviewService.getCurrentTouristId());
+            commentService.deleteComment(commentId, authentication.getName());
         }
 
         return reviewId == null || reviewId.isBlank()
@@ -480,7 +502,8 @@ public class ReviewController {
     @PostMapping("/delete/{reviewId}")
     public String deleteReview(
             @PathVariable String reviewId,
-            @RequestParam(name = "businessId", required = false) String requestedBusinessId) {
+            @RequestParam(name = "businessId", required = false) String requestedBusinessId,
+            Authentication authentication) {
 
         ReviewDTO existingReview = reviewService.getReview(reviewId);
         String businessId = existingReview == null
@@ -488,7 +511,7 @@ public class ReviewController {
                 : existingReview.getBusinessId();
 
         if (existingReview != null) {
-            reviewService.deleteReview(reviewId, reviewService.getCurrentTouristId());
+            reviewService.deleteReview(reviewId, authentication.getName());
         }
 
         return "redirect:/reviews/" + (businessId == null || businessId.isBlank() ? "BUS00" : businessId);
@@ -510,6 +533,7 @@ public class ReviewController {
             CommentDTO comment,
             CommentDTO commentEdit,
             String editingCommentId,
+            Authentication authentication,
             String commentError) {
 
         model.addAttribute("review", review);
@@ -518,7 +542,7 @@ public class ReviewController {
         model.addAttribute("comment", comment);
         model.addAttribute("commentEdit", commentEdit);
         model.addAttribute("editingCommentId", editingCommentId);
-        model.addAttribute("currentUserId", reviewService.getCurrentTouristId());
+        model.addAttribute("currentUserId", authentication.getName());
 
         if (commentError != null) {
             model.addAttribute("commentError", commentError);

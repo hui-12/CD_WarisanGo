@@ -145,7 +145,7 @@ public class CommentRepositoryImpl implements CommentRepository {
         comment.setCommentId(getString(document, "commentId"));
         comment.setReviewId(getString(document, "reviewId"));
         comment.setTouristId(getString(document, "touristId"));
-        // Tourist/User lookup will replace this temporary display value later.
+        // CommentService resolves this Firebase user UID through the users collection.
         comment.setTouristName(comment.getTouristId());
         comment.setCommentText(getString(document, "commentText"));
         comment.setReplyToCommentId(getString(document, "replyToCommentId"));

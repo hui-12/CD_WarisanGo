@@ -4,7 +4,6 @@ import com.warisango.dto.ReviewDTO;
 import com.warisango.dto.HeritageBusinessDTO;
 import com.warisango.model.repository.ReviewRepository;
 import com.warisango.model.repository.ReviewLikeRepository;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -33,7 +32,6 @@ public class ReviewService {
     private final CommentService commentService;
     private final BusinessService businessService;
     private final UserService userService;
-    private final String currentTouristId;
 
     public ReviewService(
             ReviewRepository reviewRepository,
@@ -42,8 +40,7 @@ public class ReviewService {
             ReviewLikeRepository reviewLikeRepository,
             CommentService commentService,
             BusinessService businessService,
-            UserService userService,
-            @Value("${warisango.review.current-tourist-id:tourist_002}") String currentTouristId) {
+            UserService userService) {
         this.reviewRepository = reviewRepository;
         this.reviewPhotoService = reviewPhotoService;
         this.contentModerationService = contentModerationService;
@@ -51,7 +48,6 @@ public class ReviewService {
         this.commentService = commentService;
         this.businessService = businessService;
         this.userService = userService;
-        this.currentTouristId = currentTouristId;
     }
 
     /**
@@ -102,19 +98,23 @@ public class ReviewService {
     /**
      * Create a review without photos. Kept for callers that do not use multipart forms.
      */
-    public void createReview(ReviewDTO review) {
-        createReview(review, null);
+    public void createReview(ReviewDTO review, String currentUserId) {
+        createReview(review, null, currentUserId);
     }
 
     /**
      * Create a review and persist each uploaded image as a separate ReviewPhotos document.
      */
-    public void createReview(ReviewDTO review, MultipartFile[] photos) {
+    public void createReview(ReviewDTO review, MultipartFile[] photos, String currentUserId) {
+
+        if (currentUserId == null || currentUserId.isBlank()) {
+            throw new IllegalArgumentException("Authenticated user ID is required.");
+        }
 
         contentModerationService.validate(review.getReviewText());
         reviewPhotoService.validateNewPhotos(photos);
 
-        review.setTouristId(currentTouristId);
+        review.setTouristId(currentUserId);
 
         String reviewId = reviewRepository.generateNextReviewId();
 
@@ -372,10 +372,6 @@ public class ReviewService {
                 .orElse(null);
     }
 
-    public String getCurrentTouristId() {
-        return currentTouristId;
-    }
-
     private LocalDateTime parseCreatedAt(String createdAt) {
         if (createdAt == null || createdAt.isBlank()) {
             return LocalDateTime.MAX;
@@ -416,7 +412,7 @@ public class ReviewService {
             return;
         }
 
-        review.setTouristName(userService.getDisplayNameByTouristId(review.getTouristId()));
+        review.setTouristName(userService.getDisplayNameByUserId(review.getTouristId()));
     }
 
     private void deleteReviewLikes(String reviewId) {
