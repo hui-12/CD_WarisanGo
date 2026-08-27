@@ -46,7 +46,7 @@
 
         <header class="business-title-block">
           <p class="detail-kicker"
-             th:text="${(business.category ?: 'Heritage food') + ' · ' + (business.city ?: 'Malaysia') + ', ' + (business.state ?: '')}">
+             th:text="${'Heritage food · ' + (business.city ?: 'Malaysia') + ', ' + (business.state ?: '')}">
             Heritage food · Malaysia
           </p>
           <h1 id="business-title" th:text="${business.name}">Business Name</h1>
@@ -66,7 +66,7 @@
         <section class="detail-section business-information">
           <h2>Business Information</h2>
           <dl>
-            <div><dt>Category</dt><dd th:text="${business.category ?: 'Heritage food'}">Heritage food</dd></div>
+            <div><dt>Category</dt><dd>Heritage food</dd></div>
             <div><dt>Rating</dt><dd th:text="${business.averageRating != null ? #numbers.formatDecimal(business.averageRating, 1, 1) + ' / 5' : 'New listing'}">4.8 / 5</dd></div>
             <div class="information-wide"><dt>Address</dt><dd th:text="${business.address ?: 'Address not available'}">Business address</dd></div>
           </dl>
