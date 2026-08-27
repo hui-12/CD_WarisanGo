@@ -7,6 +7,7 @@ import HomePage from './pages/HomePage'
 import DirectoryPage from './pages/DirectoryPage'
 import BusinessDetailPage from './pages/BusinessDetailPage'
 import MapPage from './pages/MapPage'
+import SavedListingsPage from './pages/SavedListingsPage'
 import RewardsPage from './pages/RewardsPage'
 import BadgesPage from './pages/BadgesPage'
 import ChallengesPage from './pages/ChallengesPage'
@@ -24,6 +25,7 @@ export default function App() {
   const [selectedBusiness, setSelectedBusiness] = useState<Business | null>(null)
   const [selectedRecord, setSelectedRecord] = useState<AIRecord | null>(null)
   const [aiRecords, setAiRecords] = useState<AIRecord[]>(AI_RECORDS)
+  const [savedIds, setSavedIds] = useState<Set<string>>(new Set(['b1', 'b3']))
 
   const handleLogin = (role: 'tourist' | 'admin') => {
     setUser(role === 'admin' ? ADMIN_USER : CURRENT_USER)
@@ -44,6 +46,18 @@ export default function App() {
   const handleSelectRecord = (r: AIRecord) => {
     setSelectedRecord(r)
     setPage('pending-detail')
+  }
+
+  const handleToggleSave = (id: string) => {
+    setSavedIds(prev => {
+      const next = new Set(prev)
+      if (next.has(id)) {
+        next.delete(id)
+      } else {
+        next.add(id)
+      }
+      return next
+    })
   }
 
   const handleUpdateRecord = (id: string, update: Partial<AIRecord>) => {
@@ -73,13 +87,40 @@ export default function App() {
       case 'home':
         return <HomePage user={user} onNavigate={handleNavigate} />
       case 'directory':
-        return <DirectoryPage onSelectBusiness={handleSelectBusiness} />
+        return (
+          <DirectoryPage
+            onSelectBusiness={handleSelectBusiness}
+            savedIds={savedIds}
+            onToggleSave={handleToggleSave}
+          />
+        )
       case 'business-detail':
         return selectedBusiness
-          ? <BusinessDetailPage business={selectedBusiness} onBack={() => handleNavigate('directory')} />
-          : <DirectoryPage onSelectBusiness={handleSelectBusiness} />
+          ? (
+            <BusinessDetailPage
+              business={selectedBusiness}
+              onBack={() => handleNavigate('directory')}
+              savedIds={savedIds}
+              onToggleSave={handleToggleSave}
+            />
+          )
+          : (
+            <DirectoryPage
+              onSelectBusiness={handleSelectBusiness}
+              savedIds={savedIds}
+              onToggleSave={handleToggleSave}
+            />
+          )
       case 'map':
         return <MapPage onSelectBusiness={handleSelectBusiness} />
+      case 'saved':
+        return (
+          <SavedListingsPage
+            savedIds={savedIds}
+            onToggleSave={handleToggleSave}
+            onSelectBusiness={handleSelectBusiness}
+          />
+        )
       case 'rewards':
         return <RewardsPage />
       case 'badges':
@@ -91,11 +132,29 @@ export default function App() {
       case 'ai-discovery':
         return <AIDiscoveryPage onNavigate={handleNavigate} onAddRecords={handleAddRecords} />
       case 'pending-list':
-        return <PendingListPage records={aiRecords} onUpdateRecord={handleUpdateRecord} onViewDetail={handleSelectRecord} />
+        return (
+          <PendingListPage
+            records={aiRecords}
+            onUpdateRecord={handleUpdateRecord}
+            onViewDetail={handleSelectRecord}
+          />
+        )
       case 'pending-detail':
         return selectedRecord
-          ? <PendingDetailPage record={selectedRecord} onBack={() => handleNavigate('pending-list')} onUpdateRecord={handleUpdateRecord} />
-          : <PendingListPage records={aiRecords} onUpdateRecord={handleUpdateRecord} onViewDetail={handleSelectRecord} />
+          ? (
+            <PendingDetailPage
+              record={selectedRecord}
+              onBack={() => handleNavigate('pending-list')}
+              onUpdateRecord={handleUpdateRecord}
+            />
+          )
+          : (
+            <PendingListPage
+              records={aiRecords}
+              onUpdateRecord={handleUpdateRecord}
+              onViewDetail={handleSelectRecord}
+            />
+          )
       case 'audit-log':
         return <AuditLogPage />
       case 'challenge-manage':

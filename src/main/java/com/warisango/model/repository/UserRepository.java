@@ -1,15 +1,30 @@
 package com.warisango.model.repository;
 
+import com.google.cloud.firestore.DocumentReference;
+import com.google.cloud.firestore.DocumentSnapshot;
+import com.warisango.model.User;
+
+import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+
 /**
- * Repository contract for user display information used by community content.
+ * Repository contract for user persistence and display-name lookup.
  */
 public interface UserRepository {
 
-    /**
-     * Resolves a tourist id such as tourist_001 to the user's display name.
-     *
-     * @param touristId the id stored on Reviews and Comments
-     * @return the user's name, or the tourist id when no name is available
-     */
+    Optional<User> findById(String uid);
+
+    void save(User user);
+
+    User initializeMissingProfileFields(User user);
+
+    void updateProfile(String uid, String name, String gender, String aboutMe);
+
     String findDisplayNameByTouristId(String touristId);
+
+    DocumentSnapshot getUser(String userId) throws ExecutionException, InterruptedException;
+
+    DocumentReference getUserRef(String userId);
+
+    int getOrCreateCurrentPoints(String userId) throws ExecutionException, InterruptedException;
 }

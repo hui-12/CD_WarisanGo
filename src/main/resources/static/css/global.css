@@ -26,6 +26,7 @@
     padding: 0;
     margin-right: 36px;
     flex-shrink: 0;
+    text-decoration: none;
 }
 
 .brand-main {
@@ -75,6 +76,7 @@
     font-family: 'Inter', Arial, sans-serif;
     transition: all 100ms;
     white-space: nowrap;
+    text-decoration: none;
 }
 
 .nav-item.active {
@@ -131,4 +133,28 @@
     padding: 16px;
     font-size: 11px;
     color: #6b6b68;
+}
+
+.admin-empty-state {
+    max-width: 720px;
+    margin: 96px auto;
+    padding: 0 24px;
+}
+
+.admin-empty-state h1 {
+    margin: 8px 0 16px;
+    font: 700 42px/1.1 'Fraunces', Georgia, serif;
+}
+
+.admin-empty-state p {
+    color: #6b6b68;
+    line-height: 1.6;
+}
+
+.admin-empty-kicker {
+    color: #c9a84c !important;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
 }

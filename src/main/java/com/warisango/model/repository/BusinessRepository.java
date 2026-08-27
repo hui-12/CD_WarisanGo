@@ -1,14 +1,24 @@
 package com.warisango.model.repository;
 
 import com.google.api.core.ApiFuture;
-import com.google.cloud.firestore.*;
+import com.google.cloud.firestore.DocumentSnapshot;
+import com.google.cloud.firestore.Firestore;
+import com.google.cloud.firestore.FieldValue;
+import com.google.cloud.firestore.GeoPoint;
+import com.google.cloud.firestore.ListenerRegistration;
+import com.google.cloud.firestore.QueryDocumentSnapshot;
+import com.google.cloud.firestore.QuerySnapshot;
+import com.google.cloud.firestore.SetOptions;
 import com.warisango.dto.HeritageBusinessDTO;
+import com.warisango.model.Business;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
@@ -16,12 +26,117 @@ import java.util.function.Consumer;
 @Repository
 public class BusinessRepository {
 
-    private static final String COLLECTION_NAME = "heritageBusinesses";
+    private static final String COLLECTION_NAME = "HeritageBusinesses";
     private static final Logger logger = LoggerFactory.getLogger(BusinessRepository.class);
     private final Firestore firestore;
 
     public BusinessRepository(Firestore firestore) {
         this.firestore = firestore;
+    }
+
+    public int migrateLegacyCollection() throws ExecutionException, InterruptedException {
+        List<QueryDocumentSnapshot> legacyDocuments = firestore.collection(LEGACY_COLLECTION_NAME)
+                .get()
+                .get()
+                .getDocuments();
+
+        for (QueryDocumentSnapshot document : legacyDocuments) {
+            Map<String, Object> data = new HashMap<>(document.getData());
+            String storedId = document.getString("businessId");
+            String businessId = storedId == null || storedId.isBlank() ? document.getId() : storedId.trim();
+
+            data.put("businessId", businessId);
+            data.putIfAbsent("averageRating", null);
+            data.putIfAbsent("checkInPoints", 50L);
+            data.remove("category");
+            data.remove("story");
+            data.remove("photos");
+            data.putIfAbsent("operatingHour", "");
+            data.putIfAbsent("approveAt", null);
+            data.putIfAbsent("rejectedAt", null);
+            data.putIfAbsent("sourceVideoLink", "");
+            data.putIfAbsent("createdAt", com.google.cloud.Timestamp.now());
+
+            String status = data.get("status") instanceof String value ? value : "Pending";
+            data.put("status", "approved".equalsIgnoreCase(status) ? "Approved" : status);
+
+            firestore.collection(COLLECTION_NAME)
+                    .document(businessId)
+                    .set(data, SetOptions.merge())
+                    .get();
+        }
+
+        for (QueryDocumentSnapshot document : firestore.collection(COLLECTION_NAME).get().get().getDocuments()) {
+            Map<String, Object> schemaUpdate = new HashMap<>();
+            schemaUpdate.put("category", FieldValue.delete());
+            schemaUpdate.put("story", FieldValue.delete());
+            if (!document.contains("operatingHour")) {
+                schemaUpdate.put("operatingHour", "");
+            }
+            if (!document.contains("approveAt")) {
+                schemaUpdate.put("approveAt", null);
+            }
+            if (!document.contains("rejectedAt")) {
+                schemaUpdate.put("rejectedAt", null);
+            }
+            document.getReference().update(schemaUpdate).get();
+        }
+
+        return legacyDocuments.size();
+    }
+
+    public boolean saveIfAbsent(Business business) throws ExecutionException, InterruptedException {
+        String businessId = business.getBusinessId();
+        var reference = businessId == null || businessId.isBlank()
+                ? firestore.collection(COLLECTION_NAME).document()
+                : firestore.collection(COLLECTION_NAME).document(businessId);
+        if (businessId == null || businessId.isBlank()) {
+            business.setBusinessId(reference.getId());
+        }
+        DocumentSnapshot existing = reference.get().get();
+        if (existing.exists()) {
+            Map<String, Object> schemaUpdate = new HashMap<>();
+            schemaUpdate.put("category", FieldValue.delete());
+            schemaUpdate.put("story", FieldValue.delete());
+            if (!existing.contains("operatingHour")) {
+                schemaUpdate.put("operatingHour", business.getOperatingHour());
+            }
+            if (!existing.contains("approveAt")) {
+                schemaUpdate.put("approveAt", business.getApproveAt());
+            }
+            if (!existing.contains("rejectedAt")) {
+                schemaUpdate.put("rejectedAt", business.getRejectedAt());
+            }
+            reference.update(schemaUpdate).get();
+            return false;
+        }
+
+        reference.set(business).get();
+        return true;
+    }
+
+    public void updateAverageRating(String businessId, Double averageRating)
+            throws ExecutionException, InterruptedException {
+        DocumentSnapshot document = firestore.collection(COLLECTION_NAME)
+                .document(businessId)
+                .get()
+                .get();
+
+        if (!document.exists()) {
+            QuerySnapshot matches = firestore.collection(COLLECTION_NAME)
+                    .whereEqualTo("businessId", businessId)
+                    .limit(1)
+                    .get()
+                    .get();
+            if (matches.isEmpty()) {
+                return;
+            }
+            document = matches.getDocuments().get(0);
+        }
+
+        Map<String, Object> update = new HashMap<>();
+        update.put("averageRating", averageRating);
+        document.getReference().update(update).get();
     }
 
     public List<HeritageBusinessDTO> findApprovedBusinesses() throws ExecutionException, InterruptedException {
@@ -129,9 +244,8 @@ public class BusinessRepository {
     }
 
     private HeritageBusinessDTO toDto(DocumentSnapshot doc, double latitude, double longitude) {
-        String businessId = doc.getString("businessId");
         HeritageBusinessDTO dto = new HeritageBusinessDTO(
-                businessId == null || businessId.isBlank() ? doc.getId() : businessId,
+                doc.getId(),
                 doc.getString("name"),
                 doc.getString("address"),
                 doc.getString("state"),
@@ -139,17 +253,21 @@ public class BusinessRepository {
                 doc.getString("description"),
                 latitude,
                 longitude,
-                doc.getDouble("averageRating")
+                doc.getDouble("averageRating"),
+                getCheckInPoints(doc)
         );
-        dto.setCategory(doc.getString("category"));
-
-        Object photos = doc.get("photos");
-        if (photos instanceof List<?> photoList) {
-            dto.setPhotos(photoList.stream()
-                    .filter(String.class::isInstance)
-                    .map(String.class::cast)
-                    .toList());
+        dto.setSourceVideoLink(doc.getString("sourceVideoLink"));
+        dto.setOperatingHour(doc.getString("operatingHour"));
+        if (doc.getTimestamp("createdAt") != null) {
+            dto.setCreatedAt(doc.getTimestamp("createdAt").toDate().toInstant());
         }
+        if (doc.getTimestamp("approveAt") != null) {
+            dto.setApproveAt(doc.getTimestamp("approveAt").toDate().toInstant());
+        }
+        if (doc.getTimestamp("rejectedAt") != null) {
+            dto.setRejectedAt(doc.getTimestamp("rejectedAt").toDate().toInstant());
+        }
+
         return dto;
     }
 
@@ -162,18 +280,11 @@ public class BusinessRepository {
         GeoPoint geoPoint = document.getGeoPoint("location");
         double lat = geoPoint != null ? geoPoint.getLatitude() : 0.0;
         double lng = geoPoint != null ? geoPoint.getLongitude() : 0.0;
-        String businessId = document.getString("businessId");
+        return toDto(document, lat, lng);
+    }
 
-        return new HeritageBusinessDTO(
-                businessId == null || businessId.isBlank() ? document.getId() : businessId,
-                document.getString("name"),
-                document.getString("address"),
-                document.getString("state"),
-                document.getString("city"),
-                document.getString("description"),
-                lat,
-                lng,
-                document.getDouble("averageRating")
-        );
+    private int getCheckInPoints(DocumentSnapshot doc) {
+        Long points = doc.getLong("checkInPoints");
+        return points != null && points > 0 ? points.intValue() : 50;
     }
 }

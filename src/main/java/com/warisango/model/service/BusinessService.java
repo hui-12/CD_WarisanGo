@@ -20,17 +20,14 @@ public class BusinessService {
 
     private static final Logger logger = LoggerFactory.getLogger(BusinessService.class);
     private final BusinessRepository businessRepository;
-    private final HeritageBusinessImageRepository heritageBusinessImageRepository;
 
-    public BusinessService(BusinessRepository businessRepository,
-                           HeritageBusinessImageRepository heritageBusinessImageRepository) {
+    public BusinessService(BusinessRepository businessRepository) {
         this.businessRepository = businessRepository;
-        this.heritageBusinessImageRepository = heritageBusinessImageRepository;
     }
 
     public List<HeritageBusinessDTO> getApprovedBusinesses() {
         try {
-            return attachImages(businessRepository.findApprovedBusinesses());
+            return businessRepository.findApprovedBusinesses();
         } catch (Exception e) {
             logger.error("Error fetching approved heritage businesses", e);
             throw new AIProcessingException("Failed to load map data.");
@@ -48,13 +45,26 @@ public class BusinessService {
         }
     }
 
+    public void updateAverageRating(String businessId, Double averageRating) {
+        try {
+            businessRepository.updateAverageRating(businessId, averageRating);
+        } catch (Exception exception) {
+            logger.error("Failed to update average rating for business {}.", businessId, exception);
+            throw new IllegalStateException("Failed to update the business rating.", exception);
+        }
+    }
+
     /**
      * Loads an approved business for the review pages, accepting either a Firestore document ID
      * or the businessId stored in the document.
      */
     public HeritageBusinessDTO getApprovedBusinessForReview(String businessId) {
         try {
-            return businessRepository.findByBusinessId(businessId);
+            HeritageBusinessDTO business = businessRepository.findByBusinessId(businessId);
+            if (business != null) {
+                attachImages(business);
+            }
+            return business;
         } catch (Exception e) {
             logger.warn("Could not load heritage business {} for Review page.", businessId, e);
             return null;
@@ -67,7 +77,7 @@ public class BusinessService {
 
         // Fetch initial state immediately upon connection
         try {
-            List<HeritageBusinessDTO> initialList = attachImages(businessRepository.findApprovedBusinesses());
+            List<HeritageBusinessDTO> initialList = businessRepository.findApprovedBusinesses();
             emitter.send(SseEmitter.event().name("business-update").data(initialList));
         } catch (Exception e) {
             logger.error("Error sending initial batch for SSE stream", e);
@@ -76,8 +86,8 @@ public class BusinessService {
         // Register Firestore real-time listener
         ListenerRegistration registration = businessRepository.addApprovedBusinessesListener(businesses -> {
             try {
-                emitter.send(SseEmitter.event().name("business-update").data(attachImages(businesses)));
-            } catch (Exception e) {
+                emitter.send(SseEmitter.event().name("business-update").data(businesses));
+            } catch (IOException e) {
                 logger.error("Error pushing SSE update to client", e);
                 emitter.completeWithError(e);
             }
@@ -89,27 +99,5 @@ public class BusinessService {
         emitter.onError((ex) -> registration.remove());
 
         return emitter;
-    }
-
-    private List<HeritageBusinessDTO> attachImages(List<HeritageBusinessDTO> businesses)
-            throws ExecutionException, InterruptedException {
-        Map<String, List<String>> imageUrlsByBusinessId = heritageBusinessImageRepository
-                .findImageUrlsByBusinessIds(businesses.stream()
-                        .map(HeritageBusinessDTO::getBusinessId)
-                        .toList());
-        businesses.forEach(business -> business.setPhotos(
-                imageUrlsByBusinessId.getOrDefault(business.getBusinessId(), List.of())));
-        return businesses;
-    }
-
-    private void attachImages(HeritageBusinessDTO business) {
-        try {
-            List<HeritageBusinessDTO> businesses = attachImages(List.of(business));
-            if (!businesses.isEmpty()) {
-                business.setPhotos(businesses.getFirst().getPhotos());
-            }
-        } catch (Exception e) {
-            logger.warn("Could not load photos for heritage business {}", business.getBusinessId(), e);
-        }
     }
 }

@@ -15,12 +15,12 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Firestore access for the root-level ReviewPhotos collection.
+ * Firestore access for the root-level reviewPhotos collection.
  */
 @Repository
 public class ReviewPhotoRepositoryImpl implements ReviewPhotoRepository {
 
-    private static final String COLLECTION = "ReviewPhotos";
+    private static final String COLLECTION = "reviewPhotos";
 
     private final Firestore firestore;
 

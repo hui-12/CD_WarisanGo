@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Saved Businesses - WarisanGo</title>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/global.css" th:href="@{/css/global.css}">
+  <link rel="stylesheet" th:href="@{/css/bundle.css}" href="/css/bundle.css">
+  <link rel="stylesheet" th:href="@{/css/assignment.css}" href="/css/assignment.css">
+  <link rel="stylesheet" th:href="@{/css/business-heritage.css}" href="/css/business-heritage.css">
+</head>
+<body>
+  <!-- Navbar fragment with 'saved' active -->
+  <div th:replace="~{fragments/fragments :: navbar('saved')}"></div>
+
+  <main class="directory-page">
+    <section class="directory-intro">
+      <h1 id="directory-title">Your <em>Saved</em> Heritage Sites</h1>
+      <p class="intro-copy">A collection of your favorite living heritage locations across Malaysia.</p>
+    </section>
+
+    <section id="saved-results" class="business-grid" aria-live="polite">
+      <!-- To be populated dynamically via JavaScript or Thymeleaf -->
+      <div id="empty-state" class="no-results hidden">
+        You haven't saved any heritage businesses yet. <a th:href="@{/directory}">Explore the directory</a> to find some!
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer fragment -->
+  <div th:replace="~{fragments/footer :: global}"></div>
+  
+  <!-- Add a specific script here to load saved items from localStorage -->
+  <script src="/js/saved-businesses.js" th:src="@{/js/saved-businesses.js}"></script>
+</body>
+</html>

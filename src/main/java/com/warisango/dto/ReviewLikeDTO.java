@@ -1,7 +1,7 @@
 package com.warisango.dto;
 
 /**
- * Carries one ReviewLikes document.
+ * Carries one reviewLikes document.
  */
 public class ReviewLikeDTO {
 

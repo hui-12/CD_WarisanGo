@@ -9,6 +9,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }).addTo(map);
 
     const markersMap = new Map();
+    const checkedInToday = new Set();
+    const visitedBusinesses = new Set();
     const listContainer = document.getElementById('locations-list');
     const locationsCountEl = document.getElementById('locations-count');
 
@@ -28,6 +30,39 @@ document.addEventListener('DOMContentLoaded', () => {
     let touristLng = null;
     let isInitialLocationSet = false; 
     let watchId = null;
+
+    window.addEventListener('warisango:check-in-complete', (event) => {
+        if (event.detail?.businessId) {
+            const businessId = event.detail.businessId;
+            checkedInToday.add(businessId);
+            visitedBusinesses.add(businessId);
+
+            const marker = markersMap.get(businessId);
+            const popupContent = marker?.getPopup()?.getContent();
+            if (popupContent instanceof HTMLElement) {
+                const checkInButton = popupContent.querySelector('.btn-popup-check-in');
+                const checkInStatus = popupContent.querySelector('.popup-check-in-status');
+                if (checkInButton) {
+                    checkInButton.disabled = true;
+                    checkInButton.textContent = 'Checked In Today';
+                }
+                if (checkInStatus) {
+                    const pointsEarned = Number(event.detail.pointsEarned || 0);
+                    checkInStatus.textContent = `Checked in successfully. You earned ${pointsEarned} points.`;
+                    checkInStatus.classList.add('check-in-success');
+                }
+            }
+
+            document.querySelectorAll('.location-item-card').forEach(card => {
+                if (card.dataset.businessId !== businessId
+                        || card.querySelector('.map-visited-label')) return;
+                const label = document.createElement('span');
+                label.className = 'map-visited-label';
+                label.textContent = '✓ Checked In';
+                card.querySelector('.location-item-info')?.appendChild(label);
+            });
+        }
+    });
 
     // --- Custom Icon for Tourist Location ---
     const userLocationIcon = L.divIcon({
@@ -184,18 +219,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Helper: Dynamic populate states from DB items
     const populateStateDropdown = (items) => {
-        if (!stateSelect || stateSelect.options.length > 4) return;
+        if (!stateSelect) return;
 
-        const statesInDb = [...new Set(items.map(i => i.state).filter(Boolean))].sort();
+        const selectedState = stateSelect.value;
+        stateSelect.replaceChildren(new Option('All States', 'All'));
+
+        const statesInDb = [...new Set(items
+            .map(item => item.state?.trim())
+            .filter(Boolean))]
+            .sort((a, b) => a.localeCompare(b));
         statesInDb.forEach(stateName => {
-            const exists = Array.from(stateSelect.options).some(opt => opt.value.toLowerCase() === stateName.toLowerCase());
-            if (!exists) {
-                const opt = document.createElement('option');
-                opt.value = stateName;
-                opt.textContent = stateName;
-                stateSelect.appendChild(opt);
-            }
+            stateSelect.appendChild(new Option(stateName, stateName));
         });
+
+        const selectionStillExists = Array.from(stateSelect.options)
+            .some(option => option.value === selectedState);
+        stateSelect.value = selectionStillExists ? selectedState : 'All';
     };
 
     // ==========================================
@@ -238,8 +277,25 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // 3. Phase 3: Sorting
-        if (selectedSort === 'rating-desc') {
-            candidates.sort((a, b) => (b.averageRating || 0) - (a.averageRating || 0));
+        if (selectedSort === 'rating-desc' || selectedSort === 'rating-asc') {
+            const direction = selectedSort === 'rating-desc' ? -1 : 1;
+            candidates.sort((a, b) => {
+                if (a.averageRating == null && b.averageRating == null) return 0;
+                if (a.averageRating == null) return 1;
+                if (b.averageRating == null) return -1;
+                return (a.averageRating - b.averageRating) * direction;
+            });
+        } else if (selectedSort === 'distance-asc' || selectedSort === 'distance-desc') {
+            const direction = selectedSort === 'distance-desc' ? -1 : 1;
+            candidates.sort((a, b) => {
+                if (a._distanceKm == null && b._distanceKm == null) return 0;
+                if (a._distanceKm == null) return 1;
+                if (b._distanceKm == null) return -1;
+                return (a._distanceKm - b._distanceKm) * direction;
+            });
+        } else if (selectedSort === 'name-asc' || selectedSort === 'name-desc') {
+            const direction = selectedSort === 'name-desc' ? -1 : 1;
+            candidates.sort((a, b) => (a.name || '').localeCompare(b.name || '') * direction);
         }
 
         renderLocations(candidates, locationMissingNotice);
@@ -290,19 +346,47 @@ document.addEventListener('DOMContentLoaded', () => {
             const popupActions = document.createElement('div');
             popupActions.className = 'popup-actions';
 
+            const popupStatus = document.createElement('p');
+            popupStatus.className = 'popup-check-in-status';
+            popupStatus.setAttribute('aria-live', 'polite');
+            popupStatus.textContent = 'Distance verification is disabled during testing.';
+
             const btnDetails = document.createElement('button');
             btnDetails.className = 'btn-popup-primary';
             btnDetails.textContent = 'View Details';
             btnDetails.addEventListener('click', () => {
-                alert(`Viewing details for ${loc.name}`);
+                window.location.assign(`/business/${encodeURIComponent(loc.businessId)}`);
             });
 
             const btnGmaps = document.createElement('a');
             btnGmaps.className = 'btn-popup-outlined';
-            btnGmaps.href = `https://maps.google.com/?q=${loc.latitude},${loc.longitude}`;
+            const googleMapsQuery = [loc.name, loc.address, loc.city, loc.state]
+                .filter(Boolean)
+                .join(', ');
+            btnGmaps.href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(googleMapsQuery)}`;
             btnGmaps.target = '_blank';
             btnGmaps.rel = 'noopener noreferrer';
             btnGmaps.textContent = 'Google Maps';
+
+            const btnCheckIn = document.createElement('button');
+            btnCheckIn.className = 'btn-popup-check-in';
+            btnCheckIn.type = 'button';
+            btnCheckIn.textContent = 'Check In';
+            btnCheckIn.addEventListener('click', () => {
+                window.WarisanGoCheckIn.checkIn(loc, btnCheckIn, popupStatus);
+            });
+
+            if (checkedInToday.has(loc.businessId)) {
+                btnCheckIn.disabled = true;
+                btnCheckIn.textContent = 'Checked In Today';
+                popupStatus.textContent = 'You have already checked in at this business today.';
+                popupStatus.classList.add('check-in-success');
+            } else {
+                window.WarisanGoCheckIn.refreshStatus(loc.businessId, btnCheckIn, popupStatus)
+                    .then(isCheckedIn => {
+                        if (isCheckedIn) checkedInToday.add(loc.businessId);
+                    });
+            }
 
             popupActions.appendChild(btnDetails);
             popupActions.appendChild(btnGmaps);
@@ -310,6 +394,8 @@ document.addEventListener('DOMContentLoaded', () => {
             popupNode.appendChild(popupTitle);
             popupNode.appendChild(popupMeta);
             popupNode.appendChild(popupActions);
+            popupNode.appendChild(btnCheckIn);
+            popupNode.appendChild(popupStatus);
 
             // Bind Marker
             const marker = L.marker([loc.latitude, loc.longitude]).addTo(map);
@@ -319,6 +405,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Create Sidebar Card
             const card = document.createElement('button');
             card.className = 'location-item-card';
+            card.dataset.businessId = loc.businessId;
 
             const itemInfo = document.createElement('div');
             itemInfo.className = 'location-item-info';
@@ -333,6 +420,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
             itemInfo.appendChild(itemName);
             itemInfo.appendChild(itemMeta);
+
+            if (visitedBusinesses.has(loc.businessId)) {
+                const visitedLabel = document.createElement('span');
+                visitedLabel.className = 'map-visited-label';
+                visitedLabel.textContent = '✓ Checked In';
+                itemInfo.appendChild(visitedLabel);
+            }
 
             const itemRating = document.createElement('div');
             itemRating.className = 'location-item-rating';
@@ -380,4 +474,15 @@ document.addEventListener('DOMContentLoaded', () => {
     eventSource.onerror = (error) => {
         console.error('SSE connection error / disconnected:', error);
     };
+
+    fetch('/api/visits/business-ids')
+        .then(response => {
+            if (!response.ok) throw new Error('Unable to load visited businesses');
+            return response.json();
+        })
+        .then(businessIds => {
+            businessIds.forEach(businessId => visitedBusinesses.add(businessId));
+            if (rawLocations.length) applyFilters();
+        })
+        .catch(error => console.warn('Unable to load map check-in indicators:', error));
 });

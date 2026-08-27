@@ -27,26 +27,16 @@
 
     <!-- Filter Bar -->
     <div class="filter-bar">
-      <div class="search-input-group">
-        <input type="text" id="map-search-input" placeholder="Search by name or city..." class="map-search-input" />
-        <button id="map-search-btn" class="btn-search-primary">Search</button>
+      <div class="search-field">
+        <label class="sr-only" for="map-search-input">Search businesses</label>
+        <input type="search" id="map-search-input" placeholder="Search businesses..." autocomplete="off" />
+        <button id="map-search-btn" class="search-button" type="button" aria-label="Search businesses">
+          Search
+        </button>
       </div>
 
       <select id="state-select" class="map-select">
         <option value="All">All States</option>
-        <option value="Johor">Johor</option>
-        <option value="Kedah">Kedah</option>
-        <option value="Kelantan">Kelantan</option>
-        <option value="Melaka">Melaka</option>
-        <option value="Negeri Sembilan">Negeri Sembilan</option>
-        <option value="Pahang">Pahang</option>
-        <option value="Perak">Perak</option>
-        <option value="Perlis">Perlis</option>
-        <option value="Pulau Pinang">Pulau Pinang</option>
-        <option value="Sabah">Sabah</option>
-        <option value="Sarawak">Sarawak</option>
-        <option value="Selangor">Selangor</option>
-        <option value="Terengganu">Terengganu</option>
       </select>
 
       <select id="radius-select" class="map-select">
@@ -73,7 +63,12 @@
           <span id="locations-count" class="locations-count-text">0 locations</span>
           <select id="sort-select" class="sidebar-sort-select">
             <option value="none">Default order</option>
-            <option value="rating-desc">Rating: High → Low</option>
+            <option value="rating-desc">Rating: High to Low</option>
+            <option value="rating-asc">Rating: Low to High</option>
+            <option value="distance-asc">Distance: Near to Far</option>
+            <option value="distance-desc">Distance: Far to Near</option>
+            <option value="name-asc">Name: A to Z</option>
+            <option value="name-desc">Name: Z to A</option>
           </select>
         </div>
         <div id="locations-list" class="sidebar-list-container"></div>
@@ -88,6 +83,7 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   
   <!-- Page-Specific Script -->
+  <script src="/js/check-in.js" th:src="@{/js/check-in.js}"></script>
   <script src="/js/interactive-map.js" th:src="@{/js/interactive-map.js}"></script>
 </body>
 </html>

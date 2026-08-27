@@ -5,7 +5,7 @@ import com.warisango.dto.ReportDTO;
 import java.util.List;
 
 /**
- * Repository contract for the root-level Reports collection.
+ * Repository contract for the root-level reports collection.
  */
 public interface ReportRepository {
 

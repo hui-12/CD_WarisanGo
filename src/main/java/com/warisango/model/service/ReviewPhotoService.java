@@ -14,7 +14,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * Coordinates local image files and the root-level ReviewPhotos collection.
+ * Coordinates local image files and the root-level reviewPhotos collection.
  */
 @Service
 public class ReviewPhotoService {

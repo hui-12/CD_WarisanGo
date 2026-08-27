@@ -40,47 +40,59 @@
     flex-wrap: wrap;
 }
 
-.search-input-group {
+.search-field {
     display: flex;
     flex: 1 1 260px;
+    gap: 0;
 }
 
-.map-search-input {
-    flex: 1;
-    padding: 9px 14px;
-    border: 1.5px solid #141413;
-    border-right: none;
-    border-radius: 8px 0 0 8px;
-    font-size: 13px;
-    font-family: 'Inter', sans-serif;
-    background-color: #faf9f5;
+.search-field input,
+.search-button,
+.map-select {
+    box-sizing: border-box;
+    height: 38px;
+    border: 1px solid #141413;
+    border-radius: 7px;
+    background: #ffffff;
     color: #141413;
+    font: 12px 'Inter', sans-serif;
+}
+
+.search-field input {
+    flex: 1;
+    width: 100%;
+    padding: 0 14px;
+    border-right: 0;
+    border-radius: 8px 0 0 8px;
     outline: none;
 }
 
-.btn-search-primary {
-    padding: 9px 16px;
-    border: 1.5px solid #141413;
-    border-radius: 0 8px 8px 0;
+.search-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 14px;
     background: #141413;
-    color: #faf9f5;
-    font-size: 13px;
+    color: #ffffff;
     font-weight: 600;
     cursor: pointer;
-    font-family: 'Inter', sans-serif;
+    border-radius: 0 8px 8px 0;
+    white-space: nowrap;
+}
+
+.search-button:hover,
+.search-button:focus-visible {
+    background: #72583b;
 }
 
 .map-select {
-    padding: 9px 14px;
-    border: 1.5px solid #141413;
-    border-radius: 8px;
-    font-size: 13px;
-    font-family: 'Inter', sans-serif;
-    background-color: #faf9f5;
-    color: #141413;
+    min-width: 142px;
+    padding: 0 12px;
     cursor: pointer;
     outline: none;
 }
+
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
 
 /* --- Map Grid Container --- */
 .map-grid {
@@ -139,6 +151,7 @@
 .popup-actions {
     display: flex;
     gap: 8px;
+    margin-bottom: 8px;
 }
 
 .btn-popup-primary {
@@ -161,6 +174,35 @@
     font-size: 11px;
     text-decoration: none;
     text-align: center;
+}
+
+.btn-popup-check-in {
+    width: 100%;
+    padding: 7px;
+    border: 1.5px solid #c9a84c;
+    border-radius: 6px;
+    background: #f5e9c4;
+    color: #141413;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.popup-check-in-status {
+    margin: 6px 0 0;
+    color: #76624c;
+    font-size: 10px;
+    line-height: 1.4;
+}
+
+.popup-check-in-status.check-in-success {
+    color: #2d7a4f;
+    font-weight: 600;
+}
+
+.btn-popup-check-in:disabled {
+    cursor: wait;
+    opacity: .65;
 }
 
 /* --- Map Sidebar --- */
@@ -244,6 +286,19 @@
 .location-item-meta {
     font-size: 11px;
     color: #6b6b68;
+}
+
+.map-visited-label {
+    display: inline-block;
+    margin-top: 5px;
+    padding: 2px 7px;
+    border-radius: 20px;
+    background: #e8f5ee;
+    color: #2d7a4f;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: .03em;
+    text-transform: uppercase;
 }
 
 .location-item-rating {

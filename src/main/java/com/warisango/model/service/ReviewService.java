@@ -140,6 +140,7 @@ public class ReviewService {
             reviewRepository.delete(review.getReviewId());
             throw e;
         }
+        synchronizeBusinessAverageRating(review.getBusinessId());
     }
 
     /**
@@ -189,6 +190,7 @@ public class ReviewService {
         );
 
         reviewRepository.update(review);
+        synchronizeBusinessAverageRating(review.getBusinessId());
 
         reviewPhotoService.replacePhotos(review.getReviewId(), removePhotoIds, photos);
 
@@ -219,6 +221,7 @@ public class ReviewService {
         deleteReviewLikes(reviewId);
         commentService.deleteCommentsForReview(reviewId);
         reviewRepository.delete(reviewId);
+        synchronizeBusinessAverageRating(existingReview.getBusinessId());
 
         return true;
     }
@@ -231,6 +234,7 @@ public class ReviewService {
 
         review.setModerationStatus("HIDDEN");
         reviewRepository.update(review);
+        synchronizeBusinessAverageRating(review.getBusinessId());
     }
 
     public void restoreReview(String reviewId) {
@@ -241,6 +245,7 @@ public class ReviewService {
 
         review.setModerationStatus("VISIBLE");
         reviewRepository.update(review);
+        synchronizeBusinessAverageRating(review.getBusinessId());
     }
 
     public void deleteReviewByAdmin(String reviewId) {
@@ -253,6 +258,7 @@ public class ReviewService {
         deleteReviewLikes(reviewId);
         commentService.deleteCommentsForReview(reviewId);
         reviewRepository.delete(reviewId);
+        synchronizeBusinessAverageRating(review.getBusinessId());
     }
 
     /**
@@ -267,10 +273,8 @@ public class ReviewService {
     /**
      * Calculate average rating for one business.
      */
-    public double getAverageRating(String businessId) {
-        Double averageRating = getCurrentAverageRating(businessId);
-        return averageRating == null ? 0 : averageRating;
-
+    public Double getAverageRating(String businessId) {
+        return getCurrentAverageRating(businessId);
     }
 
     /**
@@ -290,6 +294,19 @@ public class ReviewService {
 
         return Math.round(((double) total / reviews.size()) * 10.0) / 10.0;
 
+    }
+
+    private void synchronizeBusinessAverageRating(String businessId) {
+        List<ReviewDTO> reviews = reviewRepository.findByBusinessId(businessId);
+        reviews.removeIf(review -> !isVisible(review));
+
+        Double averageRating = null;
+        if (!reviews.isEmpty()) {
+            int total = reviews.stream().mapToInt(ReviewDTO::getRating).sum();
+            averageRating = Math.round(((double) total / reviews.size()) * 10.0) / 10.0;
+        }
+
+        businessService.updateAverageRating(businessId, averageRating);
     }
 
     /**
@@ -416,7 +433,6 @@ public class ReviewService {
         business.put("businessAddress", "George Town, Penang, Malaysia");
         business.put("businessImage",
                 "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1400&q=80");
-        business.put("category", "Heritage Food");
 
         applyFallbackBusinessInformation(business, businessId);
 
@@ -428,7 +444,6 @@ public class ReviewService {
             if (hasText(firestoreBusiness.getAddress())) {
                 business.put("businessAddress", firestoreBusiness.getAddress());
             }
-            business.put("category", "Heritage Business");
         }
 
         return business;
@@ -456,7 +471,6 @@ public class ReviewService {
             business.put("businessAddress", "Laweyan, Solo, Central Java");
             business.put("businessImage",
                     "https://images.unsplash.com/photo-1516550893923-42d28e5677af?auto=format&fit=crop&w=1400&q=80");
-            business.put("category", "Heritage Business");
         }
     }
 

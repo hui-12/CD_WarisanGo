@@ -5,7 +5,7 @@ import com.warisango.dto.CommentDTO;
 import java.util.List;
 
 /**
- * Repository contract for the root-level Comments collection.
+ * Repository contract for the root-level comments collection.
  */
 public interface CommentRepository {
 

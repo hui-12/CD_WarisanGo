@@ -23,7 +23,7 @@
 
         <div class="review-business-copy">
 
-            <p class="review-kicker" th:text="${business.category}">
+            <p class="review-kicker">Heritage business</p>
                 Heritage Food
             </p>
 
@@ -61,19 +61,22 @@
 
             <div class="review-average-body">
 
-                <p class="review-average-number" th:text="${averageRating}">
+                <p class="review-average-number"
+                   th:text="${averageRating != null ? #numbers.formatDecimal(averageRating, 1, 1) : 'Not rated'}">
                     4.7
                 </p>
 
                 <div class="review-stars">
                     <span th:each="star : ${#numbers.sequence(1,5)}"
-                          th:classappend="${star <= averageRatingRounded} ? ' filled' : ''">
+                          th:classappend="${averageRatingRounded != null and star <= averageRatingRounded} ? ' filled' : ''">
                         ★
                     </span>
                 </div>
 
                 <p class="review-rating-meta">
-                    <span th:text="${totalReviews}">0</span> visitor reviews
+                    <span th:if="${totalReviews == 0}">Be the first to review</span>
+                    <span th:unless="${totalReviews == 0}"><span th:text="${totalReviews}">0</span>
+                        visitor reviews</span>
                 </p>
 
             </div>
@@ -206,7 +209,12 @@
                          th:if="${review.photoUrls != null and !#lists.isEmpty(review.photoUrls)}">
 
                         <img th:each="photo : ${review.photoUrls}"
+                             class="review-photo-open"
                              th:src="${photo}"
+                             th:attr="data-photo-src=${photo}"
+                             tabindex="0"
+                             role="button"
+                             aria-label="Open review photo"
                              alt="Review photo">
                     </div>
 
@@ -316,6 +324,30 @@
     </section>
 
 </main>
+
+
+<div id="reviewPhotoViewer"
+     class="review-photo-viewer"
+     hidden
+     aria-hidden="true"
+     role="dialog"
+     aria-modal="true"
+     aria-label="Review photo preview">
+
+    <div class="review-photo-viewer-content">
+
+        <button type="button"
+                class="review-photo-viewer-close"
+                data-close-photo-viewer
+                aria-label="Close photo preview">
+            ×
+        </button>
+
+        <img data-review-photo-viewer-image
+             alt="Expanded review photo">
+
+    </div>
+</div>
 
 
 <div id="reviewDeleteModal" class="review-modal" aria-hidden="true">

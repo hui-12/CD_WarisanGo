@@ -1,0 +1,6 @@
+com\warisango\ContentModerationServiceTest.class
+com\warisango\WarisangoApplicationTests.class
+com\warisango\service\AIWorkflowServiceTests.class
+com\warisango\ReviewDateFormatterTest.class
+com\warisango\service\DiscoveryServiceTests.class
+com\warisango\WarisangoApplicationTests$FirebaseTestConfiguration.class

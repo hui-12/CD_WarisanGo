@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="~{fragments/fragments :: head('Pending List | WarisanGo Admin')}"></th:block>
+</head>
+<body>
+    <div th:replace="~{fragments/fragments :: navbar('pending-list')}"></div>
+    <main class="admin-empty-state">
+        <p class="admin-empty-kicker">Moderation queue</p>
+        <h1>Pending List</h1>
+        <p>AI-discovered heritage businesses awaiting an administrator decision appear here.</p>
+    </main>
+</body>
+</html>

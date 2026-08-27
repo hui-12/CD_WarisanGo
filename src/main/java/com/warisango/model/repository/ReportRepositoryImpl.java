@@ -17,12 +17,12 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Firestore access for the root-level Reports collection.
+ * Firestore access for the root-level reports collection.
  */
 @Repository
 public class ReportRepositoryImpl implements ReportRepository {
 
-    private static final String COLLECTION = "Reports";
+    private static final String COLLECTION = "reports";
 
     private final Firestore firestore;
 

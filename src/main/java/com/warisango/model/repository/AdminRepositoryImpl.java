@@ -5,12 +5,12 @@ import com.google.cloud.firestore.QueryDocumentSnapshot;
 import org.springframework.stereotype.Repository;
 
 /**
- * Reads Admin membership from the root-level Admins collection.
+ * Reads admin membership from the root-level admins collection.
  */
 @Repository
 public class AdminRepositoryImpl implements AdminRepository {
 
-    private static final String COLLECTION = "Admins";
+    private static final String COLLECTION = "admins";
     private final Firestore firestore;
 
     public AdminRepositoryImpl(Firestore firestore) {

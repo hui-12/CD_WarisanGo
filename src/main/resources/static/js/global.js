@@ -7,14 +7,18 @@ document.addEventListener("click", (event) => {
         const target = navigateBtn.getAttribute("data-navigate");
         
         const routes = {
-            "home": "/",
+            "home": "/home",
             "directory": "/directory",
             "map": "/map",
+            "saved": "/saved",
             "rewards": "/rewards",
             "badges": "/badges",
             "challenges": "/challenges",
-            "profile": "/profile",
-            "reports": "/admin/reports"
+            "ai-discovery": "/ai-discovery",
+            "pending-list": "/admin/pending",
+            "audit-log": "/admin/audit-log",
+            "admin-challenges": "/admin/challenges",
+            "profile": "/profile"
         };
         
         if (routes[target]) {
@@ -24,8 +28,11 @@ document.addEventListener("click", (event) => {
 });
 
 // Shared HTML escaping utility to prevent XSS
-const escapeHtml = (text) => {
-    if (!text) return '';
+window.escapeHtml = function (text) {
+    if (text === null || text === undefined) {
+        return '';
+    }
+
     return String(text)
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
@@ -33,3 +40,12 @@ const escapeHtml = (text) => {
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
 };
+/*const escapeHtml = (text) => {
+    if (!text) return '';
+    return String(text)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+};*/

@@ -12,6 +12,7 @@ document.addEventListener("DOMContentLoaded", function () {
     initializeModerationDeleteConfirmation();
     initializeReportTable();
     initializePhotoUpload();
+    initializeReviewPhotoViewer();
     initializeCommentPreview();
     initializeCommentReplies();
     protectOwnerActions();
@@ -725,6 +726,71 @@ function initializePhotoUpload() {
         error.textContent = message;
         error.hidden = false;
     }
+}
+
+function initializeReviewPhotoViewer() {
+    const viewer = document.getElementById("reviewPhotoViewer");
+    const viewerImage = viewer
+        ? viewer.querySelector("[data-review-photo-viewer-image]")
+        : null;
+
+    if (!viewer || !viewerImage) {
+        return;
+    }
+
+    const closeViewer = function () {
+        viewer.hidden = true;
+        viewer.setAttribute("aria-hidden", "true");
+        viewerImage.removeAttribute("src");
+        document.body.classList.remove("review-photo-viewer-open");
+    };
+
+    const openViewer = function (photo) {
+        const source = photo.dataset.photoSrc || photo.currentSrc || photo.src;
+
+        if (!source) {
+            return;
+        }
+
+        viewerImage.src = source;
+        viewer.hidden = false;
+        viewer.setAttribute("aria-hidden", "false");
+        document.body.classList.add("review-photo-viewer-open");
+    };
+
+    document.querySelectorAll(".review-photo-open").forEach(function (photo) {
+        photo.addEventListener("click", function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+            openViewer(photo);
+        });
+
+        photo.addEventListener("keydown", function (event) {
+            if (event.key !== "Enter" && event.key !== " ") {
+                return;
+            }
+
+            event.preventDefault();
+            event.stopPropagation();
+            openViewer(photo);
+        });
+    });
+
+    document.querySelectorAll("[data-close-photo-viewer]").forEach(function (button) {
+        button.addEventListener("click", closeViewer);
+    });
+
+    viewer.addEventListener("click", function (event) {
+        if (event.target === viewer) {
+            closeViewer();
+        }
+    });
+
+    document.addEventListener("keydown", function (event) {
+        if (event.key === "Escape" && !viewer.hidden) {
+            closeViewer();
+        }
+    });
 }
 
 function initializeCommentPreview() {

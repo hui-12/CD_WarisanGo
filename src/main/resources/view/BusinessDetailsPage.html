@@ -50,9 +50,9 @@
             Heritage food · Malaysia
           </p>
           <h1 id="business-title" th:text="${business.name}">Business Name</h1>
-          <p class="detail-rating">
-            <span aria-hidden="true">★★★★★</span>
-            <strong th:text="${business.averageRating != null ? #numbers.formatDecimal(business.averageRating, 1, 1) : 'New'}">4.8</strong>
+          <p class="detail-rating" th:classappend="${business.averageRating == null} ? ' unrated'">
+            <span aria-hidden="true" th:if="${business.averageRating != null}">★★★★★</span>
+            <strong th:text="${business.averageRating != null ? #numbers.formatDecimal(business.averageRating, 1, 1) : 'Not rated yet'}">4.8</strong>
             <span>Approved heritage listing</span>
           </p>
           <p class="business-summary" th:text="${business.description}">Business description</p>
@@ -75,9 +75,13 @@
         <section class="check-in-panel" aria-labelledby="check-in-title">
           <div>
             <h2 id="check-in-title">Check In</h2>
-            <p>Earn reward points when you check in near this heritage business.</p>
+            <p>Earn <strong th:text="${business.checkInPoints}">50</strong> points for this visit.</p>
+            <p id="check-in-status" class="check-in-status" aria-live="polite">
+              Distance verification is disabled during testing. GPS permission is still required.
+            </p>
           </div>
-          <a class="check-in-button" th:href="@{/map}">⌖ Check In Here</a>
+          <button class="check-in-button" type="button" data-check-in-business
+                  th:attr="data-business-id=${business.businessId}">Check In Here</button>
         </section>
       </div>
 
@@ -85,7 +89,7 @@
         <section class="sidebar-card">
           <h2>Heritage Details</h2>
           <dl class="sidebar-list">
-            <div><dt>Category</dt><dd th:text="${business.category ?: 'Heritage food'}">Heritage food</dd></div>
+            <div><dt>Operating hours</dt><dd th:text="${business.operatingHour != null and !business.operatingHour.isBlank() ? business.operatingHour : 'Not provided'}">08:00 - 23:00</dd></div>
             <div><dt>Status</dt><dd>Approved</dd></div>
             <div><dt>Rating</dt><dd th:text="${business.averageRating != null ? #numbers.formatDecimal(business.averageRating, 1, 1) + ' / 5' : 'New'}">4.8 / 5</dd></div>
             <div><dt>State</dt><dd th:text="${business.state ?: 'Not available'}">State</dd></div>

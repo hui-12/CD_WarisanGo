@@ -5,6 +5,8 @@ import { REVIEWS } from '../data/mock'
 interface Props {
   business: Business
   onBack: () => void
+  savedIds?: Set<string>
+  onToggleSave?: (id: string) => void
 }
 
 function StarRating({ rating, interactive = false, onRate }: { rating: number; interactive?: boolean; onRate?: (r: number) => void }) {
@@ -60,7 +62,16 @@ function PhotoUpload({ label }: { label: string }) {
   )
 }
 
-export default function BusinessDetailPage({ business, onBack }: Props) {
+function BookmarkIcon({ filled }: { filled: boolean }) {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill={filled ? '#141413' : 'none'} stroke="#141413" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+    </svg>
+  )
+}
+
+export default function BusinessDetailPage({ business, onBack, savedIds = new Set(), onToggleSave }: Props) {
+  const isSaved = savedIds.has(business.id)
   const [activePhoto, setActivePhoto] = useState(0)
   const [checkinState, setCheckinState] = useState<'idle' | 'checking' | 'success'>('idle')
   const [showReviewForm, setShowReviewForm] = useState(false)
@@ -120,9 +131,38 @@ export default function BusinessDetailPage({ business, onBack }: Props) {
             <p style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '1px', color: '#6b6b68', marginBottom: 8 }}>
               {business.category} · Est. {business.founded} · {business.city}, {business.state}
             </p>
-            <h1 style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: 34, fontWeight: 700, color: '#141413', lineHeight: 1.1, marginBottom: 14 }}>
-              {business.name}
-            </h1>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 14 }}>
+              <h1 style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: 34, fontWeight: 700, color: '#141413', lineHeight: 1.1, flex: 1, margin: 0 }}>
+                {business.name}
+              </h1>
+              <button
+                onClick={() => onToggleSave?.(business.id)}
+                title={isSaved ? 'Remove from saved' : 'Save this business'}
+                style={{
+                  flexShrink: 0,
+                  marginTop: 6,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  padding: '8px 14px',
+                  border: '1.5px solid #141413',
+                  borderRadius: 8,
+                  background: isSaved ? '#141413' : '#faf9f5',
+                  color: isSaved ? '#faf9f5' : '#141413',
+                  fontSize: 13,
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                  fontFamily: "'Inter', Arial, sans-serif",
+                  transition: 'all 150ms',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill={isSaved ? '#faf9f5' : 'none'} stroke={isSaved ? '#faf9f5' : '#141413'} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+                </svg>
+                {isSaved ? 'Saved' : 'Save'}
+              </button>
+            </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
               <StarRating rating={business.rating} />
               <span style={{ fontSize: 15, fontWeight: 700, color: '#141413' }}>{business.rating}</span>
