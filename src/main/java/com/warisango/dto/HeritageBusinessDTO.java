@@ -13,6 +13,7 @@ public class HeritageBusinessDTO {
     private String description;
     private String operatingHour;
     private List<String> imageUrls = new ArrayList<>();
+    private List<String> photos = new ArrayList<>();
     private double latitude;
     private double longitude;
     private Double averageRating;
@@ -72,6 +73,11 @@ public class HeritageBusinessDTO {
     public List<String> getImageUrls() { return imageUrls; }
     public void setImageUrls(List<String> imageUrls) {
         this.imageUrls = imageUrls == null ? new ArrayList<>() : new ArrayList<>(imageUrls);
+    }
+
+    public List<String> getPhotos() { return photos; }
+    public void setPhotos(List<String> photos) {
+        this.photos = photos == null ? new ArrayList<>() : new ArrayList<>(photos);
     }
     public int getCheckInPoints() { return checkInPoints; }
     public void setCheckInPoints(int checkInPoints) { this.checkInPoints = checkInPoints; }

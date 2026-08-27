@@ -25,7 +25,6 @@ com\warisango\config\FirebaseConfig.class
 com\warisango\model\repository\ReviewRepository.class
 com\warisango\model\service\SpeechToTextService.class
 com\warisango\model\service\VideoSearchService.class
-com\warisango\controller\CheckInController.class
 com\warisango\model\AIRecord.class
 com\warisango\controller\SpeechToTextController.class
 com\warisango\model\repository\ReviewPhotoRepositoryImpl.class
@@ -34,7 +33,6 @@ com\warisango\dto\ErrorResponse.class
 com\warisango\dto\CheckInResponse.class
 com\warisango\dto\DiscoverySearchRequest.class
 com\warisango\model\service\DiscoveryService.class
-com\warisango\controller\InteractiveMapController.class
 com\warisango\model\service\VideoAudioService.class
 com\warisango\exception\AIProcessingException.class
 com\warisango\controller\AIExtractionController.class
@@ -43,7 +41,6 @@ com\warisango\dto\AIExtractionResponse.class
 com\warisango\dto\HeritageBusinessDTO.class
 com\warisango\model\service\AIWorkflowService.class
 com\warisango\util\ReviewDateFormatter.class
-com\warisango\controller\ReviewController.class
 com\warisango\model\User.class
 com\warisango\model\repository\UserRepositoryImpl.class
 com\warisango\model\service\CommentLikeService.class
@@ -52,15 +49,12 @@ com\warisango\controller\AudioTestController.class
 com\warisango\dto\DiscoveryProcessResponse.class
 com\warisango\dto\VideoDTO.class
 com\warisango\model\repository\CommentRepository.class
-com\warisango\model\service\ReviewService.class
 com\warisango\model\repository\AdminRepository.class
-com\warisango\model\service\CheckInService.class
 com\warisango\dto\CommentDTO.class
 com\warisango\model\service\ChallengeService.class
 com\warisango\dto\UserPointsDTO.class
 com\warisango\dto\AIExtractionResult.class
 com\warisango\model\service\ContentModerationService.class
-com\warisango\model\service\BusinessService.class
 com\warisango\model\repository\ReviewPhotoRepository.class
 com\warisango\model\repository\AIRecordRepository.class
 com\warisango\dto\AudioExtractionRequest.class
@@ -72,12 +66,10 @@ com\warisango\model\repository\BusinessRepository.class
 com\warisango\model\repository\CheckInRepository.class
 com\warisango\dto\ReviewLikeDTO.class
 com\warisango\dto\TranscriptionRequest.class
-com\warisango\model\service\ReportService.class
 com\warisango\controller\LoginController.class
 com\warisango\model\repository\ReportRepositoryImpl.class
 com\warisango\model\service\ReviewPhotoService.class
 com\warisango\exception\GlobalExceptionHandler.class
-com\warisango\controller\HomeController.class
 com\warisango\controller\ProfileController.class
 com\warisango\controller\TestPageController.class
 com\warisango\dto\AIExtractionRequest.class
@@ -88,7 +80,6 @@ com\warisango\dto\ReviewDTO.class
 com\warisango\model\service\GeoUtils.class
 com\warisango\model\service\CommentService.class
 com\warisango\model\repository\CommentLikeRepository.class
-com\warisango\controller\ReportController.class
 com\warisango\model\repository\CommentLikeRepositoryImpl.class
 com\warisango\dto\LikeStatusDTO.class
 com\warisango\config\ReviewPhotoWebConfig.class
