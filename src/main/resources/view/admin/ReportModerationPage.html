@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/fragments :: head('Report Moderation | WarisanGo')}"></head>
+
+<body>
+
+<header th:replace="~{fragments/fragments :: navbar('reports')}"></header>
+<link rel="stylesheet" th:href="@{/css/review.css}">
+
+<main class="review-admin-page">
+
+    <section class="review-admin-header">
+        <p class="review-kicker">CONTENT MODERATION</p>
+        <h1>Report Moderation</h1>
+        <p>
+            Review reported Reviews and Comments before deciding whether to dismiss, hide or delete them.
+        </p>
+        <p class="review-admin-current-user">
+            Admin ID: <strong th:text="${currentAdminId}">admin_001</strong>
+        </p>
+    </section>
+
+    <p class="review-admin-message"
+       th:if="${moderationMessage != null}"
+       th:text="${moderationMessage}">
+        Moderation action completed.
+    </p>
+
+    <p class="review-field-error"
+       th:if="${moderationError != null}"
+       th:text="${moderationError}">
+        Moderation action failed.
+    </p>
+
+    <section class="review-admin-controls"
+             th:if="${reports != null and !#lists.isEmpty(reports)}"
+             aria-label="Report search and filters">
+        <label class="review-admin-control">
+            <span>Search</span>
+            <input type="search"
+                   data-report-search
+                   placeholder="Search username or message"
+                   autocomplete="off">
+        </label>
+
+        <label class="review-admin-control">
+            <span>Category</span>
+            <select data-report-category>
+                <option value="ALL">All reports</option>
+                <option value="REVIEW">Review</option>
+                <option value="COMMENT">Comment</option>
+            </select>
+        </label>
+    </section>
+
+    <section class="review-admin-table-wrap"
+             th:if="${reports != null and !#lists.isEmpty(reports)}">
+        <table class="review-admin-table" data-report-table>
+            <thead>
+                <tr>
+                    <th scope="col">
+                        <button type="button"
+                                class="review-admin-sort-button"
+                                data-report-sort-key="username"
+                                aria-label="Sort reports by username">
+                            Username <span data-report-sort-indicator="username">↕</span>
+                        </button>
+                    </th>
+                    <th scope="col">
+                        <button type="button"
+                                class="review-admin-sort-button"
+                                data-report-sort-key="message"
+                                aria-label="Sort reports by message">
+                            Message <span data-report-sort-indicator="message">↕</span>
+                        </button>
+                    </th>
+                    <th scope="col">
+                        <button type="button"
+                                class="review-admin-sort-button"
+                                data-report-sort-key="date"
+                                aria-label="Sort reports by date">
+                            Date <span data-report-sort-indicator="date">↕</span>
+                        </button>
+                    </th>
+                    <th scope="col">
+                        <button type="button"
+                                class="review-admin-sort-button"
+                                data-report-sort-key="status"
+                                aria-label="Sort reports by status">
+                            Status <span data-report-sort-indicator="status">↕</span>
+                        </button>
+                    </th>
+                    <th scope="col">Show Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="review-admin-table-row"
+                    th:each="report : ${reports}"
+                    th:attr="data-report-type=${report.targetType},data-report-status=${report.status},data-report-created=${report.createdAt}">
+                    <td class="review-admin-table-user">
+                        <strong data-report-search-field
+                                th:text="${report.reporterTouristId}">tourist_001</strong>
+                        <span>Reported user</span>
+                    </td>
+
+                    <td class="review-admin-table-message-cell">
+                        <a class="review-admin-report-link review-admin-table-message"
+                           th:if="${report.targetType == 'REVIEW'}"
+                           th:href="@{|/reviews/detail/${report.reviewId}|}">
+                            <span data-report-search-field
+                                  th:text="${report.targetText != null and !#strings.isEmpty(report.targetText) ? report.targetText : 'Content no longer available'}">
+                                Reported review message
+                            </span>
+                        </a>
+                        <a class="review-admin-report-link review-admin-table-message"
+                           th:if="${report.targetType == 'COMMENT'}"
+                           th:href="@{|/reviews/detail/${report.reviewId}#comment-${report.commentId}|}">
+                            <span data-report-search-field
+                                  th:text="${report.targetText != null and !#strings.isEmpty(report.targetText) ? report.targetText : 'Content no longer available'}">
+                                Reported comment message
+                            </span>
+                        </a>
+                        <div class="review-admin-table-message-meta">
+                            <span class="review-admin-report-type"
+                                  th:text="${report.targetType}">
+                                REVIEW
+                            </span>
+                            <span>Reason: <strong th:text="${report.reason}">SPAM</strong></span>
+                        </div>
+                    </td>
+
+                    <td class="review-admin-table-date-cell"
+                        th:text="${report.createdAtDisplay}">
+                        20 Aug 2026, 10:03 AM
+                    </td>
+
+                    <td class="review-admin-table-status-cell">
+                        <span class="review-admin-report-status"
+                              th:classappend="${'status-' + #strings.toLowerCase(report.status)}"
+                              th:text="${report.status}">
+                            PENDING
+                        </span>
+                        <p class="review-admin-status-admin">
+                            Admin ID: <strong th:text="${currentAdminId}">admin_001</strong>
+                        </p>
+                    </td>
+
+                    <td class="review-admin-table-show-action-cell">
+                        <button type="button"
+                                class="review-btn-outline review-admin-actions-toggle"
+                                data-report-actions-toggle
+                                aria-haspopup="dialog"
+                                aria-expanded="false"
+                                th:if="${report.status != 'DELETED'}">
+                            Show Action
+                        </button>
+                        <span class="review-admin-no-actions"
+                              th:if="${report.status == 'DELETED'}">
+                            Content deleted
+                        </span>
+
+                        <span data-report-actions-placeholder></span>
+                        <div class="review-admin-report-actions review-admin-table-actions"
+                             data-report-actions
+                             th:if="${report.status != 'DELETED'}"
+                             hidden>
+                            <form th:action="@{/admin/reports/{id}/dismiss(id=${report.reportId})}"
+                                  method="post">
+                                <button type="submit"
+                                        class="review-btn-outline">
+                                    Dismiss
+                                </button>
+                            </form>
+
+                            <form th:if="${report.status == 'PENDING'}"
+                                  th:action="@{/admin/reports/{id}/hide(id=${report.reportId})}"
+                                  method="post">
+                                <button type="submit"
+                                        class="review-btn-outline">
+                                    Hide Content
+                                </button>
+                            </form>
+
+                            <form th:if="${report.status == 'HIDDEN'}"
+                                  th:action="@{/admin/reports/{id}/restore(id=${report.reportId})}"
+                                  method="post">
+                                <button type="submit"
+                                        class="review-btn-outline">
+                                    Restore Content
+                                </button>
+                            </form>
+
+                            <form th:action="@{/admin/reports/{id}/delete(id=${report.reportId})}"
+                                  method="post"
+                                  data-moderation-delete>
+                                <button type="submit"
+                                        class="review-btn-primary review-btn-danger">
+                                    Delete Reported Content
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+
+                <tr class="review-admin-table-no-results"
+                    data-report-no-results
+                    hidden>
+                    <td colspan="5">No reports match your search.</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section class="review-empty"
+             th:if="${reports == null or #lists.isEmpty(reports)}">
+        <h2 class="review-empty-title">No reports yet</h2>
+        <p class="review-empty-text">
+            New Review and Comment reports will appear here.
+        </p>
+    </section>
+
+    <div class="review-admin-action-modal"
+         data-report-actions-modal
+         hidden>
+        <div class="review-admin-action-dialog"
+             role="dialog"
+             aria-modal="true"
+             aria-labelledby="report-action-title">
+            <div class="review-admin-action-dialog-header">
+                <div>
+                    <p class="review-kicker">MODERATION</p>
+                    <h2 id="report-action-title">Report Actions</h2>
+                </div>
+                <button type="button"
+                        class="review-modal-close"
+                        data-report-actions-close
+                        aria-label="Close report actions">
+                    ×
+                </button>
+            </div>
+            <p class="review-admin-action-dialog-message"
+               data-report-actions-message>
+                Choose an action for this report.
+            </p>
+            <div class="review-admin-action-dialog-body"
+                 data-report-actions-modal-body></div>
+        </div>
+    </div>
+
+</main>
+
+<footer th:replace="~{fragments/footer :: global}"></footer>
+<script th:src="@{/js/review.js}"></script>
+
+</body>
+</html>

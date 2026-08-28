@@ -31,9 +31,10 @@ public class ProfileApiController {
     }
 
     @PostMapping("/upload-avatar")
-    public ResponseEntity<Map<String, String>> uploadAvatar(@RequestParam("file") MultipartFile file,
+    public ResponseEntity<Map<String, Object>> uploadAvatar(@RequestParam("file") MultipartFile file,
                                                              Authentication authentication) {
-        return ResponseEntity.ok(Map.of("avatarUrl", profileService.uploadAvatar(authentication.getName(), file)));
+        String imageUrl = profileService.uploadAvatar(authentication.getName(), file);
+        return ResponseEntity.ok(Map.of("success", true, "imageUrl", imageUrl));
     }
 
     @ExceptionHandler(ProfileUpdateException.class)

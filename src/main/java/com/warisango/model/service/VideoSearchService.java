@@ -4,8 +4,10 @@ import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import com.warisango.config.YoutubeConfig;
 import com.warisango.dto.VideoDTO;
+import com.warisango.exception.AIProcessingException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,23 +25,33 @@ public class VideoSearchService {
         this.objectMapper = new ObjectMapper();
     }
 
-    public List<VideoDTO> searchVideos(String keyword) throws Exception {
+    public List<VideoDTO> searchVideos(String keyword) {
 
-        // Build the YouTube API search URL
-        String url = youtubeConfig.getBaseUrl()
-                + "/search"
-                + "?part=snippet"
-                + "&type=video"
-                + "&maxResults=20"
-                + "&q=" + keyword.replace(" ", "%20")
-                + "&key=" + youtubeConfig.getApiKey();
+        try {
 
-        String response = restClient.get()
-                .uri(url)
-                .retrieve()
-                .body(String.class);
+            String url = UriComponentsBuilder
+                .fromUriString(youtubeConfig.getBaseUrl() + "/search")
+                .queryParam("part", "snippet")
+                .queryParam("type", "video")
+                .queryParam("maxResults", 20)
+                .queryParam("q", keyword)
+                .queryParam("key", youtubeConfig.getApiKey())
+                .build()
+                .encode()
+                .toUriString();
 
-        return parseVideos(response);
+            String response = restClient.get()
+                    .uri(url)
+                    .retrieve()
+                    .body(String.class);
+
+            return parseVideos(response);
+        } catch (Exception exception) {
+            throw new AIProcessingException(
+                    "Unable to search YouTube videos.",
+                    exception
+            );
+        }
     }
 
     // Parse the JSON response and extract video details(no content)
@@ -49,7 +61,7 @@ public class VideoSearchService {
 
         JsonNode root = objectMapper.readTree(json);
 
-        JsonNode items = root.get("items");
+        JsonNode items = root.path("items");
 
         for (JsonNode item : items) {
 

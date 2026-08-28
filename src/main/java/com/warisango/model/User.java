@@ -1,5 +1,7 @@
 package com.warisango.model;
 
+import com.google.cloud.Timestamp;
+
 public class User {
     private String uid;
     private String email;
@@ -8,6 +10,10 @@ public class User {
     private String role;
     private int totalPoints;
     private Long lastNameChangeTimestamp;
+    private String tierStatus;
+    private String gender;
+    private String aboutMe;
+    private Timestamp createdAt;
 
     public User() {} // Required for Firestore data mapping
 
@@ -17,7 +23,11 @@ public class User {
         this.name = name;
         this.avatar = avatar;
         this.role = role;
-        this.totalPoints = 0; // Default initialization
+        this.totalPoints = 0;
+        this.tierStatus = "Bronze";
+        this.gender = null;
+        this.aboutMe = null;
+        this.createdAt = Timestamp.now();
     }
 
     // --- Getters and Setters ---
@@ -77,4 +87,18 @@ public class User {
     public void setLastNameChangeTimestamp(Long lastNameChangeTimestamp) {
         this.lastNameChangeTimestamp = lastNameChangeTimestamp;
     }
+    public String getTierStatus() {
+        return tierStatus;
+    }
+
+    public void setTierStatus(String tierStatus) {
+        this.tierStatus = tierStatus == null ? null : tierStatus.trim();
+    }
+
+    public String getGender() { return gender; }
+    public void setGender(String gender) { this.gender = gender; }
+    public String getAboutMe() { return aboutMe; }
+    public void setAboutMe(String aboutMe) { this.aboutMe = aboutMe; }
+    public Timestamp getCreatedAt() { return createdAt; }
+    public void setCreatedAt(Timestamp createdAt) { this.createdAt = createdAt; }
 }

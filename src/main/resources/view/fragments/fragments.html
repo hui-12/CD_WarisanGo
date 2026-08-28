@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head th:fragment="head(title)">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,30 +18,50 @@
     <!-- Sticky Navbar Fragment -->
     <header th:fragment="navbar(activePage)" class="navbar">
         <div class="nav-container">
-            <button type="button" class="brand-logo" data-navigate="home">
+            <a class="brand-logo"
+               th:href="${#authorization.expression('hasRole(''ADMIN'')')} ? @{/ai-discovery} : @{/home}">
                 <span class="brand-main">Warisan</span><span class="brand-accent">Go</span>
-                <span th:if="${currentUser != null and #strings.equalsIgnoreCase(currentUser.role, 'ADMIN')}"
-                      class="admin-badge">ADMIN MODE</span>
-            </button>
+                <span class="admin-badge" sec:authorize="hasRole('ADMIN')">ADMIN</span>
+            </a>
 
-            <nav class="nav-links" id="nav-menu">
-                <button type="button" class="nav-item" th:classappend="${activePage == 'home'} ? ' active'" data-navigate="home">Home</button>
-                <button type="button" class="nav-item" th:classappend="${activePage == 'directory'} ? ' active'" data-navigate="directory">Directory</button>
-                <button type="button" class="nav-item" th:classappend="${activePage == 'map'} ? ' active'" data-navigate="map">Map</button>
-                <button type="button" class="nav-item" th:classappend="${activePage == 'rewards'} ? ' active'" data-navigate="rewards">Rewards</button>
-                <button type="button" class="nav-item" th:classappend="${activePage == 'badges'} ? ' active'" data-navigate="badges">Badges</button>
-                <button type="button" class="nav-item" th:classappend="${activePage == 'challenges'} ? ' active'" data-navigate="challenges">Challenges</button>
-                <button type="button" class="nav-item" th:classappend="${activePage == 'profile'} ? ' active'" data-navigate="profile">Profile</button>
+            <nav class="nav-links" aria-label="Primary navigation" sec:authorize="hasRole('TOURIST')">
+                <a class="nav-item" th:classappend="${activePage == 'home'} ? ' active'" th:href="@{/home}">Home</a>
+                <a class="nav-item" th:classappend="${activePage == 'directory'} ? ' active'"
+                   th:href="@{/directory}">Directory</a>
+                <a class="nav-item" th:classappend="${activePage == 'map'} ? ' active'" th:href="@{/map}">Map</a>
+                <a class="nav-item" th:classappend="${activePage == 'saved'} ? ' active'" th:href="@{/saved}">Saved</a>
+                <a class="nav-item" th:classappend="${activePage == 'rewards'} ? ' active'"
+                   th:href="@{/rewards}">Rewards</a>
+                <a class="nav-item" th:classappend="${activePage == 'badges'} ? ' active'" th:href="@{/badges}">Badges</a>
+                <a class="nav-item" th:classappend="${activePage == 'challenges'} ? ' active'"
+                   th:href="@{/challenges}">Challenges</a>
+                <a class="nav-item" th:classappend="${activePage == 'profile'} ? ' active'"
+                   th:href="@{/profile}">Profile</a>
+            </nav>
+
+            <nav class="nav-links" aria-label="Admin navigation" sec:authorize="hasRole('ADMIN')">
+                <a class="nav-item" th:classappend="${activePage == 'ai-discovery'} ? ' active'"
+                   th:href="@{/ai-discovery}">AI Discovery</a>
+                <a class="nav-item" th:classappend="${activePage == 'pending-list'} ? ' active'"
+                   th:href="@{/admin/pending}">Pending List</a>
+                <a class="nav-item" th:classappend="${activePage == 'audit-log'} ? ' active'"
+                   th:href="@{/admin/audit-log}">Audit Log</a>
+                <a class="nav-item" th:classappend="${activePage == 'admin-challenges'} ? ' active'"
+                   th:href="@{/admin/challenges}">Challenges</a>
+                <a class="nav-item" th:classappend="${activePage == 'admin-badges'} ? ' active'"
+                   th:href="@{/admin/badges}">Badges</a>
             </nav>
 
             <div class="nav-actions">
-                <button th:if="${currentUser != null and #strings.equalsIgnoreCase(currentUser.role, 'ADMIN')}"
-                        type="button" class="btn-role-switch admin-workspace" data-navigate="admin">Admin workspace</button>
-                <button type="button" class="user-profile-btn" data-navigate="profile">
-                    <img th:src="${currentUser != null and currentUser.avatar != null and !currentUser.avatar.isBlank() ? currentUser.avatar : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop'}"
-                         alt="User avatar" class="avatar-img">
-                    <span class="user-name" th:text="${currentUser != null ? currentUser.name : 'WarisanGo visitor'}">WarisanGo visitor</span>
-                </button>
+                <a class="nav-user-link" th:href="@{/profile}">
+                    <img id="navProfilePic" class="nav-avatar-img" alt="User avatar"
+                         th:src="${session.navbarUser != null and session.navbarUser.avatar != null
+                                 and !session.navbarUser.avatar.isBlank()
+                                 ? session.navbarUser.avatar
+                                 : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&amp;h=100&amp;fit=crop'}">
+                    <span class="user-name"
+                          th:text="${session.navbarUser != null ? session.navbarUser.name : 'Profile'}">Profile</span>
+                </a>
             </div>
         </div>
     </header>

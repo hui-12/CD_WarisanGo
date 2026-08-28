@@ -19,7 +19,6 @@ public class ReviewDTO {
 
     private String touristId;
 
-    @NotBlank(message = "Your name is required.")
     private String touristName;
 
     @NotBlank(message = "Review text is required.")
@@ -31,12 +30,32 @@ public class ReviewDTO {
 
     private List<String> photoUrls;
 
+    /**
+     * Existing reviewPhotos records used by the edit form.
+     * This is not stored inside the reviews document.
+     */
+    private List<ReviewPhotoDTO> photos;
+
+    /**
+     * Display-only like state loaded from the root-level reviewLikes collection.
+     */
+    private int likeCount;
+
+    private boolean likedByCurrentUser;
+
+    /**
+     * Content visibility state used by the moderation workflow.
+     * Existing documents without this field are treated as VISIBLE.
+     */
+    private String moderationStatus = "VISIBLE";
+
     private String createdAt;
 
     private String updatedAt;
 
     public ReviewDTO() {
         this.photoUrls = new ArrayList<>();
+        this.photos = new ArrayList<>();
     }
 
     public ReviewDTO(String reviewId,
@@ -56,6 +75,7 @@ public class ReviewDTO {
         this.reviewText = reviewText;
         this.rating = rating;
         this.photoUrls = photoUrls;
+        this.photos = new ArrayList<>();
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
@@ -114,6 +134,40 @@ public class ReviewDTO {
 
     public void setPhotoUrls(List<String> photoUrls) {
         this.photoUrls = photoUrls;
+    }
+
+    public List<ReviewPhotoDTO> getPhotos() {
+        return photos;
+    }
+
+    public void setPhotos(List<ReviewPhotoDTO> photos) {
+        this.photos = photos;
+    }
+
+    public int getLikeCount() {
+        return likeCount;
+    }
+
+    public void setLikeCount(int likeCount) {
+        this.likeCount = likeCount;
+    }
+
+    public boolean isLikedByCurrentUser() {
+        return likedByCurrentUser;
+    }
+
+    public void setLikedByCurrentUser(boolean likedByCurrentUser) {
+        this.likedByCurrentUser = likedByCurrentUser;
+    }
+
+    public String getModerationStatus() {
+        return moderationStatus;
+    }
+
+    public void setModerationStatus(String moderationStatus) {
+        this.moderationStatus = moderationStatus == null || moderationStatus.isBlank()
+                ? "VISIBLE"
+                : moderationStatus;
     }
 
     public String getCreatedAt() {

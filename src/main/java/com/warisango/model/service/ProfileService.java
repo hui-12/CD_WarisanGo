@@ -7,7 +7,6 @@ import com.warisango.model.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.net.URI;
 import java.time.Duration;
 import java.time.Instant;
 import java.nio.file.Files;
@@ -21,7 +20,7 @@ public class ProfileService {
     private static final Duration NAME_CHANGE_COOLDOWN = Duration.ofDays(30);
     private final UserRepository userRepository;
     private static final long MAX_AVATAR_SIZE_BYTES = 5 * 1024 * 1024;
-    private static final Set<String> ALLOWED_IMAGE_TYPES = Set.of("image/jpeg", "image/png", "image/webp");
+    private static final Set<String> ALLOWED_EXTENSIONS = Set.of(".jpg", ".jpeg", ".png", ".webp");
 
     public ProfileService(UserRepository userRepository) { this.userRepository = userRepository; }
 
@@ -51,19 +50,15 @@ public class ProfileService {
         if (file == null || file.isEmpty()) {
             throw new ProfileUpdateException("avatarUrl", "Please select an image to upload.");
         }
-        if (file.getSize() > MAX_AVATAR_SIZE_BYTES || !ALLOWED_IMAGE_TYPES.contains(file.getContentType())) {
+        String originalFilename = file.getOriginalFilename();
+        String extension = extensionOf(originalFilename);
+        if (file.getSize() > MAX_AVATAR_SIZE_BYTES || !ALLOWED_EXTENSIONS.contains(extension)) {
             throw new ProfileUpdateException("avatarUrl", "Use a JPG, PNG, or WebP image no larger than 5 MB.");
         }
-        String extension = switch (file.getContentType()) {
-            case "image/jpeg" -> "jpg";
-            case "image/png" -> "png";
-            case "image/webp" -> "webp";
-            default -> throw new ProfileUpdateException("avatarUrl", "Unsupported image format.");
-        };
         try {
             Path directory = Path.of("uploads", "profile-images").toAbsolutePath().normalize();
             Files.createDirectories(directory);
-            String filename = uid + "-" + UUID.randomUUID() + "." + extension;
+            String filename = uid + "-" + UUID.randomUUID() + extension;
             Files.copy(file.getInputStream(), directory.resolve(filename), StandardCopyOption.REPLACE_EXISTING);
             String avatarUrl = "/uploads/profile-images/" + filename;
             User user = userRepository.findById(uid)
@@ -71,9 +66,19 @@ public class ProfileService {
             user.setAvatar(avatarUrl);
             userRepository.save(user);
             return avatarUrl;
+        } catch (ProfileUpdateException exception) {
+            throw exception;
         } catch (Exception exception) {
             throw new ProfileUpdateException("avatarUrl", "Image upload failed. Please try again.");
         }
+    }
+
+    private String extensionOf(String filename) {
+        if (filename == null) {
+            return "";
+        }
+        int extensionIndex = filename.lastIndexOf('.');
+        return extensionIndex < 0 ? "" : filename.substring(extensionIndex).toLowerCase();
     }
 
 }

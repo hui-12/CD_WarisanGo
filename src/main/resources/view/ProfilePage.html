@@ -1,12 +1,37 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org"><head>
-<th:block th:replace="~{fragments/fragments :: head('WarisanGo - Profile')}"></th:block><link rel="stylesheet" th:href="@{/css/profile.css}"><script type="module" th:src="@{/js/profile.js}"></script></head><body>
-<div th:replace="~{fragments/fragments :: navbar('profile')}"></div><main class="profile-page" th:with="points=${user.totalPoints}">
-<section class="profile-card"><div class="profile-title"><div><p class="eyebrow">ACCOUNT</p><h1>Your profile</h1></div><a th:if="${user.role == 'admin'}" class="admin-link" href="/ai-discovery">Admin AI review queue</a></div><p id="profile-notice" class="notice" role="status"></p>
-<form id="profile-form" class="profile-form" novalidate><div class="profile-summary"><img id="avatar-preview" class="profile-avatar" th:src="${user.avatar}" alt="Profile photo"><div><h2 th:text="${user.name}">Visitor</h2><p th:text="${user.email}">visitor@example.com</p></div></div>
-<label for="email">Email address</label><input id="email" th:value="${user.email}" readonly><p class="field-help">Your Google email cannot be changed.</p>
-<label for="display-name">Display name</label><input id="display-name" th:value="${user.name}" minlength="3" maxlength="30" required><p id="name-error" class="field-error"></p>
-<label for="avatar-file">Profile picture</label><p class="field-help">Upload a JPG, PNG, or WebP image (maximum 5 MB).</p><input id="avatar-file" type="file" accept="image/jpeg,image/png,image/webp"><p id="avatar-error" class="field-error"></p><button class="primary-button" type="submit">Save changes</button></form></section>
-<section class="profile-card" th:with="tier=${points >= 2000 ? 'Platinum' : (points >= 1000 ? 'Gold' : (points >= 500 ? 'Silver' : 'Bronze'))}, ceiling=${points >= 2000 ? 2000 : (points >= 1000 ? 2000 : (points >= 500 ? 1000 : 500))}"><p class="eyebrow">REWARDS</p><h2 th:text="${tier + ' tier'}">Bronze tier</h2><p><strong th:text="${points}">0</strong> points <span th:if="${points < 2000}" th:text="${'· ' + (ceiling - points) + ' points to next tier'}"></span></p><div class="progress-track"><div class="progress-value" th:style="${'width:' + (points >= 2000 ? 100 : (points % 500) * 100 / 500) + '%'}"></div></div><div class="badge-grid"><div class="badge" th:each="badge, s : ${#numbers.sequence(1,4)}" th:classappend="${points >= (s.index * 500)} ? ' earned' : ' locked'"><span th:text="${s.index == 0 ? 'Bronze' : (s.index == 1 ? 'Silver' : (s.index == 2 ? 'Gold' : 'Platinum'))}">Bronze</span><small th:text="${points >= (s.index * 500) ? 'Earned' : (s.index * 500) + ' points'}">Locked</small></div></div><p class="empty-state">Points history and visit activity will appear once they are recorded.</p></section>
-<section class="profile-card"><p class="eyebrow">ACTIVITY</p><h2>Points history</h2><p class="empty-state" th:if="${#lists.isEmpty(pointsHistory)}">No point transactions recorded yet.</p><ul><li th:each="entry : ${pointsHistory}" th:text="${entry.activity + ' · +' + entry.points + ' points'}"></li></ul><h2>Visit activity</h2><p class="empty-state" th:if="${#lists.isEmpty(visitHistory)}">No check-ins recorded yet.</p><ul><li th:each="visit : ${visitHistory}" th:text="${visit.businessName}"></li></ul></section><section class="profile-card"><p class="eyebrow">SESSION</p><h2>Account session</h2><button id="logout-button" class="secondary-button" type="button">Sign out</button></section></main>
-<dialog id="confirm-dialog"><form method="dialog"><h2>Save profile changes?</h2><p>Your display name and profile picture will be updated. Display names can only change once every 30 days.</p><div class="dialog-actions"><button value="cancel" class="secondary-button">Cancel</button><button value="confirm" class="primary-button">Save changes</button></div></form></dialog><dialog id="cooldown-dialog"><form method="dialog"><h2>Display name unavailable</h2><p id="cooldown-message"></p><button class="primary-button">Understood</button></form></dialog><div th:replace="~{fragments/footer :: global}"></div></body></html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="~{fragments/fragments :: head('WarisanGo - Profile')}"></th:block>
+    <link rel="stylesheet" th:href="@{/css/profile.css}">
+    <script defer th:src="@{/js/profile.js}"></script>
+</head>
+<body>
+<div th:replace="~{fragments/fragments :: navbar('profile')}"></div>
+<main class="profile-page" th:if="${user != null}">
+    <div class="profile-container">
+        <section class="profile-card profile-stats-card">
+            <button id="profileAvatarButton" class="profile-avatar-control" type="button" aria-label="Update profile picture">
+                <img id="profileAvatarImg" class="profile-avatar" th:src="${user.avatar != null and !user.avatar.isBlank() ? user.avatar : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=160&amp;h=160&amp;fit=crop'}" alt="Profile photo">
+                <span class="profile-avatar-camera" aria-hidden="true">&#128247;</span>
+            </button>
+            <div class="profile-identity"><p class="profile-kicker">My Account</p><h1 th:text="${user.name}">Visitor</h1><p th:text="${user.email}">Email</p></div>
+            <dl class="profile-statistics"><div><dt th:text="${calculatedTier}">Platinum</dt><dd>Tier</dd></div><div><dt th:text="${#numbers.formatInteger(user.totalPoints, 1, 'COMMA')}">10,000</dt><dd>Points</dd></div><div><dt th:text="${visitCount}">0</dt><dd>Visits</dd></div><div><dt th:text="${badgeCount}">0</dt><dd>Badges</dd></div></dl>
+        </section>
+
+        <section class="profile-card profile-content-card">
+            <nav class="profile-tabs" aria-label="Profile sections"><button class="profile-tab active" type="button" data-profile-tab="info">My Info</button><button class="profile-tab" type="button" data-profile-tab="history">Visit History</button></nav>
+            <p class="profile-message" th:if="${profileMessage}" th:text="${profileMessage}"></p><p class="profile-error" th:if="${profileError}" th:text="${profileError}"></p>
+            <div class="profile-tab-panel active" data-profile-panel="info"><div class="profile-columns">
+                <form class="profile-panel" method="post" th:action="@{/profile}"><div class="profile-panel-heading"><h2>Personal Information</h2><div class="profile-actions"><button type="button" data-profile-edit>Edit</button><button class="primary" type="submit" data-profile-save hidden>Save</button><button type="button" data-profile-cancel hidden>Cancel</button></div></div><div class="profile-form-body"><label>Username<input name="name" maxlength="80" required readonly th:value="${user.name}"></label><label>Gender<select name="gender" disabled><option value="" th:selected="${user.gender == null}">Not set</option><option value="Male" th:selected="${user.gender == 'Male'}">Male</option><option value="Female" th:selected="${user.gender == 'Female'}">Female</option><option value="Other" th:selected="${user.gender == 'Other'}">Other</option></select></label><label>About Me<textarea name="aboutMe" maxlength="500" rows="5" readonly placeholder="Tell us about your food journey" th:text="${user.aboutMe}"></textarea></label></div></form>
+                <section class="profile-panel"><div class="profile-panel-heading"><h2>Account Details</h2></div><dl class="account-details"><div><dt>Email</dt><dd th:text="${user.email}">Email</dd></div><div><dt>Member Since</dt><dd th:text="${memberSince}">Date</dd></div><div><dt>Role</dt><dd class="profile-role" th:text="${user.role}">Tourist</dd></div></dl></section>
+            </div></div>
+            <div class="profile-tab-panel" data-profile-panel="history" hidden><div class="profile-empty-state" th:if="${#lists.isEmpty(visits)}"><span aria-hidden="true">&#128205;</span><h2>No visits yet</h2><p>Your completed check-ins will appear here.</p></div><div class="profile-visit-history" th:unless="${#lists.isEmpty(visits)}"><a class="profile-visit-row" th:each="visit:${visits}" th:href="@{/business/{id}(id=${visit.businessId})}"><span class="profile-visit-details"><strong th:text="${visit.businessName}">Business</strong><small th:text="${visit.formattedVisitedAt()}">Date</small></span><span class="profile-visit-points" th:text="${'+' + visit.points + ' pts'}">+50 pts</span></a></div></div>
+        </section>
+
+        <section class="profile-card profile-session-card"><div><p class="profile-kicker">Session</p><h2>Account session</h2><p>Sign out securely when you are finished.</p></div><button id="switch-account-button" type="button">Log Out</button></section>
+    </div>
+</main>
+<dialog id="avatarUploadModal" class="avatar-upload-modal" aria-labelledby="avatarUploadTitle"><div class="avatar-modal-header"><h2 id="avatarUploadTitle">Update Profile Picture</h2><button id="closeAvatarModal" type="button" aria-label="Close">&times;</button></div><div id="avatarDropzone" class="avatar-dropzone" role="button" tabindex="0"><strong>Drag &amp; drop your photo here, or click to browse</strong><span>Supports .jpg, .png, .webp (max 5 MB)</span></div><input type="file" id="avatarFileInput" accept=".jpg,.jpeg,.png,.webp" hidden><p id="avatarUploadStatus" class="avatar-upload-status" role="status" aria-live="polite"></p></dialog>
+<div th:replace="~{fragments/footer :: global}"></div>
+</body>
+</html>

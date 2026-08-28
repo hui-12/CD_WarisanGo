@@ -197,6 +197,14 @@
     gap: 14px;
     padding: 14px 20px;
     border-bottom: 1px solid #e8e6e0;
+    color: inherit;
+    text-decoration: none;
+    transition: background-color 120ms ease;
+}
+
+.visit-row:hover,
+.visit-row:focus-visible {
+    background-color: #faf9f5;
 }
 
 .visit-row:last-child {
@@ -423,4 +431,30 @@
     cursor: pointer;
     font-family: 'Inter', Arial, sans-serif;
     align-self: flex-start;
+}
+
+.visits-container {
+    max-height: 360px;
+    overflow-y: auto;
+}
+
+.home-challenge-list {
+    max-height: 250px;
+    margin: 10px 0 14px;
+    overflow-y: auto;
+}
+
+.home-challenge-item {
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(20, 20, 19, .15);
+}
+
+.home-challenge-item:last-child {
+    border-bottom: 0;
+}
+
+.challenge-empty {
+    margin: 12px 0 16px;
+    color: #6b6b68;
+    font-size: 12px;
 }

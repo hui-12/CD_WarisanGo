@@ -1,0 +1,179 @@
+# Chinese profanity and insult list for WarisanGo review/comment moderation.
+# Includes common Mandarin, Cantonese, Taiwanese, pinyin and chat variants.
+# Keep one term or phrase per line. Review ambiguous regional terms before production use.
+傻逼
+傻比
+妈的
+他妈的
+操
+草泥马
+王八蛋
+混蛋
+去死
+废物
+畜生
+傻子
+傻瓜
+傻吊
+傻屌
+煞笔
+妈逼
+你妈的
+妈了个逼
+操你妈
+草你妈
+日你妈
+去你妈的
+狗日的
+狗东西
+狗屎
+脑残
+智障
+白痴
+孬种
+滚蛋
+滚开
+贱人
+婊子
+骚货
+杂种
+废柴
+脑子有病
+神经病
+臭傻逼
+死全家
+全家死光
+
+# Common Mandarin variants.
+13点
+下三烂
+下贱
+他妈
+他娘
+他奶奶的
+你个傻比
+你妈
+你娘
+你马的
+傻屄
+傻叉
+傻缺
+二逼
+二货
+册那
+几八
+几叭
+几巴
+卖B
+卖比
+吃屎
+妈B
+妈个B
+妈个比
+妈逼
+妈卖批
+妈卖逼
+妓女
+婊子养的
+娘个比
+贱B
+贱货
+贼你妈
+干你
+干你妈
+干你娘
+干你老母
+干死你
+操你全家
+操你奶奶
+操你祖宗
+操逼
+日你
+日你妈
+日你娘
+机八
+机巴
+鸡8
+鸡八
+鸡叭
+鸡吧
+鸡芭
+鸡奸
+杂种
+烂货
+烂逼
+狗日
+狗娘养的
+狗狼养的
+瓜娃子
+瓜婆娘
+瓜批
+瘪三
+白烂
+滚你妈
+去你妈
+去你妈的
+王八
+王八羔子
+龟儿子
+龟孙子
+骚比
+骚逼
+靠北
+靠母
+靠爸
+靠背
+靠腰
+逼样
+野鸡
+死妈
+死全家
+全家死光
+
+# Cantonese / Taiwanese / regional variants.
+扑街
+仆街
+死扑街
+屎忽
+冚家铲
+咸家铲
+咸家伶
+硬胶
+閪
+撚
+柒
+鳩
+𨳒
+屌你
+屌你老母
+屌你妈
+屌你老母
+diu
+diu lei
+diu nei
+ham ga caan
+ji bai
+jiba
+lan jiao
+lanjiao
+sohai
+
+# Pinyin / internet abbreviations.
+cao ni ma
+cao nima
+cao ni ma de
+cnm
+gan ni ma
+gan niang
+kan ni na
+kanina
+ma bi
+mabi
+ni ma
+ni ma de
+nmsl
+sb
+shabi
+sha bi
+sha diao
+傻吊

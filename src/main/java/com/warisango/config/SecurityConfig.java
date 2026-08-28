@@ -4,11 +4,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.web.access.AccessDeniedHandler;
+import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.access.AccessDeniedHandler;
-import org.springframework.http.HttpStatus;
 
 @Configuration
 @EnableWebSecurity
@@ -27,9 +28,26 @@ public class SecurityConfig {
             .securityContext(securityContext -> securityContext
                 .securityContextRepository(securityContextRepository)
             )
+            .exceptionHandling(exceptionHandling -> exceptionHandling
+                .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login"))
+            )
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/login", "/api/auth/login", "/css/**", "/js/**", "/images/**", "/uploads/**").permitAll()
-                .requestMatchers("/ai-discovery", "/st-discovery", "/admin/**").hasRole("ADMIN")
+                .requestMatchers(
+                    "/",
+                    "/login",
+                    "/heritage-gate",
+                    "/api/auth/login",
+                    "/api/auth/admin-login",
+                    "/css/**",
+                    "/js/**",
+                    "/images/**"
+                ).permitAll()
+                .requestMatchers(
+                    "/ai-discovery",
+                    "/st-discovery",
+                    "/admin/**",
+                    "/AdminChallengePage"
+                ).hasRole("ADMIN")
                 .anyRequest().authenticated()
             )
             .exceptionHandling(exceptions -> exceptions.accessDeniedHandler(accessDeniedHandler()));

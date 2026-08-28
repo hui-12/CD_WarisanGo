@@ -8,6 +8,16 @@ public class AdminController {
 
     @GetMapping({"/ai-discovery", "/st-discovery"})
     public String aiDiscoveryPage() {
-        return "admin/AIDiscoveryPage";
+        return "admin/discovery";
+    }
+
+    @GetMapping("/admin/pending")
+    public String pendingListPage() {
+        return "admin/PendingListPage";
+    }
+
+    @GetMapping("/admin/audit-log")
+    public String auditLogPage() {
+        return "admin/AuditLogPage";
     }
 }

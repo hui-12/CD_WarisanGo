@@ -1,10 +1,92 @@
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js';
-import { getAuth, signOut } from 'https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js';
-const app=initializeApp({apiKey:'AIzaSyBXQ0QR6fkW5cwbnUqkFF78-0-zeGeFu5M',authDomain:'warisango.firebaseapp.com',projectId:'warisango',appId:'1:880767167288:web:9e352fe9321030d6302fcd'}),auth=getAuth(app);
-const form=document.getElementById('profile-form'),dialog=document.getElementById('confirm-dialog'),cooldown=document.getElementById('cooldown-dialog'),name=document.getElementById('display-name'),avatar=document.getElementById('avatar-preview'),notice=document.getElementById('profile-notice');
-const setError=(id,message='')=>document.getElementById(id).textContent=message;
-const valid=()=>{const ok=/^[A-Za-z0-9 ]{3,30}$/.test(name.value.trim());setError('name-error',ok?'':'Use 3–30 letters, numbers, and spaces only.');return ok;};
-name.addEventListener('input',valid);form.addEventListener('submit',event=>{event.preventDefault();if(valid())dialog.showModal();});
-dialog.addEventListener('close',async()=>{if(dialog.returnValue!=='confirm')return;const response=await fetch('/api/profile',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({displayName:name.value.trim()})}),payload=await response.json();if(!response.ok){if(payload.remainingDays){document.getElementById('cooldown-message').textContent=`You can only change your display name once every 30 days. You have ${payload.remainingDays} day(s) remaining.`;cooldown.showModal();return;}setError('name-error',payload.message);return;}notice.className='notice success';notice.textContent='Profile saved successfully.';});
-document.getElementById('avatar-file').addEventListener('change',async event=>{const file=event.target.files[0];if(!file)return;if(!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size>5*1024*1024){setError('avatar-error','Choose a JPG, PNG, or WebP image no larger than 5 MB.');return;}const data=new FormData();data.append('file',file);const response=await fetch('/api/profile/upload-avatar',{method:'POST',body:data}),payload=await response.json();if(!response.ok){setError('avatar-error',payload.message||'Image upload failed.');return;}avatar.src=payload.avatarUrl;notice.className='notice success';notice.textContent='Profile picture updated.';});
-document.getElementById('logout-button').addEventListener('click',async()=>{await signOut(auth);await fetch('/api/auth/logout',{method:'POST'});location.assign('/login');});
+document.addEventListener('DOMContentLoaded', () => {
+    const tabs = document.querySelectorAll('[data-profile-tab]');
+    const panels = document.querySelectorAll('[data-profile-panel]');
+    tabs.forEach((tab) => tab.addEventListener('click', () => {
+        tabs.forEach((item) => item.classList.toggle('active', item === tab));
+        panels.forEach((panel) => { panel.hidden = panel.dataset.profilePanel !== tab.dataset.profileTab; });
+    }));
+
+    const form = document.querySelector('.profile-panel[method="post"]');
+    const fields = form ? Array.from(form.querySelectorAll('input, select, textarea')) : [];
+    const originalValues = fields.map((field) => field.value);
+    const setEditing = (enabled) => {
+        fields.forEach((field) => {
+            if (field instanceof HTMLSelectElement) field.disabled = !enabled;
+            else field.readOnly = !enabled;
+        });
+        document.querySelector('[data-profile-edit]').hidden = enabled;
+        document.querySelector('[data-profile-save]').hidden = !enabled;
+        document.querySelector('[data-profile-cancel]').hidden = !enabled;
+    };
+    document.querySelector('[data-profile-edit]')?.addEventListener('click', () => setEditing(true));
+    document.querySelector('[data-profile-cancel]')?.addEventListener('click', () => {
+        fields.forEach((field, index) => { field.value = originalValues[index]; });
+        setEditing(false);
+    });
+
+    const modal = document.getElementById('avatarUploadModal');
+    const avatarButton = document.getElementById('profileAvatarButton');
+    const closeButton = document.getElementById('closeAvatarModal');
+    const dropzone = document.getElementById('avatarDropzone');
+    const fileInput = document.getElementById('avatarFileInput');
+    const status = document.getElementById('avatarUploadStatus');
+    const avatarImage = document.getElementById('profileAvatarImg');
+    const maxSize = 5 * 1024 * 1024;
+    const allowedExtensions = ['jpg', 'jpeg', 'png', 'webp'];
+
+    const showStatus = (message, isError = true) => {
+        status.textContent = message;
+        status.classList.toggle('is-error', isError);
+    };
+    const validFile = (file) => {
+        const extension = file.name.split('.').pop().toLowerCase();
+        if (!allowedExtensions.includes(extension)) return 'Use a JPG, PNG, or WebP image.';
+        if (file.size > maxSize) return 'Your image must be 5 MB or smaller.';
+        return '';
+    };
+    const upload = async (file) => {
+        const error = validFile(file);
+        if (error) { showStatus(error); return; }
+        const formData = new FormData();
+        formData.append('file', file);
+        dropzone.classList.add('is-uploading');
+        showStatus('Uploading...', false);
+        try {
+            const response = await fetch('/api/profile/upload-avatar', { method: 'POST', body: formData });
+            const payload = await response.json();
+            if (!response.ok || !payload.success) throw new Error(payload.message || 'Upload failed.');
+            const updatedImageUrl = `${payload.imageUrl}?v=${Date.now()}`;
+            avatarImage.src = updatedImageUrl;
+            const navbarAvatar = document.getElementById('navProfilePic');
+            if (navbarAvatar) {
+                navbarAvatar.src = updatedImageUrl;
+            }
+            modal.close();
+            fileInput.value = '';
+            showStatus('');
+        } catch (uploadError) {
+            showStatus(uploadError.message);
+        } finally {
+            dropzone.classList.remove('is-uploading');
+        }
+    };
+
+    avatarButton?.addEventListener('click', () => { status.textContent = ''; modal.showModal(); });
+    closeButton?.addEventListener('click', () => modal.close());
+    dropzone?.addEventListener('click', () => fileInput.click());
+    dropzone?.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); fileInput.click(); }
+    });
+    fileInput?.addEventListener('change', () => { if (fileInput.files[0]) upload(fileInput.files[0]); });
+    ['dragenter', 'dragover'].forEach((eventName) => dropzone?.addEventListener(eventName, (event) => {
+        event.preventDefault(); dropzone.classList.add('is-dragging');
+    }));
+    ['dragleave', 'drop'].forEach((eventName) => dropzone?.addEventListener(eventName, (event) => {
+        event.preventDefault(); dropzone.classList.remove('is-dragging');
+    }));
+    dropzone?.addEventListener('drop', (event) => { if (event.dataTransfer.files[0]) upload(event.dataTransfer.files[0]); });
+    document.getElementById('switch-account-button')?.addEventListener('click', async () => {
+        const response = await fetch('/api/auth/logout', { method: 'POST' });
+        if (response.ok) window.location.href = '/login';
+    });
+});
