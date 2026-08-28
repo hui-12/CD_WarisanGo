@@ -112,6 +112,10 @@
     margin-bottom: 4px;
 }
 
+.challenge-widget .widget-label{
+    color: #000;
+}
+
 .tier-name {
     font-family: 'Fraunces', Georgia, serif;
     font-size: 26px;
