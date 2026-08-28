@@ -23,6 +23,9 @@ public class ReportDTO {
     /** Display-only content loaded from Reviews or Comments. */
     private String targetText;
 
+    /** Display-only reporter name resolved from the users collection. */
+    private String reporterName;
+
     /** Display-only owner ID loaded from Reviews or Comments. */
     private String targetOwnerId;
 
@@ -128,6 +131,14 @@ public class ReportDTO {
 
     public void setTargetText(String targetText) {
         this.targetText = targetText;
+    }
+
+    public String getReporterName() {
+        return reporterName;
+    }
+
+    public void setReporterName(String reporterName) {
+        this.reporterName = reporterName;
     }
 
     public String getTargetOwnerId() {
