@@ -178,7 +178,7 @@
   </main>
 
   <!-- Include Footer & Global Scripts Fragment -->
-  <div th:replace="~{fragments/footer :: global}"></div>
+  <div th:replace="~{fragments/footer :: global('home')}"></div>
 
   <!-- Page-Specific Script -->
   <script src="/js/home.js" th:src="@{/js/home.js}"></script>

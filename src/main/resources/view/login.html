@@ -2,7 +2,8 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <th:block th:replace="~{fragments/fragments :: head('Sign in | WarisanGo')}"></th:block>
-    <link rel="stylesheet" th:href="@{/css/login.css}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Special+Elite&family=Bebas+Neue&family=Courier+Prime:wght@700&display=swap" rel="stylesheet">    <link rel="stylesheet" th:href="@{/css/login.css}">
     <script type="module" th:src="@{/js/login.js}" defer></script>
 </head>
 <body class="login-page" data-login-endpoint="/api/auth/login" data-login-redirect="/home">
@@ -14,18 +15,51 @@
             <p class="login-campaign">Visit Malaysia 2026</p>
         </div>
         <div class="login-hero-inner">
-            <p class="login-hunt-badge">HERITAGE FOOD HUNT &#127474;&#127486;</p>
             <h1>Taste a Century of</h1>
-            <div class="letter-tiles-container" aria-label="Flavour food discovery tiles"><span class="letter-tile tile-f" data-food="Fish Head Curry" tabindex="0">F</span><span class="letter-tile tile-l" data-food="Laksa" tabindex="0">L</span><span class="letter-tile tile-a" data-food="Ayam Percik" tabindex="0">A</span><span class="letter-tile tile-v" data-food="Vadai" tabindex="0">V</span><span class="letter-tile tile-o" data-food="Onde-Onde" tabindex="0">O</span><span class="letter-tile tile-u" data-food="Ulam" tabindex="0">U</span><span class="letter-tile tile-r" data-food="Rendang" tabindex="0">R</span></div>
+
+                <div class="flavour-wrap">
+                    <div class="flavour-strip" aria-label="Flavour food discovery — ransom note style">
+                        <span class="clip clip-f" tabindex="0" aria-label="Fish Head Curry"><span class="face">F</span></span>
+                        <span class="clip clip-l" tabindex="0" aria-label="Laksa"><span class="tape"></span><span class="face">L</span></span>
+                        <span class="clip clip-a" tabindex="0" aria-label="Ayam Percik"><span class="face">A</span></span>
+                        <span class="clip clip-v" tabindex="0" aria-label="Vadai"><span class="pin"></span><span class="face">V</span></span>
+                        <span class="clip clip-o" tabindex="0" aria-label="Onde-Onde"><span class="face">O</span></span>
+                        <span class="clip clip-u" tabindex="0" aria-label="Ulam"><span class="tape"></span><span class="face">U</span></span>
+                        <span class="clip clip-r" tabindex="0" aria-label="Rendang"><span class="pin"></span><span class="face">R</span></span>
+                    </div>
+
+                    <div class="caption-dock">
+                        <div class="caption caption-f"><strong>Fish Head Curry</strong>A fiery tamarind curry born in Klang's old port kopitiams.</div>
+                        <div class="caption caption-l"><strong>Laksa</strong>Tangy coconut noodle soup — every state defends its own version.</div>
+                        <div class="caption caption-a"><strong>Ayam Percik</strong>Chicken basted in spiced coconut glaze, grilled over charcoal.</div>
+                        <div class="caption caption-v"><strong>Vadai</strong>Crisp lentil fritters sold outside Indian coffee shops since the 1900s.</div>
+                        <div class="caption caption-o"><strong>Onde-Onde</strong>Pandan rice balls bursting with molten palm sugar.</div>
+                        <div class="caption caption-u"><strong>Ulam</strong>A raw herb platter with sambal — Malaysia's original salad.</div>
+                        <div class="caption caption-r"><strong>Rendang</strong>Beef slow-cooked in coconut and spice until almost black.</div>
+                    </div>
+                </div>
+
             <p class="login-introduction">Discover Malaysia's hidden kopitiams, legendary street food stalls, and secret family recipes.</p>
         </div>
     </section>
     <section class="login-form-panel">
         <div class="login-form-content">
             <a class="login-mobile-brand" th:href="@{/}"><span>Warisan</span><em>Go</em></a>
-            <p class="login-form-eyebrow">Welcome to WarisanGo</p><h2>Welcome back</h2>
+            <p class="login-form-eyebrow">WarisanGo</p>
+            <h2>Welcome back</h2>
             <p class="login-subtitle">Sign in to continue your heritage food journey.</p>
-            <div class="login-actions"><button id="btn-login-tourist" class="login-button login-button-primary" type="button" data-role="tourist"><svg class="google-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M21.8 12.2c0-.7-.1-1.4-.2-2H12v3.8h5.4a4.6 4.6 0 0 1-2 3v2.5h3.2c1.9-1.7 3.2-4.3 3.2-7.3Z"/><path fill="#34A853" d="M12 22c2.7 0 5-0.9 6.6-2.5l-3.2-2.5c-.9.6-2 .9-3.4.9-2.6 0-4.8-1.7-5.6-4.1H3.1v2.6A10 10 0 0 0 12 22Z"/><path fill="#FBBC05" d="M6.4 13.8a6 6 0 0 1 0-3.7V7.5H3.1a10 10 0 0 0 0 8.9l3.3-2.6Z"/><path fill="#EA4335" d="M12 6.1c1.5 0 2.9.5 4 1.6l3-3C17 2.9 14.7 2 12 2a10 10 0 0 0-8.9 5.5l3.3 2.6C7.2 7.8 9.4 6.1 12 6.1Z"/></svg><span>Continue with Google</span></button></div>
+            <div class="login-actions">
+                <button id="btn-login-tourist" class="login-button login-button-primary" type="button" data-role="tourist">
+                    <svg class="google-icon" viewBox="0 0 24 24" aria-hidden="true">
+                        <path fill="#4285F4" d="M21.8 12.2c0-.7-.1-1.4-.2-2H12v3.8h5.4a4.6 4.6 0 0 1-2 3v2.5h3.2c1.9-1.7 3.2-4.3 3.2-7.3Z"/>
+                        <path fill="#34A853" d="M12 22c2.7 0 5-0.9 6.6-2.5l-3.2-2.5c-.9.6-2 .9-3.4.9-2.6 0-4.8-1.7-5.6-4.1H3.1v2.6A10 10 0 0 0 12 22Z"/>
+                        <path fill="#FBBC05" d="M6.4 13.8a6 6 0 0 1 0-3.7V7.5H3.1a10 10 0 0 0 0 8.9l3.3-2.6Z"/>
+                        <path fill="#EA4335" d="M12 6.1c1.5 0 2.9.5 4 1.6l3-3C17 2.9 14.7 2 12 2a10 10 0 0 0-8.9 5.5l3.3 2.6C7.2 7.8 9.4 6.1 12 6.1Z"/>
+                    </svg>
+                    <span>Continue with Google</span>
+                </button>
+                <a href="/home?guest=true" class="login-guest-link">Continue as guest</a>
+            </div>
             <p id="login-status" class="login-status" role="status"></p>
             <p class="login-terms">By continuing, you agree to the WarisanGo <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.</p>
         </div>

@@ -89,7 +89,7 @@
   </main>
 
   <!-- Footer fragment -->
-  <div th:replace="~{fragments/footer :: global}"></div>
+  <div th:replace="~{fragments/footer :: global('directory')}"></div>
 
   <!-- Page-specific script -->
   <script src="/js/business-heritage.js" th:src="@{/js/business-heritage.js}"></script>
