@@ -90,11 +90,15 @@ public class CommentService {
     }
 
     public void createComment(CommentDTO comment, String currentUserId, String requestedReplyId) {
+        if (currentUserId == null || currentUserId.isBlank()) {
+            throw new IllegalArgumentException("Authenticated user ID is required.");
+        }
+
         contentModerationService.validate(comment.getCommentText());
         applyReplyTarget(comment, requestedReplyId);
         comment.setCommentId(commentRepository.generateNextCommentId());
         comment.setTouristId(currentUserId);
-        comment.setTouristName(userService.getDisplayNameByTouristId(currentUserId));
+        comment.setTouristName(userService.getDisplayNameByUserId(currentUserId));
         comment.setCreatedAt(LocalDateTime.now().toLocalDate().toString());
         comment.setUpdatedAt(LocalDateTime.now().toLocalDate().toString());
 
@@ -207,7 +211,7 @@ public class CommentService {
             return "Visitor";
         }
 
-        String resolvedName = userService.getDisplayNameByTouristId(comment.getTouristId());
+        String resolvedName = userService.getDisplayNameByUserId(comment.getTouristId());
         if (resolvedName != null && !resolvedName.isBlank()) {
             return resolvedName;
         }

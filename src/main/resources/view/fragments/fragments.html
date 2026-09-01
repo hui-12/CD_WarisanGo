@@ -35,8 +35,12 @@
                 <a class="nav-item" th:classappend="${activePage == 'badges'} ? ' active'" th:href="@{/badges}">Badges</a>
                 <a class="nav-item" th:classappend="${activePage == 'challenges'} ? ' active'"
                    th:href="@{/challenges}">Challenges</a>
-                <a class="nav-item" th:classappend="${activePage == 'profile'} ? ' active'"
-                   th:href="@{/profile}">Profile</a>
+            </nav>
+
+            <nav class="nav-links" aria-label="Guest navigation" sec:authorize="isAnonymous()">
+                <a class="nav-item" th:classappend="${activePage == 'directory'} ? ' active'" th:href="@{/directory}">Directory</a>
+                <a class="nav-item" th:classappend="${activePage == 'map'} ? ' active'" th:href="@{/map}">Map</a>
+                <a class="nav-item" th:classappend="${activePage == 'challenges'} ? ' active'" th:href="@{/challenges}">How It Works</a>
             </nav>
 
             <nav class="nav-links" aria-label="Admin navigation" sec:authorize="hasRole('ADMIN')">
@@ -46,6 +50,8 @@
                    th:href="@{/admin/pending}">Pending List</a>
                 <a class="nav-item" th:classappend="${activePage == 'audit-log'} ? ' active'"
                    th:href="@{/admin/audit-log}">Audit Log</a>
+                <a class="nav-item" th:classappend="${activePage == 'business-reports'} ? ' active'"
+                   th:href="@{/admin/business-reports}">Reports</a>
                 <a class="nav-item" th:classappend="${activePage == 'admin-challenges'} ? ' active'"
                    th:href="@{/admin/challenges}">Challenges</a>
                 <a class="nav-item" th:classappend="${activePage == 'admin-badges'} ? ' active'"
@@ -53,8 +59,11 @@
             </nav>
 
             <div class="nav-actions">
-                <a class="nav-user-link" th:href="@{/profile}">
-                    <img id="navProfilePic" class="nav-avatar-img" alt="User avatar"
+                <div class="guest-nav-actions" sec:authorize="isAnonymous()">
+                    <a class="nav-login-link" th:href="@{/login}">Log In</a>
+                </div>
+                <a class="nav-user-link" th:href="@{/profile}" sec:authorize="isAuthenticated()">
+                    <img id="navProfilePic" class="nav-avatar-img" alt="User avatar" referrerpolicy="no-referrer"
                          th:src="${session.navbarUser != null and session.navbarUser.avatar != null
                                  and !session.navbarUser.avatar.isBlank()
                                  ? session.navbarUser.avatar
@@ -63,6 +72,7 @@
                           th:text="${session.navbarUser != null ? session.navbarUser.name : 'Profile'}">Profile</span>
                 </a>
             </div>
+
         </div>
     </header>
 </body>

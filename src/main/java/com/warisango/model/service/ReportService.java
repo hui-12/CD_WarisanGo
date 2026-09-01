@@ -5,7 +5,6 @@ import com.warisango.dto.ReportDTO;
 import com.warisango.dto.ReviewDTO;
 import com.warisango.model.repository.AdminRepository;
 import com.warisango.model.repository.ReportRepository;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -34,34 +33,34 @@ public class ReportService {
     private final AdminRepository adminRepository;
     private final ReviewService reviewService;
     private final CommentService commentService;
-    private final String currentModerationUserId;
 
     public ReportService(
             ReportRepository reportRepository,
             AdminRepository adminRepository,
             ReviewService reviewService,
-            CommentService commentService,
-            @Value("${warisango.moderation.current-user-id:user_001}") String currentModerationUserId) {
+            CommentService commentService) {
         this.reportRepository = reportRepository;
         this.adminRepository = adminRepository;
         this.reviewService = reviewService;
         this.commentService = commentService;
-        this.currentModerationUserId = currentModerationUserId;
     }
 
     public ReportDTO createReport(
             String targetType,
             String reviewId,
             String commentId,
-            String reason) {
+            String reason,
+            String reporterUserId) {
+
+        if (reporterUserId == null || reporterUserId.isBlank()) {
+            throw new IllegalArgumentException("Authenticated user ID is required.");
+        }
 
         String normalizedTargetType = normalizeTargetType(targetType);
         String targetId = validateTarget(normalizedTargetType, reviewId, commentId);
         String normalizedReason = normalizeReason(reason);
-        String reporterTouristId = reviewService.getCurrentTouristId();
-
         if (reportRepository.existsByReporterAndTarget(
-                reporterTouristId,
+                reporterUserId,
                 normalizedTargetType,
                 targetId)) {
             throw new IllegalArgumentException("You have already reported this content.");
@@ -69,7 +68,7 @@ public class ReportService {
 
         ReportDTO report = new ReportDTO();
         report.setReportId(reportRepository.generateNextReportId());
-        report.setReporterTouristId(reporterTouristId);
+        report.setReporterTouristId(reporterUserId);
         report.setTargetType(normalizedTargetType);
         report.setReason(normalizedReason);
         report.setStatus("PENDING");
@@ -109,12 +108,12 @@ public class ReportService {
         return report;
     }
 
-    public void dismissReport(String reportId) {
-        resolveReport(reportId, "DISMISSED");
+    public void dismissReport(String reportId, String currentUserId) {
+        resolveReport(reportId, "DISMISSED", currentUserId);
     }
 
-    public void hideReport(String reportId) {
-        requireAdmin();
+    public void hideReport(String reportId, String currentUserId) {
+        requireAdmin(currentUserId);
         ReportDTO report = requireReport(reportId);
 
         if (!"PENDING".equalsIgnoreCase(report.getStatus())) {
@@ -127,11 +126,11 @@ public class ReportService {
             commentService.hideComment(report.getCommentId());
         }
 
-        resolveReport(report, "HIDDEN");
+        resolveReport(report, "HIDDEN", currentUserId);
     }
 
-    public void restoreReportTarget(String reportId) {
-        requireAdmin();
+    public void restoreReportTarget(String reportId, String currentUserId) {
+        requireAdmin(currentUserId);
         ReportDTO report = requireReport(reportId);
 
         if (!"HIDDEN".equalsIgnoreCase(report.getStatus())) {
@@ -144,11 +143,11 @@ public class ReportService {
             commentService.restoreComment(report.getCommentId());
         }
 
-        resolveReport(report, "RESTORED");
+        resolveReport(report, "RESTORED", currentUserId);
     }
 
-    public void deleteReportTarget(String reportId) {
-        requireAdmin();
+    public void deleteReportTarget(String reportId, String currentUserId) {
+        requireAdmin(currentUserId);
         ReportDTO report = requireReport(reportId);
 
         if (REVIEW_TARGET.equals(report.getTargetType())) {
@@ -157,34 +156,31 @@ public class ReportService {
             commentService.deleteCommentByAdmin(report.getCommentId());
         }
 
-        resolveReport(report, "DELETED");
+        resolveReport(report, "DELETED", currentUserId);
     }
 
-    public void requireAdmin() {
-        if (!adminRepository.existsByUserId(currentModerationUserId)) {
+    public void requireAdmin(String currentUserId) {
+        if (currentUserId == null || currentUserId.isBlank()
+                || !adminRepository.existsByUserId(currentUserId)) {
             throw new SecurityException("Admin access is required.");
         }
     }
 
-    public String getCurrentModerationUserId() {
-        return currentModerationUserId;
+    private void resolveReport(String reportId, String status, String currentUserId) {
+        requireAdmin(currentUserId);
+        resolveReport(requireReport(reportId), status, currentUserId);
     }
 
-    private void resolveReport(String reportId, String status) {
-        requireAdmin();
-        resolveReport(requireReport(reportId), status);
-    }
-
-    private void resolveReport(ReportDTO report, String status) {
+    private void resolveReport(ReportDTO report, String status, String currentUserId) {
         report.setStatus(status);
-        report.setResolvedBy(getCurrentModerationAdminId());
+        report.setResolvedBy(getCurrentModerationAdminId(currentUserId));
         report.setResolvedAt(LocalDateTime.now().toString());
         reportRepository.update(report);
     }
 
-    public String getCurrentModerationAdminId() {
-        String adminId = adminRepository.findAdminIdByUserId(currentModerationUserId);
-        return adminId == null || adminId.isBlank() ? currentModerationUserId : adminId;
+    public String getCurrentModerationAdminId(String currentUserId) {
+        String adminId = adminRepository.findAdminIdByUserId(currentUserId);
+        return adminId == null || adminId.isBlank() ? currentUserId : adminId;
     }
 
     private ReportDTO requireReport(String reportId) {

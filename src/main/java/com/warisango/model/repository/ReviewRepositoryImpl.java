@@ -339,8 +339,8 @@ public class ReviewRepositoryImpl implements ReviewRepository {
          * The reviews collection does not have
          * touristName.
          *
-         * We will connect this to Tourists/Users
-         * later.
+         * ReviewService resolves this Firebase user UID through the users
+         * collection before the review is rendered.
          */
         review.setTouristName(
                 getString(

@@ -27,6 +27,7 @@
     if(nr) nr.style.display = any ? 'none' : '';
     const resultCount = document.getElementById('resultCount');
     if (resultCount) resultCount.textContent = `${cards.filter(card => card.style.display !== 'none').length} heritage businesses found`;
+    if (clearBtn) clearBtn.style.display = q || st || ct ? 'block' : '';
   }
 
   function populateFilters(){
@@ -49,6 +50,21 @@
     fill(cityFilter, cities);
   }
 
+  function populateCitiesForState(){
+    if(!resultsContainer || !cityFilter) return;
+    const selectedCity = cityFilter.value;
+    const selectedState = sanitizeText(stateFilter?.value || '');
+    const cities = new Set();
+    Array.from(resultsContainer.querySelectorAll('.business-card')).forEach(card=>{
+      if((!selectedState || sanitizeText(card.dataset.state) === selectedState) && card.dataset.city){
+        cities.add(card.dataset.city);
+      }
+    });
+    while(cityFilter.options.length>1) cityFilter.remove(1);
+    Array.from(cities).sort().forEach(city=>cityFilter.add(new Option(city, city)));
+    if(Array.from(cityFilter.options).some(option=>option.value===selectedCity)) cityFilter.value=selectedCity;
+  }
+
   function ensureImageAccessibility(){
     document.querySelectorAll('img').forEach(img=>{
       if(!img.getAttribute('alt') || img.getAttribute('alt').trim()===''){
@@ -65,67 +81,72 @@
     });
   }
 
-  function initializeGallery(){
-    const featuredImage = document.querySelector('.gallery-featured');
-    const thumbnails = Array.from(document.querySelectorAll('.gallery-thumbnail-button'));
-    const previousButton = document.querySelector('.gallery-previous');
-    const nextButton = document.querySelector('.gallery-next');
+  function setupGallery(){
+    const stage = document.querySelector('.gallery-stage');
+    const featured = document.getElementById('galleryFeatured');
+    const thumbnails = Array.from(document.querySelectorAll('.gallery-thumbnail'));
+    if (!stage || !featured || thumbnails.length < 2) return;
 
-    if(!featuredImage || thumbnails.length === 0) return;
+    const photos = thumbnails.map(thumbnail => thumbnail.querySelector('img')?.src).filter(Boolean);
+    if (photos.length < 2) return;
 
-    let currentIndex = 0;
-
-    const showImage = (index) => {
-      currentIndex = (index + thumbnails.length) % thumbnails.length;
-      const thumbnailImage = thumbnails[currentIndex].querySelector('img');
-      if(!thumbnailImage) return;
-
-      featuredImage.src = thumbnailImage.src;
+    let selectedIndex = 0;
+    const showPhoto = (index) => {
+      selectedIndex = (index + photos.length) % photos.length;
+      featured.src = photos[selectedIndex];
+      const photoTitle = thumbnails[selectedIndex].querySelector('img')?.alt || 'Business photo';
+      featured.alt = photoTitle;
+      featured.title = photoTitle;
       thumbnails.forEach((thumbnail, thumbnailIndex) => {
-        thumbnail.classList.toggle('active', thumbnailIndex === currentIndex);
-        thumbnail.setAttribute('aria-current', thumbnailIndex === currentIndex ? 'true' : 'false');
+        const selected = thumbnailIndex === selectedIndex;
+        thumbnail.classList.toggle('is-active', selected);
+        thumbnail.setAttribute('aria-current', selected ? 'true' : 'false');
       });
     };
 
-    thumbnails.forEach((thumbnail, index) => {
-      thumbnail.addEventListener('click', () => showImage(index));
-    });
-    previousButton?.addEventListener('click', () => showImage(currentIndex - 1));
-    nextButton?.addEventListener('click', () => showImage(currentIndex + 1));
-    showImage(0);
-  }
+    document.querySelector('[data-gallery-previous]')?.addEventListener('click', () => showPhoto(selectedIndex - 1));
+    document.querySelector('[data-gallery-next]')?.addEventListener('click', () => showPhoto(selectedIndex + 1));
+    thumbnails.forEach((thumbnail, index) => thumbnail.addEventListener('click', () => showPhoto(index)));
 
-  async function markVisitedBusinesses(){
-    const cards = Array.from(document.querySelectorAll('.business-card[data-business-id]'));
-    if(cards.length === 0) return;
-    try {
-      const response = await fetch('/api/visits/business-ids');
-      if(!response.ok) throw new Error('Unable to load check-in history');
-      const visitedIds = new Set(await response.json());
-      cards.forEach(card => {
-        const visited = visitedIds.has(card.dataset.businessId);
-        card.classList.toggle('business-visited', visited);
-        const label = card.querySelector('.business-visited-label');
-        if(label) label.hidden = !visited;
-      });
-    } catch(error) {
-      console.warn('Unable to label checked-in businesses:', error);
-    }
+    // The left and right halves of the photo act as previous and next controls.
+    stage.addEventListener('click', (event) => {
+      if (event.target.closest('.gallery-nav')) return;
+      const bounds = stage.getBoundingClientRect();
+      showPhoto(event.clientX - bounds.left < bounds.width / 2 ? selectedIndex - 1 : selectedIndex + 1);
+    });
+    stage.addEventListener('keydown', (event) => {
+      if (event.key === 'ArrowLeft') {
+        event.preventDefault();
+        showPhoto(selectedIndex - 1);
+      }
+      if (event.key === 'ArrowRight') {
+        event.preventDefault();
+        showPhoto(selectedIndex + 1);
+      }
+    });
+
+    showPhoto(0);
   }
 
   // Event wiring
   if(searchInput) searchInput.addEventListener('input', applyFilters);
   if(searchButton) searchButton.addEventListener('click', applyFilters);
-  if(clearBtn) clearBtn.addEventListener('click', ()=>{ if(searchInput) searchInput.value=''; if(stateFilter) stateFilter.value=''; if(cityFilter) cityFilter.value=''; applyFilters(); });
-  [stateFilter, cityFilter].forEach(el=>{ if(el) el.addEventListener('change', applyFilters); });
+  if(clearBtn) clearBtn.addEventListener('click', ()=>{
+    if(searchInput) searchInput.value='';
+    if(stateFilter) stateFilter.value='';
+    populateCitiesForState();
+    if(cityFilter) cityFilter.value='';
+    applyFilters();
+  });
+  if(stateFilter) stateFilter.addEventListener('change', ()=>{ populateCitiesForState(); applyFilters(); });
+  if(cityFilter) cityFilter.addEventListener('change', applyFilters);
 
   // initialize on DOM ready
   document.addEventListener('DOMContentLoaded', ()=>{
     populateFilters();
     ensureImageAccessibility();
-    initializeGallery();
-    markVisitedBusinesses();
     applyFilters();
+    setupGallery();
   });
 
 })();

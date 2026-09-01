@@ -30,7 +30,6 @@ com\warisango\model\repository\UserRepositoryImpl.class
 com\warisango\model\service\AIRecordService.class
 com\warisango\controller\AudioTestController.class
 com\warisango\model\repository\CommentRepository.class
-com\warisango\model\service\ReviewService.class
 com\warisango\model\repository\AdminRepository.class
 com\warisango\model\service\ChallengeService.class
 com\warisango\dto\AIExtractionResult.class

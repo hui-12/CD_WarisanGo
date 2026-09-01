@@ -13,6 +13,7 @@ C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\controller\Aud
 C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\controller\AuthController.java
 C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\controller\BadgeController.java
 C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\controller\BusinessDirectoryController.java
+C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\controller\BusinessReportController.java
 C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\controller\ChallengeApiController.java
 C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\controller\CheckInController.java
 C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\controller\CurrentUserModelAdvice.java
@@ -26,6 +27,7 @@ C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\controller\Pro
 C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\controller\ReportController.java
 C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\controller\ReviewController.java
 C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\controller\RewardController.java
+C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\controller\SavedListingController.java
 C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\controller\SessionService.java
 C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\controller\SpeechToTextController.java
 C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\controller\TestPageController.java
@@ -36,6 +38,7 @@ C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\dto\AIExtracti
 C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\dto\AudioExtractionRequest.java
 C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\dto\BadgeDTO.java
 C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\dto\BadgeSummaryDTO.java
+C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\dto\BusinessCorrectionRequest.java
 C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\dto\CheckInRequest.java
 C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\dto\CheckInResponse.java
 C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\dto\CommentDTO.java
@@ -59,13 +62,16 @@ C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\dto\VideoDTO.j
 C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\dto\VideoProcessingRequest.java
 C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\dto\VisitDTO.java
 C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\exception\AIProcessingException.java
+C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\exception\BusinessReportException.java
 C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\exception\FirebasePersistenceException.java
 C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\exception\GlobalExceptionHandler.java
 C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\exception\ProfileUpdateException.java
 C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\exception\ProhibitedContentException.java
 C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\exception\RoleAccessDeniedException.java
+C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\exception\SavedListingException.java
 C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\model\AIRecord.java
 C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\model\Business.java
+C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\model\BusinessReport.java
 C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\model\CheckIn.java
 C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\model\ExtractedBusiness.java
 C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\model\PointsHistory.java
@@ -73,6 +79,7 @@ C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\model\reposito
 C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\model\repository\AdminRepositoryImpl.java
 C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\model\repository\AIRecordRepository.java
 C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\model\repository\BadgeRepository.java
+C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\model\repository\BusinessReportRepository.java
 C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\model\repository\BusinessRepository.java
 C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\model\repository\ChallengeRepository.java
 C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\model\repository\CheckInRepository.java
@@ -92,16 +99,19 @@ C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\model\reposito
 C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\model\repository\ReviewPhotoRepositoryImpl.java
 C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\model\repository\ReviewRepository.java
 C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\model\repository\ReviewRepositoryImpl.java
+C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\model\repository\SavedListingRepository.java
 C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\model\repository\SessionCache.java
 C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\model\repository\UserRepository.java
 C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\model\repository\UserRepositoryImpl.java
 C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\model\repository\VisitHistoryRepository.java
+C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\model\SavedListing.java
 C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\model\service\AIExtractionService.java
 C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\model\service\AIRecordService.java
 C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\model\service\AIWorkflowService.java
 C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\model\service\AuditLogService.java
 C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\model\service\AuthService.java
 C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\model\service\BadgeService.java
+C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\model\service\BusinessReportService.java
 C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\model\service\BusinessService.java
 C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\model\service\ChallengeService.java
 C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\model\service\CheckInService.java
@@ -119,6 +129,7 @@ C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\model\service\
 C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\model\service\ReviewPhotoService.java
 C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\model\service\ReviewPhotoStorageService.java
 C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\model\service\ReviewService.java
+C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\model\service\SavedListingService.java
 C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\model\service\SpeechToTextService.java
 C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\model\service\TierService.java
 C:\Users\cpie3\Documents\CD_WarisanGo\src\main\java\com\warisango\model\service\TranscriptionService.java

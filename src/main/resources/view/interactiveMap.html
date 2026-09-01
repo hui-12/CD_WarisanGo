@@ -39,6 +39,10 @@
         <option value="All">All States</option>
       </select>
 
+      <select id="city-select" class="map-select">
+        <option value="All">All Cities</option>
+      </select>
+
       <select id="radius-select" class="map-select">
         <option value="0">Any Distance</option>
         <option value="1">Within 1 km</option>
@@ -50,6 +54,8 @@
         <option value="250">Within 250 km</option>
         <option value="500">Within 500 km</option>
       </select>
+
+      <button id="map-clear-filters" class="map-clear-filter" type="button">Clear filters</button>
     </div>
 
     <!-- Map Grid Layout -->
@@ -77,7 +83,7 @@
   </main>
 
   <!-- Include Footer & Global Scripts Fragment -->
-  <div th:replace="~{fragments/footer :: global('map')}"></div>
+  <div th:replace="~{fragments/footer :: global}"></div>
   
   <!-- Leaflet JS (Required before interactive-map.js) -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>

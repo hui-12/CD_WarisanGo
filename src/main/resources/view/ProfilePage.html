@@ -32,6 +32,6 @@
     </div>
 </main>
 <dialog id="avatarUploadModal" class="avatar-upload-modal" aria-labelledby="avatarUploadTitle"><div class="avatar-modal-header"><h2 id="avatarUploadTitle">Update Profile Picture</h2><button id="closeAvatarModal" type="button" aria-label="Close">&times;</button></div><div id="avatarDropzone" class="avatar-dropzone" role="button" tabindex="0"><strong>Drag &amp; drop your photo here, or click to browse</strong><span>Supports .jpg, .png, .webp (max 5 MB)</span></div><input type="file" id="avatarFileInput" accept=".jpg,.jpeg,.png,.webp" hidden><p id="avatarUploadStatus" class="avatar-upload-status" role="status" aria-live="polite"></p></dialog>
-<div th:replace="~{fragments/footer :: global('profile')}"></div>
+<div th:replace="~{fragments/footer :: global}"></div>
 </body>
 </html>

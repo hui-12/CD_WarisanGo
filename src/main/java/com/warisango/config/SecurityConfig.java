@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
@@ -36,12 +37,32 @@ public class SecurityConfig {
                     "/",
                     "/login",
                     "/heritage-gate",
+                    "/directory",
+                    "/business-directory",
+                    "/business/**",
+                    "/map",
+                    "/interactive-map/**",
+                    "/sse/businesses",
+                    "/challenges",
+                    "/api/approved",
+                    "/api/stream",
                     "/api/auth/login",
                     "/api/auth/admin-login",
                     "/css/**",
                     "/js/**",
                     "/images/**"
                 ).permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/challenges").permitAll()
+                .requestMatchers(
+                    "/profile/**",
+                    "/api/checkin",
+                    "/api/checkin/**",
+                    "/api/save/**",
+                    "/api/saved-listings/**",
+                    "/api/challenges/join/**",
+                    "/api/challenges/*/join",
+                    "/api/challenges/*/claim"
+                ).authenticated()
                 .requestMatchers(
                     "/ai-discovery",
                     "/st-discovery",

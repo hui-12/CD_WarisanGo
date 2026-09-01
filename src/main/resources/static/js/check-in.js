@@ -108,6 +108,7 @@
     const initializeDetailButton = () => {
         const button = document.querySelector('[data-check-in-business]');
         if (!button) return;
+        if (document.getElementById('guest-gate-modal')) return;
         const statusElement = document.getElementById('check-in-status');
         button.addEventListener('click', () => checkIn({
             businessId: button.dataset.businessId

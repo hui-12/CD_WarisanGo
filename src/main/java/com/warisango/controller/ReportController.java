@@ -4,6 +4,7 @@ import com.warisango.dto.ReportDTO;
 import com.warisango.model.service.ContentModerationService;
 import com.warisango.model.service.ReportService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -38,10 +39,17 @@ public class ReportController {
             @RequestParam String targetType,
             @RequestParam(required = false) String reviewId,
             @RequestParam(required = false) String commentId,
-            @RequestParam String reason) {
+            @RequestParam String reason,
+            Authentication authentication) {
 
         try {
-            reportService.createReport(targetType, reviewId, commentId, reason);
+            reportService.createReport(
+                    targetType,
+                    reviewId,
+                    commentId,
+                    reason,
+                    authentication.getName()
+            );
             return ResponseEntity.ok(Map.of("message", "Thank you. Your report has been submitted."));
         } catch (IllegalArgumentException e) {
             String message = e.getMessage() == null
@@ -62,11 +70,14 @@ public class ReportController {
     }
 
     @GetMapping("/admin/reports")
-    public String moderationPage(Model model) {
+    public String moderationPage(Model model, Authentication authentication) {
         try {
-            reportService.requireAdmin();
+            reportService.requireAdmin(authentication.getName());
             model.addAttribute("reports", reportService.getAllReports());
-            model.addAttribute("currentAdminId", reportService.getCurrentModerationAdminId());
+            model.addAttribute(
+                    "currentAdminId",
+                    reportService.getCurrentModerationAdminId(authentication.getName())
+            );
             return "admin/ReportModerationPage";
         } catch (SecurityException e) {
             return "redirect:/";
@@ -76,29 +87,45 @@ public class ReportController {
     @PostMapping("/admin/reports/{reportId}/dismiss")
     public String dismissReport(
             @PathVariable String reportId,
-            RedirectAttributes redirectAttributes) {
-        return resolveAction(() -> reportService.dismissReport(reportId), redirectAttributes);
+            RedirectAttributes redirectAttributes,
+            Authentication authentication) {
+        return resolveAction(
+                () -> reportService.dismissReport(reportId, authentication.getName()),
+                redirectAttributes
+        );
     }
 
     @PostMapping("/admin/reports/{reportId}/hide")
     public String hideReport(
             @PathVariable String reportId,
-            RedirectAttributes redirectAttributes) {
-        return resolveAction(() -> reportService.hideReport(reportId), redirectAttributes);
+            RedirectAttributes redirectAttributes,
+            Authentication authentication) {
+        return resolveAction(
+                () -> reportService.hideReport(reportId, authentication.getName()),
+                redirectAttributes
+        );
     }
 
     @PostMapping("/admin/reports/{reportId}/restore")
     public String restoreReport(
             @PathVariable String reportId,
-            RedirectAttributes redirectAttributes) {
-        return resolveAction(() -> reportService.restoreReportTarget(reportId), redirectAttributes);
+            RedirectAttributes redirectAttributes,
+            Authentication authentication) {
+        return resolveAction(
+                () -> reportService.restoreReportTarget(reportId, authentication.getName()),
+                redirectAttributes
+        );
     }
 
     @PostMapping("/admin/reports/{reportId}/delete")
     public String deleteReportTarget(
             @PathVariable String reportId,
-            RedirectAttributes redirectAttributes) {
-        return resolveAction(() -> reportService.deleteReportTarget(reportId), redirectAttributes);
+            RedirectAttributes redirectAttributes,
+            Authentication authentication) {
+        return resolveAction(
+                () -> reportService.deleteReportTarget(reportId, authentication.getName()),
+                redirectAttributes
+        );
     }
 
     private String resolveAction(Runnable action, RedirectAttributes redirectAttributes) {

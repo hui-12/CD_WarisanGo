@@ -14,7 +14,7 @@ public interface ReportRepository {
     ReportDTO findByReportId(String reportId);
 
     boolean existsByReporterAndTarget(
-            String reporterTouristId,
+            String reporterUserId,
             String targetType,
             String targetId
     );

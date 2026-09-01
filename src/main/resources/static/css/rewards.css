@@ -1,3 +1,6 @@
+/* ============================================
+   Rewards: page shell and summary components
+   ============================================ */
 .rewards-page {
     min-height: calc(100vh - 56px);
 }

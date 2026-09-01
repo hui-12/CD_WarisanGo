@@ -115,6 +115,10 @@ main {
     flex-shrink: 0;
 }
 
+.guest-nav-actions { display: flex; align-items: center; gap: 10px; }
+.nav-login-link, .nav-signup-link { padding: 7px 11px; color: #faf9f5; font: 600 12px 'Inter', Arial, sans-serif; text-decoration: none; border-radius: 6px; }
+.nav-login-link:hover { color: #c9a84c; }.nav-signup-link { background: #c9a84c; color: #141413; }
+
 .btn-role-switch {
     font-size: 12px;
     padding: 5px 10px;
@@ -222,6 +226,12 @@ main {
     text-align: center;
     font-size: .85rem;
 }
+
+/* Guest feature gate */
+.guest-gate-modal { width: min(440px, calc(100% - 32px)); border: 0; border-radius: 14px; padding: 28px; color: #141413; box-shadow: 0 20px 60px rgba(0,0,0,.35); }
+.guest-gate-modal::backdrop { background: rgba(20,20,19,.68); }.guest-gate-close { position: absolute; top: 10px; right: 14px; border: 0; background: none; font-size: 26px; cursor: pointer; }
+.guest-gate-kicker { margin: 0 0 8px; color: #8f6e20; font-size: 10px; font-weight: 700; letter-spacing: .12em; }.guest-gate-modal h2 { margin: 0; font: 700 26px/1.15 'Fraunces', Georgia, serif; }.guest-gate-modal > p:not(.guest-gate-kicker) { color: #625e58; line-height: 1.6; }
+.guest-gate-actions { display: flex; gap: 10px; margin-top: 22px; }.guest-gate-actions a { padding: 10px 14px; border: 1px solid #141413; border-radius: 7px; color: #141413; font: 600 13px 'Inter', Arial, sans-serif; text-decoration: none; }.guest-gate-actions .guest-gate-primary { background: #141413; color: #fff; }
 
 /* --- Admin empty state --- */
 .admin-empty-state {

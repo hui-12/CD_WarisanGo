@@ -48,6 +48,25 @@ public class ChallengeService {
         return result;
     }
 
+    /**
+     * Returns active challenge information without creating or reading visitor participation.
+     */
+    public List<Map<String, Object>> getGuestChallenges() throws Exception {
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (Map<String, Object> challenge : challengeRepository.findAllChallenges()) {
+            if (!"ACTIVE".equalsIgnoreCase(textValue(challenge.getOrDefault("status", "ACTIVE")))) {
+                continue;
+            }
+            Map<String, Object> guestChallenge = new HashMap<>(challenge);
+            guestChallenge.put("progress", 0);
+            guestChallenge.put("joined", false);
+            guestChallenge.put("done", false);
+            guestChallenge.put("eligibleToClaim", false);
+            result.add(guestChallenge);
+        }
+        return result;
+    }
+
     public void join(String touristId, String challengeId) throws Exception {
         Map<String, Object> challenge = requireChallenge(challengeId);
         Map<String, Object> existing = challengeRepository.findParticipation(touristId, challengeId);

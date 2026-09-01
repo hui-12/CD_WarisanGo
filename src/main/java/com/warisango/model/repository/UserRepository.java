@@ -20,7 +20,7 @@ public interface UserRepository {
 
     void updateProfile(String uid, String name, String gender, String aboutMe);
 
-    String findDisplayNameByTouristId(String touristId);
+    String findDisplayNameByUserId(String userId);
 
     DocumentSnapshot getUser(String userId) throws ExecutionException, InterruptedException;
 

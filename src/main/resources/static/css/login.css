@@ -466,7 +466,8 @@ html, body {
 }
 
 /* login as guest */
-.login-guest-link {
+.login-guest-link,
+.guest-link {
   display: block;
   margin-top: 14px;
   color: #8a8578;
@@ -477,12 +478,14 @@ html, body {
   transition: color .15s ease;
 }
 
-.login-guest-link:hover {
+.login-guest-link:hover,
+.guest-link:hover {
   color: #45433f;
   text-decoration: underline;
 }
 
-.login-guest-link:focus-visible {
+.login-guest-link:focus-visible,
+.guest-link:focus-visible {
   outline: 2px solid #d9a046;
   outline-offset: 3px;
   border-radius: 2px;

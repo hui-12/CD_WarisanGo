@@ -111,6 +111,76 @@ export interface AuditEntry {
   recordId: string
 }
 
+export const REPORT_REASONS = [
+  'Permanently Closed',
+  'Incorrect Location',
+  'Incorrect Business Hours',
+  'Wrong Business Name',
+  'Outdated Information',
+  'Other',
+] as const
+
+export type ReportReason = typeof REPORT_REASONS[number]
+export type ReportStatus = 'pending' | 'resolved' | 'dismissed'
+
+export interface BusinessReport {
+  id: string
+  businessId: string
+  businessName: string
+  touristId: string
+  touristName: string
+  touristAvatar: string
+  reason: ReportReason
+  details: string
+  submittedAt: string
+  status: ReportStatus
+  resolvedBy?: string
+  resolvedAt?: string
+  resolutionNote?: string
+}
+
+export const INITIAL_REPORTS: BusinessReport[] = [
+  {
+    id: 'rpt1',
+    businessId: 'b2',
+    businessName: 'Restoran Yut Kee',
+    touristId: 'u3',
+    touristName: 'Nurul Izzah',
+    touristAvatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=80&h=80&fit=crop&auto=format',
+    reason: 'Incorrect Business Hours',
+    details: 'The listed hours say Mon–Sat 7:30 AM – 4:30 PM but when I visited on a Tuesday at 3:30 PM the shop was already closed. Please update to reflect the actual closing time.',
+    submittedAt: '2026-08-15T10:22:00',
+    status: 'pending',
+  },
+  {
+    id: 'rpt2',
+    businessId: 'b4',
+    businessName: 'Warung Pak Ali Nasi Kandar',
+    touristId: 'u2',
+    touristName: "James O'Brien",
+    touristAvatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&auto=format',
+    reason: 'Incorrect Location',
+    details: 'The pin on the map is about 200 metres off. The actual stall entrance is on the alley behind Jalan Penang, not on the main road. This caused me to walk around for 20 minutes.',
+    submittedAt: '2026-08-12T14:05:00',
+    status: 'pending',
+  },
+  {
+    id: 'rpt3',
+    businessId: 'b5',
+    businessName: 'Kim Lian Kee Restaurant',
+    touristId: 'u4',
+    touristName: 'David Koh',
+    touristAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&auto=format',
+    reason: 'Permanently Closed',
+    details: 'I visited on 10 August 2026 and the shophouse was shuttered with a notice saying they have ceased operations. The listed phone number is also no longer in service.',
+    submittedAt: '2026-08-10T18:40:00',
+    status: 'resolved',
+    resolvedBy: 'Ahmad Fadzillah',
+    resolvedAt: '2026-08-11T09:00:00',
+    resolutionNote: 'Confirmed with local heritage board. Listing marked as inactive pending verification of permanent closure.',
+  },
+]
+
 export const CURRENT_USER: User = {
   id: 'u1',
   name: 'Priya Krishnamurthy',

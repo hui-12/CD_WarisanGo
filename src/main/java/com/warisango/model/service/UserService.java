@@ -19,8 +19,8 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public String getDisplayNameByTouristId(String touristId) {
-        return userRepository.findDisplayNameByTouristId(touristId);
+    public String getDisplayNameByUserId(String userId) {
+        return userRepository.findDisplayNameByUserId(userId);
     }
 
     public Optional<User> getUserByUid(String uid) {
