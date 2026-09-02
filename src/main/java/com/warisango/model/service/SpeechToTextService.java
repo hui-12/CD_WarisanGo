@@ -66,7 +66,7 @@ public class SpeechToTextService {
             @Value("${assemblyai.api.key}") String apiKey,
             ObjectMapper objectMapper) {
 
-        this.apiKey = apiKey;
+        this.apiKey = apiKey == null ? "" : apiKey.trim();
         this.objectMapper = objectMapper;
 
         this.httpClient =
@@ -82,6 +82,12 @@ public class SpeechToTextService {
      * @return completed transcript
      */
     public String transcribe(Path audioFile) {
+
+        if (apiKey.isBlank()) {
+            throw new AIProcessingException(
+                    "AssemblyAI API key is missing. Set the ASSEMBLYAI_API_KEY environment variable and restart the app."
+            );
+        }
 
         validateAudioFile(audioFile);
 
@@ -208,10 +214,11 @@ public class SpeechToTextService {
                         response.body()
                 );
 
-                throw new AIProcessingException(
-                        "AssemblyAI audio upload failed. HTTP status: "
-                                + response.statusCode()
-                );
+                String message = response.statusCode() == 401
+                        ? "AssemblyAI rejected the API key (HTTP 401). Check ASSEMBLYAI_API_KEY and restart the app."
+                        : "AssemblyAI audio upload failed. HTTP status: " + response.statusCode();
+
+                throw new AIProcessingException(message);
             }
 
             JsonNode responseJson =

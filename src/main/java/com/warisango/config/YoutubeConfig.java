@@ -6,11 +6,16 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class YoutubeConfig {
 
-    @Value("${youtube.api.key}")
-    private String apiKey;
+    private final String apiKey;
 
-    @Value("${youtube.base.url}")
-    private String baseUrl;
+    private final String baseUrl;
+
+    public YoutubeConfig(
+            @Value("${youtube.api.key}") String apiKey,
+            @Value("${youtube.base.url}") String baseUrl) {
+        this.apiKey = apiKey == null ? "" : apiKey.trim();
+        this.baseUrl = baseUrl;
+    }
 
     public String getApiKey() {
         return apiKey;

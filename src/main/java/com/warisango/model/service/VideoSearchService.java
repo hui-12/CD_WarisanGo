@@ -7,6 +7,7 @@ import com.warisango.dto.VideoDTO;
 import com.warisango.exception.AIProcessingException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.ArrayList;
@@ -27,6 +28,12 @@ public class VideoSearchService {
 
     public List<VideoDTO> searchVideos(String keyword) {
 
+        if (youtubeConfig.getApiKey().isBlank()) {
+            throw new AIProcessingException(
+                    "YouTube API key is missing. Set the YOUTUBE_API_KEY environment variable and restart the app."
+            );
+        }
+
         try {
 
             String url = UriComponentsBuilder
@@ -46,9 +53,17 @@ public class VideoSearchService {
                     .body(String.class);
 
             return parseVideos(response);
+        } catch (RestClientResponseException exception) {
+            throw new AIProcessingException(
+                    "YouTube API request failed (HTTP " + exception.getStatusCode().value()
+                            + "): " + exception.getResponseBodyAsString(),
+                    exception
+            );
+        } catch (AIProcessingException exception) {
+            throw exception;
         } catch (Exception exception) {
             throw new AIProcessingException(
-                    "Unable to search YouTube videos.",
+                    "Unable to search YouTube videos: " + exception.getMessage(),
                     exception
             );
         }
