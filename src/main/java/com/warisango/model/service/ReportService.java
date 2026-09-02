@@ -33,16 +33,19 @@ public class ReportService {
     private final AdminRepository adminRepository;
     private final ReviewService reviewService;
     private final CommentService commentService;
+    private final UserService userService;
 
     public ReportService(
             ReportRepository reportRepository,
             AdminRepository adminRepository,
             ReviewService reviewService,
-            CommentService commentService) {
+            CommentService commentService,
+            UserService userService) {
         this.reportRepository = reportRepository;
         this.adminRepository = adminRepository;
         this.reviewService = reviewService;
         this.commentService = commentService;
+        this.userService = userService;
     }
 
     public ReportDTO createReport(
@@ -89,7 +92,7 @@ public class ReportService {
 
     public List<ReportDTO> getAllReports() {
         List<ReportDTO> reports = reportRepository.findAll();
-        reports.forEach(this::enrichTarget);
+        reports.forEach(this::enrichReport);
 
         return reports.stream()
                 .sorted(Comparator
@@ -103,7 +106,7 @@ public class ReportService {
     public ReportDTO getReport(String reportId) {
         ReportDTO report = reportRepository.findByReportId(reportId);
         if (report != null) {
-            enrichTarget(report);
+            enrichReport(report);
         }
         return report;
     }
@@ -229,6 +232,11 @@ public class ReportService {
         }
 
         return normalized;
+    }
+
+    private void enrichReport(ReportDTO report) {
+        report.setReporterName(userService.getDisplayNameByUserId(report.getReporterTouristId()));
+        enrichTarget(report);
     }
 
     private void enrichTarget(ReportDTO report) {

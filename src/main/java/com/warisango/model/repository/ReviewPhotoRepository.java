@@ -6,6 +6,8 @@ import java.util.List;
 
 public interface ReviewPhotoRepository {
 
+    List<ReviewPhotoDTO> findAll();
+
     List<ReviewPhotoDTO> findByReviewId(String reviewId);
 
     void save(ReviewPhotoDTO photo);

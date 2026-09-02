@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="/css/bundle.css" th:href="@{/css/bundle.css}">
   <link rel="stylesheet" href="/css/assignment.css" th:href="@{/css/assignment.css}">
   <link rel="stylesheet" href="/css/business-heritage.css" th:href="@{/css/business-heritage.css}">
+  <link rel="stylesheet" href="/css/review.css" th:href="@{/css/review.css}">
 </head>
 <body>
   <div th:replace="~{fragments/fragments :: navbar('directory')}"></div>
@@ -142,6 +143,72 @@
       </div>
 
       <aside class="detail-sidebar" aria-label="Business details">
+        <section class="review-highlight-card" th:if="${featuredReview != null}">
+          <div class="review-highlight-heading">
+            <div>
+              <p class="review-highlight-kicker"
+                 th:text="${totalReviews + (totalReviews == 1 ? ' community review' : ' community reviews')}">
+                Community pick
+              </p>
+              <h2>Community Pick</h2>
+            </div>
+            <span class="review-highlight-rating" th:switch="${featuredReview.rating}">
+              <span th:case="5">🤩 5/5</span>
+              <span th:case="4">🙂 4/5</span>
+              <span th:case="3">😐 3/5</span>
+              <span th:case="2">😕 2/5</span>
+              <span th:case="1">😞 1/5</span>
+              <span th:case="*">😐 0/5</span>
+            </span>
+          </div>
+
+          <a class="review-highlight-content"
+             th:href="@{/reviews/detail/{id}(id=${featuredReview.reviewId})}"
+             aria-label="Read community pick review">
+            <div class="review-highlight-author">
+              <span class="review-highlight-avatar"
+                    th:text="${featuredReview.touristName != null and !featuredReview.touristName.isEmpty()
+                    ? #strings.substring(featuredReview.touristName, 0, 1).toUpperCase()
+                    : 'U'}">
+                U
+              </span>
+              <strong th:text="${featuredReview.touristName != null and !featuredReview.touristName.isEmpty()
+                              ? featuredReview.touristName : 'Visitor'}">
+                Visitor
+              </strong>
+            </div>
+
+            <div class="review-highlight-stars" aria-label="Review rating">
+              <span th:each="star : ${#numbers.sequence(1, 5)}"
+                    th:classappend="${star <= featuredReview.rating} ? ' filled' : ''">
+                ★
+              </span>
+            </div>
+
+            <p class="review-highlight-text" th:text="${featuredReview.reviewText}">
+              Read what visitors think about this heritage business.
+            </p>
+          </a>
+
+          <a class="review-highlight-link"
+             th:href="@{/reviews/{id}(id=${business.businessId})}">
+            See all reviews →
+          </a>
+        </section>
+
+        <section class="review-highlight-card review-highlight-empty" th:if="${featuredReview == null}">
+          <p class="review-highlight-kicker" th:text="${totalReviews + ' community reviews'}">Community reviews</p>
+          <h2>Be the first to share</h2>
+          <p th:text="${totalReviews == 0
+                       ? 'No reviews have been posted for this business yet.'
+                       : totalReviews + ' reviews have been posted for this business.'}">
+            No reviews have been posted for this business yet.
+          </p>
+          <a class="review-btn-primary" th:href="@{/reviews/create/{id}(id=${business.businessId})}">
+            Write a Review
+          </a>
+        </section>
+
         <section class="sidebar-card">
           <h2>Heritage Details</h2>
           <dl class="sidebar-list">

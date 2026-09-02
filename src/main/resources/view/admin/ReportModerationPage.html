@@ -5,7 +5,7 @@
 
 <body>
 
-<header th:replace="~{fragments/fragments :: navbar('reports')}"></header>
+<header th:replace="~{fragments/fragments :: navbar('review-reports')}"></header>
 <link rel="stylesheet" th:href="@{/css/review.css}">
 
 <main class="review-admin-page">
@@ -100,7 +100,8 @@
                     th:attr="data-report-type=${report.targetType},data-report-status=${report.status},data-report-created=${report.createdAt}">
                     <td class="review-admin-table-user">
                         <strong data-report-search-field
-                                th:text="${report.reporterTouristId}">Unknown user</strong>
+                                th:text="${report.reporterName != null and !#strings.isEmpty(report.reporterName)
+                                ? report.reporterName : 'Unknown user'}">Unknown user</strong>
                         <span>Reported user</span>
                     </td>
 

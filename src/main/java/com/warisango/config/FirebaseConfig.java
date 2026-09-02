@@ -7,6 +7,7 @@ import com.google.firebase.FirebaseOptions;
 import com.google.firebase.cloud.FirestoreClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,14 +28,19 @@ public class FirebaseConfig {
             LoggerFactory.getLogger(FirebaseConfig.class);
 
     @Bean(destroyMethod = "delete")
-    public FirebaseApp firebaseApp() {
-        try (InputStream serviceAccount = new ClassPathResource(
-                "firebase-service-account.json"
-        ).getInputStream()) {
+    public FirebaseApp firebaseApp(
+            @Value("${warisango.firebase.storage-bucket:warisango.firebasestorage.app}")
+            String storageBucket) {
+        try (
+                InputStream serviceAccount = new ClassPathResource(
+                        "firebase-service-account.json"
+                ).getInputStream()
+        ) {
             FirebaseOptions options = FirebaseOptions.builder()
-                    .setCredentials(GoogleCredentials.fromStream(serviceAccount))
-                    .setProjectId("warisango")
-                    .build();
+                .setCredentials(GoogleCredentials.fromStream(serviceAccount))
+                .setProjectId("warisango")
+                .setStorageBucket(storageBucket)
+                .build();
 
             if (!FirebaseApp.getApps().isEmpty()) {
                 return FirebaseApp.getInstance();

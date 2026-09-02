@@ -222,6 +222,14 @@
     .output-card .card-body, .results-panel-content { padding: 18px; }
     .results-panel-header { align-items: flex-start; }
     .toggle-label { display: none; }
-    .video-thumbnail { height: 210px; }
+    .video-thumbnail { height: 200px; }
     .workflow, .pipeline-guide-grid { grid-template-columns: 1fr; }
+
+    .page-header h1 {
+        font-size: 28px;
+    }
+
+    .workflow-step {
+        align-items: flex-start;
+    }
 }
