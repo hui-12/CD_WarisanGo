@@ -1,5 +1,6 @@
 /* --- Interactive Map Page Layout --- */
 .main-layout {
+    min-width: 1024px;
     max-width: 1280px;
     margin: 0 auto;
     padding: 20px 32px;

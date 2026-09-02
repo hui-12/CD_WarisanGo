@@ -1,3 +1,6 @@
+/* ============================================
+   Transcription Test: base page and cards
+   ============================================ */
 body {
     background-color: #f8f9fa;
 }
@@ -23,6 +26,7 @@ body {
     margin-bottom: 20px;
 }
 
+/* Audio and transcript fields */
 #audioUrl,
 #transcript {
     font-family: monospace;

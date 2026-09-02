@@ -72,3 +72,29 @@ const handleLogin = async (event) => {
 loginButtons.forEach((button) => {
     button.addEventListener('click', handleLogin);
 });
+
+document.querySelectorAll('.letter-tile').forEach((tile) => {
+    const showTooltip = () => {
+        document.querySelectorAll('.letter-tile.is-active').forEach((item) => {
+            item.classList.remove('is-active');
+            item.querySelector('.food-tooltip')?.remove();
+        });
+        tile.classList.add('is-active');
+        if (!tile.querySelector('.food-tooltip')) {
+            const tooltip = document.createElement('span');
+            tooltip.className = 'food-tooltip';
+            tooltip.textContent = tile.dataset.food;
+            tile.appendChild(tooltip);
+        }
+    };
+    const hideTooltip = () => {
+        tile.classList.remove('is-active');
+        tile.querySelector('.food-tooltip')?.remove();
+    };
+    tile.addEventListener('mouseenter', showTooltip);
+    tile.addEventListener('mouseleave', hideTooltip);
+    tile.addEventListener('focus', showTooltip);
+    tile.addEventListener('blur', hideTooltip);
+    tile.addEventListener('click', showTooltip);
+    tile.addEventListener('touchstart', showTooltip, { passive: true });
+});

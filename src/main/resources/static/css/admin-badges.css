@@ -1,1 +1,41 @@
-.admin-badge-page{max-width:1120px;margin:auto;padding:38px 28px 64px}.admin-badge-header{display:flex;align-items:flex-start;justify-content:space-between;gap:24px;margin-bottom:28px}.admin-badge-header h1{margin:5px 0 7px;font:700 34px Fraunces,Georgia,serif}.admin-badge-header p{margin:0;color:#6b6b68;font-size:13px}.admin-badge-kicker{color:#8f6e20!important;font-size:11px!important;font-weight:700;letter-spacing:.13em;text-transform:uppercase}.primary-button,.secondary-button,.icon-button{border-radius:8px;cursor:pointer;font:600 13px Inter,sans-serif}.primary-button{padding:10px 16px;border:1px solid #c9a84c;background:#c9a84c;color:#141413}.secondary-button{padding:10px 16px;border:1px solid #d8d4ca;background:#fff;color:#141413}.icon-button{border:0;background:transparent;font-size:24px}.badge-admin-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}.admin-badge-card{padding:20px;border:1px solid #e8e6e0;border-radius:12px;background:#fff}.admin-badge-card h2{margin:10px 0 5px;font:700 19px Fraunces,Georgia,serif}.admin-badge-card p{min-height:42px;margin:0 0 12px;color:#6b6b68;font-size:12px;line-height:1.5}.admin-badge-emoji{font-size:34px}.admin-badge-rule{display:block;padding:8px;border-radius:7px;background:#faf7ee;color:#72583b;font-size:11px}.admin-badge-actions{display:flex;gap:8px;margin-top:16px}.admin-badge-actions button{flex:1;padding:7px;border-radius:7px;cursor:pointer}.edit-badge{border:1px solid #ddd7c8;background:#fff}.delete-badge{border:1px solid #9c3f35;background:#9c3f35;color:#fff}.badge-empty{grid-column:1/-1;padding:42px;border:1px dashed #b9b0a4;border-radius:12px;color:#6b6b68;text-align:center}.badge-message{padding:12px 16px;border-radius:8px;background:#e7f4ec;color:#24613f}.badge-message.error{background:#fae9e6;color:#8c3028}.badge-dialog{width:min(620px,calc(100% - 32px));padding:0;border:1px solid #ded9cd;border-radius:14px}.badge-dialog::backdrop{background:rgba(20,20,19,.55)}.badge-dialog form{padding:26px}.dialog-heading{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}.dialog-heading h2{margin:0;font:700 24px Fraunces,Georgia,serif}.badge-dialog label{display:grid;gap:6px;margin-bottom:16px;color:#454541;font-size:12px;font-weight:600}.badge-dialog input,.badge-dialog textarea,.badge-dialog select{width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid #d8d4ca;border-radius:8px;background:#faf9f5;color:#141413;font:13px Inter,sans-serif}.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}.dialog-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:22px}@media(max-width:620px){.admin-badge-page{padding:28px 16px}.admin-badge-header{flex-direction:column}.form-row{grid-template-columns:1fr}}
+/* ============================================
+   Admin Badges: page header and controls
+   ============================================ */
+.admin-badge-page { max-width: 1120px; margin: auto; padding: 38px 28px 64px; }
+.admin-badge-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; margin-bottom: 28px; }
+.admin-badge-header h1 { margin: 5px 0 7px; font: 700 34px Fraunces, Georgia, serif; }
+.admin-badge-header p { margin: 0; color: #6b6b68; font-size: 13px; }
+.admin-badge-kicker { color: #8f6e20 !important; font-size: 11px !important; font-weight: 700; letter-spacing: .13em; text-transform: uppercase; }
+.primary-button, .secondary-button, .icon-button { border-radius: 8px; cursor: pointer; font: 600 13px Inter, sans-serif; }
+.primary-button { padding: 10px 16px; border: 1px solid #c9a84c; background: #c9a84c; color: #141413; }
+.secondary-button { padding: 10px 16px; border: 1px solid #d8d4ca; background: #fff; color: #141413; }
+.icon-button { border: 0; background: transparent; font-size: 24px; }
+
+/* Badge grid and cards */
+.badge-admin-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 14px; }
+.admin-badge-card { padding: 20px; border: 1px solid #e8e6e0; border-radius: 12px; background: #fff; }
+.admin-badge-card h2 { margin: 10px 0 5px; font: 700 19px Fraunces, Georgia, serif; }
+.admin-badge-card p { min-height: 42px; margin: 0 0 12px; color: #6b6b68; font-size: 12px; line-height: 1.5; }
+.admin-badge-emoji { font-size: 34px; }
+.admin-badge-rule { display: block; padding: 8px; border-radius: 7px; background: #faf7ee; color: #72583b; font-size: 11px; }
+.admin-badge-actions { display: flex; gap: 8px; margin-top: 16px; }
+.admin-badge-actions button { flex: 1; padding: 7px; border-radius: 7px; cursor: pointer; }
+.edit-badge { border: 1px solid #ddd7c8; background: #fff; }
+.delete-badge { border: 1px solid #9c3f35; background: #9c3f35; color: #fff; }
+.badge-empty { grid-column: 1 / -1; padding: 42px; border: 1px dashed #b9b0a4; border-radius: 12px; color: #6b6b68; text-align: center; }
+.badge-message { padding: 12px 16px; border-radius: 8px; background: #e7f4ec; color: #24613f; }
+.badge-message.error { background: #fae9e6; color: #8c3028; }
+
+/* Badge editor dialog */
+.badge-dialog { width: min(620px, calc(100% - 32px)); padding: 0; border: 1px solid #ded9cd; border-radius: 14px; }
+.badge-dialog::backdrop { background: rgba(20, 20, 19, .55); }
+.badge-dialog form { padding: 26px; }
+.dialog-heading { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.dialog-heading h2 { margin: 0; font: 700 24px Fraunces, Georgia, serif; }
+.badge-dialog label { display: grid; gap: 6px; margin-bottom: 16px; color: #454541; font-size: 12px; font-weight: 600; }
+.badge-dialog input, .badge-dialog textarea, .badge-dialog select { box-sizing: border-box; width: 100%; padding: 10px 12px; border: 1px solid #d8d4ca; border-radius: 8px; background: #faf9f5; color: #141413; font: 13px Inter, sans-serif; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.dialog-actions { display: flex; justify-content: flex-end; gap: 9px; margin-top: 22px; }
+
+/* Responsive layout */
+@media (max-width: 620px) { .admin-badge-page { padding: 28px 16px; } .admin-badge-header { flex-direction: column; } .form-row { grid-template-columns: 1fr; } }

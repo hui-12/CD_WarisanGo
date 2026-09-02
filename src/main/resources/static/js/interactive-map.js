@@ -600,7 +600,7 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error('SSE connection error / disconnected:', error);
     };
 
-    fetch('/api/saved-listings/ids', {headers: {'Accept': 'application/json'}})
+    if (!document.getElementById('guest-gate-modal')) fetch('/api/saved-listings/ids', {headers: {'Accept': 'application/json'}})
         .then(response => response.ok
             ? response.json()
             : Promise.reject(new Error('Unable to load saved listings.')))

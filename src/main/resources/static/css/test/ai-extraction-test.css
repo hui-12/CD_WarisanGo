@@ -1,3 +1,6 @@
+/* ============================================
+   AI Extraction Test: base page and panels
+   ============================================ */
 body {
     background-color: #f8f9fa;
 }
@@ -19,6 +22,7 @@ body {
     resize: vertical;
 }
 
+/* Status feedback */
 .status-message {
     padding: 12px 16px;
     border-radius: 8px;
@@ -37,6 +41,7 @@ body {
     background-color: #f8d7da;
 }
 
+/* JSON result output */
 .json-output {
     min-height: 200px;
     max-height: 400px;

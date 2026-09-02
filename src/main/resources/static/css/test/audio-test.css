@@ -1,3 +1,6 @@
+/* ============================================
+   Audio Test: base page and test cards
+   ============================================ */
 body {
     background-color: #f5f6f8;
     font-family: Arial, sans-serif;
@@ -9,6 +12,7 @@ body {
 }
 
 
+/* Navigation and test layout */
 .navigation {
     display: flex;
     gap: 10px;
@@ -45,6 +49,7 @@ body {
 }
 
 
+/* Results and form controls */
 .result-block {
     margin-top: 30px;
     padding-top: 25px;

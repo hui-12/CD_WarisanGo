@@ -16,9 +16,14 @@ public class ChallengeApiController {
 
     @GetMapping("/api/challenges")
     public ResponseEntity<?> list(Authentication authentication) {
-        try { return ResponseEntity.ok(service.getChallenges(authentication.getName())); }
+        try {
+            if (authentication == null || !authentication.isAuthenticated()) {
+                return ResponseEntity.ok(service.getGuestChallenges());
+            }
+            return ResponseEntity.ok(service.getChallenges(authentication.getName()));
+        }
         catch (Exception e) {
-            logger.error("Unable to load challenges for user {}.", authentication.getName(), e);
+            logger.error("Unable to load challenges.", e);
             return ResponseEntity.internalServerError().body("Unable to load challenges.");
         }
     }

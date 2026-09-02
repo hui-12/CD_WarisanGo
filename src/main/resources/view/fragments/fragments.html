@@ -37,6 +37,12 @@
                    th:href="@{/challenges}">Challenges</a>
             </nav>
 
+            <nav class="nav-links" aria-label="Guest navigation" sec:authorize="isAnonymous()">
+                <a class="nav-item" th:classappend="${activePage == 'directory'} ? ' active'" th:href="@{/directory}">Directory</a>
+                <a class="nav-item" th:classappend="${activePage == 'map'} ? ' active'" th:href="@{/map}">Map</a>
+                <a class="nav-item" th:classappend="${activePage == 'challenges'} ? ' active'" th:href="@{/challenges}">How It Works</a>
+            </nav>
+
             <nav class="nav-links" aria-label="Admin navigation" sec:authorize="hasRole('ADMIN')">
                 <a class="nav-item" th:classappend="${activePage == 'ai-discovery'} ? ' active'"
                    th:href="@{/ai-discovery}">AI Discovery</a>
@@ -55,12 +61,15 @@
             </nav>
 
             <div class="nav-actions">
-                <a class="user-profile-btn" th:href="@{/profile}">
-                    <img class="avatar-img" alt="User avatar" referrerpolicy="no-referrer"
+                <div class="guest-nav-actions" sec:authorize="isAnonymous()">
+                    <a class="nav-login-link" th:href="@{/login}">Log In</a>
+                </div>
+                <a class="nav-user-link" th:href="@{/profile}" sec:authorize="isAuthenticated()">
+                    <img id="navProfilePic" class="nav-avatar-img" alt="User avatar" referrerpolicy="no-referrer"
                          th:src="${session.navbarUser != null and session.navbarUser.avatar != null
-                                 and !session.navbarUser.avatar.isBlank()}
-                                 ? ${session.navbarUser.avatar}
-                                 : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&amp;h=100&amp;fit=crop'">
+                                 and !session.navbarUser.avatar.isBlank()
+                                 ? session.navbarUser.avatar
+                                 : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&amp;h=100&amp;fit=crop'}">
                     <span class="user-name"
                           th:text="${session.navbarUser != null ? session.navbarUser.name : 'Profile'}">Profile</span>
                 </a>

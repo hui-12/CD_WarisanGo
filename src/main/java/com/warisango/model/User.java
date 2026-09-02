@@ -9,6 +9,7 @@ public class User {
     private String avatar;
     private String role;
     private int totalPoints;
+    private Long lastNameChangeTimestamp;
     private String tierStatus;
     private String gender;
     private String aboutMe;
@@ -79,6 +80,13 @@ public class User {
         this.totalPoints = totalPoints;
     }
 
+    public Long getLastNameChangeTimestamp() {
+        return lastNameChangeTimestamp;
+    }
+
+    public void setLastNameChangeTimestamp(Long lastNameChangeTimestamp) {
+        this.lastNameChangeTimestamp = lastNameChangeTimestamp;
+    }
     public String getTierStatus() {
         return tierStatus;
     }

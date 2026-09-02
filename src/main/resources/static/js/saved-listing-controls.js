@@ -27,6 +27,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   buttons.forEach((button) => updateButton(button, false));
 
+  if (document.getElementById('guest-gate-modal')) return;
+
   try {
     const response = await fetch('/api/saved-listings/ids', {headers: {'Accept': 'application/json'}});
     if (!response.ok) throw new Error('Unable to load saved listings.');

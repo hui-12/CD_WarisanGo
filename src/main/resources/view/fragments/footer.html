@@ -1,13 +1,26 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-    <body>
-    <footer th:fragment="global">
-        <div class="footer-content">
-            <p>© 2026 WarisanGo. All rights reserved.</p>
-        </div>
-
-        <!-- Global Scripts (With static src fallback) -->
-        <script src="/js/global.js" th:src="@{/js/global.js}"></script>
-    </footer>
-
-</body></html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+<footer th:fragment="global" class="site-footer">
+    <div class="footer-content">
+        <nav class="footer-links" aria-label="Footer navigation">
+            <a th:href="@{/directory}" th:unless="${activePage == 'directory'}">Directory</a>
+            <a th:href="@{/map}" th:unless="${activePage == 'map'}">Map</a>
+            <a th:href="@{/profile}" th:unless="${activePage == 'profile'}" sec:authorize="isAuthenticated()">Profile</a>
+            <a href="#guest-gate-modal" data-guest-gated th:unless="${activePage == 'profile'}"
+               sec:authorize="isAnonymous()">Profile</a>
+        </nav>
+        <p class="footer-copyright">&copy; 2026 WarisanGo. All rights reserved.</p>
+    </div>
+    <script src="/js/global.js" th:src="@{/js/global.js}" defer></script>
+    <dialog id="guest-gate-modal" class="guest-gate-modal" sec:authorize="isAnonymous()" aria-labelledby="guest-gate-title">
+        <button class="guest-gate-close" type="button" aria-label="Close">&times;</button>
+        <p class="guest-gate-kicker">WARISANGO MEMBER BENEFIT</p>
+        <h2 id="guest-gate-title">Want to earn points and badges?</h2>
+        <p>Log in or create a free WarisanGo account to check in at this heritage spot and save your favourites.</p>
+        <div class="guest-gate-actions"><a th:href="@{/login}">Log In</a><a class="guest-gate-primary" th:href="@{/login}">Sign Up</a></div>
+    </dialog>
+</footer>
+</body>
+</html>
