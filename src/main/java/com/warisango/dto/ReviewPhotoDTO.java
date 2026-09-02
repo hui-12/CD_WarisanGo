@@ -8,14 +8,20 @@ public class ReviewPhotoDTO {
     private String photoId;
     private String reviewId;
     private String photoUrl;
+    private String storagePath;
 
     public ReviewPhotoDTO() {
     }
 
     public ReviewPhotoDTO(String photoId, String reviewId, String photoUrl) {
+        this(photoId, reviewId, photoUrl, "");
+    }
+
+    public ReviewPhotoDTO(String photoId, String reviewId, String photoUrl, String storagePath) {
         this.photoId = photoId;
         this.reviewId = reviewId;
         this.photoUrl = photoUrl;
+        this.storagePath = storagePath;
     }
 
     public String getPhotoId() {
@@ -40,5 +46,13 @@ public class ReviewPhotoDTO {
 
     public void setPhotoUrl(String photoUrl) {
         this.photoUrl = photoUrl;
+    }
+
+    public String getStoragePath() {
+        return storagePath;
+    }
+
+    public void setStoragePath(String storagePath) {
+        this.storagePath = storagePath;
     }
 }

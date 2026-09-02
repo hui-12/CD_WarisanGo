@@ -29,6 +29,22 @@ public class ReviewPhotoRepositoryImpl implements ReviewPhotoRepository {
     }
 
     @Override
+    public List<ReviewPhotoDTO> findAll() {
+        try {
+            List<ReviewPhotoDTO> photos = new ArrayList<>();
+            QuerySnapshot snapshot = firestore.collection(COLLECTION).get().get();
+
+            for (QueryDocumentSnapshot document : snapshot.getDocuments()) {
+                photos.add(convertDocumentToPhoto(document));
+            }
+
+            return photos;
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to load review photos.", e);
+        }
+    }
+
+    @Override
     public List<ReviewPhotoDTO> findByReviewId(String reviewId) {
         List<ReviewPhotoDTO> photos = new ArrayList<>();
 
@@ -110,7 +126,8 @@ public class ReviewPhotoRepositoryImpl implements ReviewPhotoRepository {
         return new ReviewPhotoDTO(
                 getString(document, "photoId"),
                 getString(document, "reviewId"),
-                getString(document, "photoUrl")
+                getString(document, "photoUrl"),
+                getString(document, "storagePath")
         );
     }
 
@@ -119,6 +136,7 @@ public class ReviewPhotoRepositoryImpl implements ReviewPhotoRepository {
         data.put("photoId", photo.getPhotoId());
         data.put("reviewId", photo.getReviewId());
         data.put("photoUrl", photo.getPhotoUrl());
+        data.put("storagePath", photo.getStoragePath());
         return data;
     }
 

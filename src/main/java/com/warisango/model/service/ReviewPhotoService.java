@@ -14,7 +14,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * Coordinates local image files and the root-level reviewPhotos collection.
+ * Coordinates Firebase Storage image files and the root-level reviewPhotos collection.
  */
 @Service
 public class ReviewPhotoService {
@@ -94,13 +94,14 @@ public class ReviewPhotoService {
                     photo = new ReviewPhotoDTO(
                             reviewPhotoRepository.generateNextPhotoId(),
                             reviewId,
-                            storedPhoto.publicUrl()
+                            storedPhoto.publicUrl(),
+                            storedPhoto.storagePath()
                     );
                     reviewPhotoRepository.save(photo);
                     savedPhotos.add(photo);
                 } catch (RuntimeException e) {
                     if (storedPhoto != null) {
-                        storageService.delete(storedPhoto.publicUrl());
+                        storageService.delete(storedPhoto.publicUrl(), storedPhoto.storagePath());
                     }
                     throw e;
                 }
@@ -127,7 +128,7 @@ public class ReviewPhotoService {
 
         for (ReviewPhotoDTO photo : existingPhotos) {
             if (removableIds.contains(photo.getPhotoId())) {
-                storageService.delete(photo.getPhotoUrl());
+                storageService.delete(photo.getPhotoUrl(), photo.getStoragePath());
                 reviewPhotoRepository.delete(photo.getPhotoId());
             }
         }
@@ -137,7 +138,7 @@ public class ReviewPhotoService {
         List<ReviewPhotoDTO> photos = reviewPhotoRepository.findByReviewId(reviewId);
 
         for (ReviewPhotoDTO photo : photos) {
-            storageService.delete(photo.getPhotoUrl());
+            storageService.delete(photo.getPhotoUrl(), photo.getStoragePath());
             reviewPhotoRepository.delete(photo.getPhotoId());
         }
     }
@@ -175,7 +176,7 @@ public class ReviewPhotoService {
 
     private void deleteSavedPhotos(List<ReviewPhotoDTO> savedPhotos) {
         for (ReviewPhotoDTO photo : savedPhotos) {
-            storageService.delete(photo.getPhotoUrl());
+            storageService.delete(photo.getPhotoUrl(), photo.getStoragePath());
             reviewPhotoRepository.delete(photo.getPhotoId());
         }
     }
