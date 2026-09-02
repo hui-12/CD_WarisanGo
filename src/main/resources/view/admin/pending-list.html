@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WarisanGo - Pending Heritage Businesses</title>
+    <link rel="stylesheet" th:href="@{/css/global.css}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/admin/admin.css}">
+    <link rel="stylesheet" th:href="@{/css/admin/pending-list.css}">
+</head>
+
+<body>
+
+<div th:replace="~{fragments/fragments :: navbar('pending-list')}"></div>
+
+<main class="container pending-page py-4">
+
+    <div class="page-heading">
+        <div>
+            <p class="module-eyebrow">Admin &middot; Discovery Module</p>
+            <h1>Pending List</h1>
+            <p>Review heritage businesses discovered by the AI workflow.</p>
+        </div>
+        <span class="pending-count" th:text="|${#lists.size(businesses)} pending|">0 pending</span>
+    </div>
+
+    <div class="alert alert-success"
+         role="status"
+         th:if="${successMessage}"
+         th:text="${successMessage}">
+        Heritage business approved successfully.
+    </div>
+
+    <section aria-labelledby="pending-businesses-heading">
+        <h2 id="pending-businesses-heading" class="visually-hidden">Pending heritage businesses</h2>
+
+        <div class="empty-state" th:if="${#lists.isEmpty(businesses)}">
+            <h3>No pending businesses</h3>
+            <p>New AI-discovered businesses will appear here for review.</p>
+        </div>
+
+        <div class="business-grid" th:unless="${#lists.isEmpty(businesses)}">
+            <a class="business-card"
+               th:each="business : ${businesses}"
+               th:href="@{/admin/pending-list/{id}(id=${business.businessId})}">
+                <div class="business-card-header">
+                    <span class="status-badge" th:text="${business.status}">Pending</span>
+                    <span class="business-id" th:text="${business.businessId}">hb_001</span>
+                </div>
+                <h3 th:text="${business.name ?: 'Unnamed heritage business'}">Business name</h3>
+                <p class="business-location"
+                   th:text="${business.address ?: (business.city ?: 'Location not available')}">
+                    Business location
+                </p>
+                <p class="business-description"
+                   th:text="${business.description ?: 'No description available.'}">
+                    Business description
+                </p>
+                <span class="view-details">View details <span aria-hidden="true">→</span></span>
+            </a>
+        </div>
+    </section>
+
+</main>
+
+<div th:replace="~{fragments/footer :: global}"></div>
+
+</body>
+
+</html>

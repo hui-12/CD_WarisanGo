@@ -7,14 +7,15 @@ import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.GeoPoint;
 import com.google.cloud.firestore.SetOptions;
 import com.warisango.model.CheckIn;
+import com.warisango.model.CheckInRecord;
 import com.warisango.util.TierCalculator;
 import org.springframework.stereotype.Repository;
 
-import java.util.HashMap;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.Map;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 @Repository
@@ -22,7 +23,6 @@ public class CheckInRepository {
     private static final String CHECK_INS = "checkIns";
     private static final String POINTS_HISTORIES = "pointsHistories";
     private static final String USERS = "users";
-
     private final Firestore firestore;
 
     public CheckInRepository(Firestore firestore) {
@@ -31,12 +31,8 @@ public class CheckInRepository {
 
     public boolean hasCheckedInToday(String touristId, String businessId, ZoneId zoneId)
             throws ExecutionException, InterruptedException {
-        return firestore.collection(CHECK_INS)
-                .whereEqualTo("touristId", touristId)
-                .get()
-                .get()
-                .getDocuments()
-                .stream()
+        return firestore.collection(CHECK_INS).whereEqualTo("touristId", touristId).get().get()
+                .getDocuments().stream()
                 .filter(document -> businessId.equals(document.getString("businessId")))
                 .map(document -> document.getTimestamp("checkInTimestamp"))
                 .filter(timestamp -> timestamp != null)
@@ -52,20 +48,35 @@ public class CheckInRepository {
 
     public List<CheckIn> findByTouristId(String touristId)
             throws ExecutionException, InterruptedException {
-        return firestore.collection(CHECK_INS)
-                .whereEqualTo("touristId", touristId)
-                .get()
-                .get()
-                .getDocuments()
-                .stream()
+        return firestore.collection(CHECK_INS).whereEqualTo("touristId", touristId).get().get()
+                .getDocuments().stream()
                 .map(document -> document.toObject(CheckIn.class))
-                .filter(checkIn -> checkIn.getCheckInTimestamp() != null)
+                .filter(checkIn -> checkIn != null && checkIn.getCheckInTimestamp() != null)
                 .sorted((left, right) -> right.getCheckInTimestamp().compareTo(left.getCheckInTimestamp()))
                 .toList();
     }
 
-    public int saveAndAwardPoints(String touristId, String businessId, GeoPoint gpsLocation,
-                                  int pointsAwarded) throws ExecutionException, InterruptedException {
+    public List<CheckInRecord> findByUserId(String touristId) {
+        try {
+            return firestore.collection(CHECK_INS).whereEqualTo("touristId", touristId).get().get()
+                    .getDocuments().stream()
+                    .map(document -> new CheckInRecord(
+                            document.getString("businessName"),
+                            numberValue(document, "pointsAwarded"),
+                            document.getTimestamp("checkInTimestamp") == null ? null
+                                    : document.getTimestamp("checkInTimestamp").toDate().toInstant()))
+                    .toList();
+        } catch (InterruptedException exception) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException("Unable to load recent visits.", exception);
+        } catch (ExecutionException exception) {
+            throw new IllegalStateException("Unable to load recent visits.", exception);
+        }
+    }
+
+    public int saveAndAwardPoints(String touristId, String businessId, String businessName,
+                                  GeoPoint gpsLocation, int pointsAwarded)
+            throws ExecutionException, InterruptedException {
         DocumentReference userReference = firestore.collection(USERS).document(touristId);
         DocumentReference checkInReference = firestore.collection(CHECK_INS).document();
         DocumentReference historyReference = firestore.collection(POINTS_HISTORIES).document();
@@ -74,7 +85,6 @@ public class CheckInRepository {
             DocumentSnapshot user = transaction.get(userReference).get();
             Long storedPoints = user.exists() ? user.getLong("totalPoints") : null;
             int updatedPoints = (storedPoints == null ? 0 : storedPoints.intValue()) + pointsAwarded;
-
             Map<String, Object> userUpdate = new HashMap<>();
             userUpdate.put("totalPoints", updatedPoints);
             userUpdate.put("tierStatus", TierCalculator.tierFor(updatedPoints));
@@ -82,6 +92,7 @@ public class CheckInRepository {
 
             Map<String, Object> checkIn = new HashMap<>();
             checkIn.put("businessId", businessId);
+            checkIn.put("businessName", businessName);
             checkIn.put("checkInId", checkInReference.getId());
             checkIn.put("checkInTimestamp", FieldValue.serverTimestamp());
             checkIn.put("gpsLocation", gpsLocation);
@@ -97,8 +108,12 @@ public class CheckInRepository {
             history.put("touristId", touristId);
             history.put("transactionId", historyReference.getId());
             transaction.set(historyReference, history);
-
             return updatedPoints;
         }).get();
+    }
+
+    private int numberValue(DocumentSnapshot document, String field) {
+        Number value = (Number) document.get(field);
+        return value == null ? 0 : value.intValue();
     }
 }

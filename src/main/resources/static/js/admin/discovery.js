@@ -6,6 +6,13 @@ document.addEventListener("DOMContentLoaded", function () {
     const searchButton =
         document.getElementById("searchButton");
 
+    const videoSource = document.getElementById("videoSource");
+    const tikTokOptions = document.getElementById("tikTokOptions");
+    const maximumVideos = document.getElementById("maximumVideos");
+    const scrollCount = document.getElementById("scrollCount");
+    const waitTime = document.getElementById("waitTime");
+    const resultsHeading = document.getElementById("resultsHeading");
+
     const searchStatus =
         document.getElementById("searchStatus");
 
@@ -15,11 +22,23 @@ document.addEventListener("DOMContentLoaded", function () {
     const videoList =
         document.getElementById("videoList");
 
+    const toggleVideoResults =
+        document.getElementById("toggleVideoResults");
+
+    const videoResultsContent =
+        document.getElementById("videoResultsContent");
+
     const processingSection =
         document.getElementById("processingSection");
 
     const processingStatus =
         document.getElementById("processingStatus");
+
+    const processingProgressBar =
+        document.getElementById("processingProgressBar");
+
+    const activeJobStorageKey =
+        "warisango.activeDiscoveryJob";
 
     const selectedVideoTitle =
         document.getElementById("selectedVideoTitle");
@@ -57,6 +76,12 @@ document.addEventListener("DOMContentLoaded", function () {
         searchVideos
     );
 
+    videoSource.addEventListener("change", function () {
+        const isTikTok = videoSource.value === "tiktok";
+        tikTokOptions.classList.toggle("d-none", !isTikTok);
+        resultsHeading.textContent = isTikTok ? "TikTok Results" : "YouTube Results";
+    });
+
     keywordInput.addEventListener(
         "keydown",
         function (event) {
@@ -92,8 +117,12 @@ document.addEventListener("DOMContentLoaded", function () {
         searchButton.innerText =
             "Searching...";
 
+        const isTikTok = videoSource.value === "tiktok";
+
         showSearchStatus(
-            "Searching YouTube videos...",
+            isTikTok
+                ? "Searching TikTok in a visible browser. Complete any verification there when prompted."
+                : "Searching YouTube videos...",
             "info"
         );
 
@@ -101,15 +130,22 @@ document.addEventListener("DOMContentLoaded", function () {
 
             const response =
                 await fetch(
-                    "/api/discovery/search",
+                    isTikTok
+                        ? "/api/discovery/search/tiktok"
+                        : "/api/discovery/search",
                     {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json"
                         },
-                        body: JSON.stringify({
-                            keyword: keyword
-                        })
+                        body: JSON.stringify(isTikTok
+                            ? {
+                                keyword: keyword,
+                                maximumVideos: Number(maximumVideos.value),
+                                scrollCount: Number(scrollCount.value),
+                                waitTime: Number(waitTime.value)
+                            }
+                            : {keyword: keyword})
                     }
                 );
 
@@ -134,7 +170,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 return;
             }
 
-            displayVideos(videos);
+            displayVideos(videos, isTikTok);
 
             showSearchStatus(
                 videos.length
@@ -151,7 +187,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
             showSearchStatus(
                 error.message
-                || "Unable to search YouTube.",
+                || "Unable to search videos.",
                 "danger"
             );
 
@@ -165,7 +201,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // DISPLAY VIDEOS
-    function displayVideos(videos) {
+    function displayVideos(videos, isTikTok) {
 
         videoList.innerHTML = "";
 
@@ -183,18 +219,6 @@ document.addEventListener("DOMContentLoaded", function () {
             card.className =
                 "card video-card";
 
-            const thumbnail =
-                document.createElement("img");
-
-            thumbnail.className =
-                "video-thumbnail";
-
-            thumbnail.src =
-                video.thumbnail;
-
-            thumbnail.alt =
-                video.title;
-
             const cardBody =
                 document.createElement("div");
 
@@ -207,8 +231,54 @@ document.addEventListener("DOMContentLoaded", function () {
             title.className =
                 "video-title";
 
-            title.textContent =
-                video.title;
+            title.textContent = video.title || "TikTok video";
+
+            if (isTikTok) {
+                if (video.thumbnail) {
+                    const thumbnail = document.createElement("img");
+                    thumbnail.className = "video-thumbnail";
+                    thumbnail.src = video.thumbnail;
+                    thumbnail.alt = video.title || "TikTok video cover";
+                    thumbnail.loading = "lazy";
+                    card.appendChild(thumbnail);
+                }
+
+                const videoLink = document.createElement("a");
+                videoLink.className = "tiktok-video-link";
+                videoLink.href = video.videoUrl;
+                videoLink.target = "_blank";
+                videoLink.rel = "noopener noreferrer";
+                videoLink.textContent = video.videoUrl;
+
+                const openButton = document.createElement("a");
+                openButton.className = "btn btn-outline-primary mt-3";
+                openButton.href = video.videoUrl;
+                openButton.target = "_blank";
+                openButton.rel = "noopener noreferrer";
+                openButton.textContent = "Open Video";
+
+                const processButton = document.createElement("button");
+                processButton.type = "button";
+                processButton.className = "btn btn-success mt-3 ms-2";
+                processButton.innerText = "Process Video";
+                processButton.addEventListener("click", function () {
+                    processVideo(video, processButton);
+                });
+
+                cardBody.appendChild(title);
+                cardBody.appendChild(videoLink);
+                cardBody.appendChild(openButton);
+                cardBody.appendChild(processButton);
+                card.appendChild(cardBody);
+                column.appendChild(card);
+                videoList.appendChild(column);
+                return;
+            }
+
+            const thumbnail = document.createElement("img");
+            thumbnail.className = "video-thumbnail";
+            thumbnail.src = video.thumbnail;
+            thumbnail.alt = video.title;
 
             const channel =
                 document.createElement("div");
@@ -269,14 +339,15 @@ document.addEventListener("DOMContentLoaded", function () {
         videoResultsSection.classList.remove(
             "d-none"
         );
+
+        setVideoResultsExpanded(true);
     }
 
     // PROCESS VIDEO
     async function processVideo(video, processButton) {
 
-        const videoUrl =
-            "https://www.youtube.com/watch?v="
-            + video.videoId;
+        const videoUrl = video.videoUrl
+            || "https://www.youtube.com/watch?v=" + video.videoId;
 
         processingSection.classList.remove(
             "d-none"
@@ -320,58 +391,20 @@ document.addEventListener("DOMContentLoaded", function () {
                 "Waiting for server-side transcription...";
 
             extractionStatus.innerText =
-                "Waiting for Gemini extraction and Firestore save...";
+                "Waiting for Gemini extraction and Firebase save...";
 
             // STEP 2 Audio → AssemblyAI
             processingStatus.innerText =
                 "Processing selected video on the server...";
 
-            const workflowResult =
-                await window.WarisanGoWorkflow.process(videoUrl);
-
-            const transcriptText =
-                workflowResult.transcript;
-
-            const extractionData =
-                workflowResult.extraction;
-
-            transcript.value =
-                transcriptText;
-
-            transcriptSection.classList.remove(
-                "d-none"
-            );
-
-            transcriptionStatus.innerText =
-                "Transcription completed.";
+            const jobId = await window.WarisanGoWorkflow.start(videoUrl);
+            saveActiveJob(jobId, video.title, videoUrl);
+            await pollProcessingJob(jobId);
 
             // STEP 3 Transcript → Gemini
-            audioStatus.innerText =
-                "Audio extraction completed.";
-
             // =====================================
             // DISPLAY GEMINI RESULT
             // =====================================
-
-            jsonResult.textContent =
-                JSON.stringify(
-                    extractionData,
-                    null,
-                    2
-                );
-
-            resultSection.classList.remove(
-                "d-none"
-            );
-
-            extractionStatus.innerText =
-                "AI extraction completed.";
-
-            processingStatus.className =
-                "alert alert-success";
-
-            processingStatus.innerText =
-                "AI Heritage Discovery completed successfully.";
 
         } catch (error) {
 
@@ -393,6 +426,94 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
+    function saveActiveJob(jobId, videoTitle, videoUrl) {
+        localStorage.setItem(activeJobStorageKey, JSON.stringify({
+            jobId: jobId,
+            videoTitle: videoTitle,
+            videoUrl: videoUrl
+        }));
+    }
+
+    function getActiveJob() {
+        try {
+            return JSON.parse(localStorage.getItem(activeJobStorageKey));
+        } catch (error) {
+            localStorage.removeItem(activeJobStorageKey);
+            return null;
+        }
+    }
+
+    async function pollProcessingJob(jobId) {
+        while (true) {
+            const job = await window.WarisanGoWorkflow.get(jobId);
+            updateProcessingDisplay(job);
+
+            if (job.status === "COMPLETED") {
+                displayCompletedJob(job.result);
+                localStorage.removeItem(activeJobStorageKey);
+                return;
+            }
+
+            if (job.status === "FAILED") {
+                localStorage.removeItem(activeJobStorageKey);
+                throw new Error(job.message || "AI processing failed.");
+            }
+
+            await new Promise(function (resolve) {
+                setTimeout(resolve, 1500);
+            });
+        }
+    }
+
+    function updateProcessingDisplay(job) {
+        const progress = Math.max(0, Math.min(100, Number(job.progress) || 0));
+        processingSection.classList.remove("d-none");
+        processingStatus.innerText = job.message;
+        processingProgressBar.style.width = progress + "%";
+        processingProgressBar.innerText = progress + "%";
+        processingProgressBar.parentElement.setAttribute("aria-valuenow", String(progress));
+
+        if (progress >= 35) {
+            audioStatus.innerText = "Audio extraction completed.";
+        }
+        if (progress >= 65) {
+            transcriptionStatus.innerText = "Transcription completed.";
+        }
+        if (progress >= 90) {
+            extractionStatus.innerText = "AI extraction completed. Saving result...";
+        }
+    }
+
+    function displayCompletedJob(workflowResult) {
+        transcript.value = workflowResult.transcript;
+        transcriptSection.classList.remove("d-none");
+        jsonResult.textContent = JSON.stringify(workflowResult.extraction, null, 2);
+        resultSection.classList.remove("d-none");
+        extractionStatus.innerText = "AI extraction completed and saved to Firebase.";
+        processingStatus.className = "alert alert-success";
+        processingProgressBar.classList.remove("progress-bar-animated");
+    }
+
+    async function restoreActiveJob() {
+        const activeJob = getActiveJob();
+        if (!activeJob || !activeJob.jobId) {
+            return;
+        }
+
+        selectedVideoTitle.textContent = activeJob.videoTitle || "Selected video";
+        selectedVideoUrl.textContent = activeJob.videoUrl || "";
+        processingSection.classList.remove("d-none");
+        resetWorkflow();
+
+        try {
+            await pollProcessingJob(activeJob.jobId);
+        } catch (error) {
+            localStorage.removeItem(activeJobStorageKey);
+            processingStatus.className = "alert alert-danger";
+            processingStatus.innerText = error.message || "Unable to restore processing status.";
+        }
+    }
+
     // RESET WORKFLOW
     function resetWorkflow() {
 
@@ -409,6 +530,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
         jsonResult.textContent = "";
 
+        processingProgressBar.style.width = "0%";
+        processingProgressBar.innerText = "0%";
+        processingProgressBar.classList.add("progress-bar-animated");
+
     }
 
     // RESET PAGE
@@ -420,9 +545,11 @@ document.addEventListener("DOMContentLoaded", function () {
             "d-none"
         );
 
-        processingSection.classList.add(
-            "d-none"
-        );
+        if (!getActiveJob()) {
+            processingSection.classList.add(
+                "d-none"
+            );
+        }
 
         transcriptSection.classList.add(
             "d-none"
@@ -521,5 +648,21 @@ document.addEventListener("DOMContentLoaded", function () {
 
         }
     );
+
+    toggleVideoResults.addEventListener("click", function () {
+        const isExpanded = toggleVideoResults.getAttribute("aria-expanded") === "true";
+        setVideoResultsExpanded(!isExpanded);
+    });
+
+    function setVideoResultsExpanded(isExpanded) {
+        toggleVideoResults.setAttribute("aria-expanded", String(isExpanded));
+        videoResultsContent.hidden = !isExpanded;
+        toggleVideoResults.querySelector(".toggle-label").textContent =
+            isExpanded ? "Collapse videos" : "Expand videos";
+        toggleVideoResults.querySelector(".toggle-icon").innerHTML =
+            isExpanded ? "&#8963;" : "&#8964;";
+    }
+
+    restoreActiveJob();
 
 });

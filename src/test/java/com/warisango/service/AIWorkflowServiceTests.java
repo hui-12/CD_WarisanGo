@@ -5,6 +5,7 @@ import com.warisango.dto.DiscoveryProcessResponse;
 import com.warisango.model.service.AIExtractionService;
 import com.warisango.model.service.AIRecordService;
 import com.warisango.model.service.AIWorkflowService;
+import com.warisango.model.service.HeritageBusinessPersistenceService;
 import com.warisango.model.service.SpeechToTextService;
 import com.warisango.model.service.VideoAudioService;
 import org.junit.jupiter.api.Test;
@@ -32,7 +33,7 @@ class AIWorkflowServiceTests {
     private AIExtractionService aiExtractionService;
 
     @Mock
-    private AIRecordService aiRecordService;
+    private HeritageBusinessPersistenceService persistenceService;
 
     @InjectMocks
     private AIWorkflowService aiWorkflowService;
@@ -47,14 +48,10 @@ class AIWorkflowServiceTests {
         when(videoAudioService.downloadAudio(videoUrl)).thenReturn(audioFile);
         when(speechToTextService.transcribe(audioFile)).thenReturn(transcript);
         when(aiExtractionService.extract(transcript)).thenReturn(extraction);
-        when(aiRecordService.save(extraction, transcript, videoUrl))
-                .thenReturn("record-123");
-
         DiscoveryProcessResponse response = aiWorkflowService.process(videoUrl);
 
         assertThat(response.transcript()).isEqualTo(transcript);
         assertThat(response.extraction()).isSameAs(extraction);
-        assertThat(response.recordId()).isEqualTo("record-123");
-        verify(aiRecordService).save(extraction, transcript, videoUrl);
+        verify(persistenceService).save(extraction, videoUrl);
     }
 }

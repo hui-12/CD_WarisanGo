@@ -22,7 +22,7 @@ import java.time.Duration;
  *
  * Flow:
  *
- * Local .m4a file
+ * Local audio or video file
  *      ↓
  * AssemblyAI Upload API
  *      ↓
@@ -76,9 +76,9 @@ public class SpeechToTextService {
     }
 
     /**
-     * Transcribes a local audio file.
+     * Transcribes a local audio or video file.
      *
-     * @param audioFile path to the temporary .m4a file
+     * @param audioFile path to the temporary media file
      * @return completed transcript
      */
     public String transcribe(Path audioFile) {
@@ -556,11 +556,10 @@ public class SpeechToTextService {
                         .toString()
                         .toLowerCase();
 
-        if (!fileName.endsWith(".m4a")) {
+        if (!fileName.endsWith(".m4a") && !fileName.endsWith(".mp4")) {
 
             throw new AIProcessingException(
-                    "Unsupported audio format. "
-                            + "Expected .m4a file."
+                    "Unsupported media format. Expected .m4a or .mp4 file."
             );
         }
 

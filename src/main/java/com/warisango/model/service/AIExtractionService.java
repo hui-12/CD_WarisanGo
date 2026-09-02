@@ -113,6 +113,14 @@ public class AIExtractionService {
                 - Do not guess coordinates.
                 - Output JSON only.
                 - Allow to do research if needed to find the business information.
+                - Never return an empty array. If no businesses are found, return 
+                an array with a single object with all fields set to null.
+                - Do not invent information.
+                - Only return longitude and latitude for the location field, otherwise return null.
+                - Location must follow the format: "[3.1488° N, 101.7133° E]"
+                - Operating hours must follow the format: "08:00 - 23:00"
+                - if the field is not available, return null.
+                - averageRating always return null.
 
                 Required JSON format:
 
@@ -125,7 +133,9 @@ public class AIExtractionService {
                       "city": "",
                       "location": "",
                       "description": "",
-                      "operatingHour": ""
+                      "operatingHour": "",
+                      "averageRating": null,
+                      "checkInPoints": 50
                     }
                   ]
                 }
@@ -142,6 +152,19 @@ public class AIExtractionService {
 
         Schema stringField = Schema.builder()
                 .type("STRING")
+                .nullable(true)
+                .build();
+
+        Schema numberField = Schema.builder()
+                .type("NUMBER")
+                .nullable(true)
+                .minimum(0.0)
+                .maximum(5.0)
+                .build();
+
+        Schema integerField = Schema.builder()
+                .type("INTEGER")
+                .minimum(1.0)
                 .build();
 
         Schema business = Schema.builder()
@@ -154,7 +177,9 @@ public class AIExtractionService {
                                 "city", stringField,
                                 "location", stringField,
                                 "description", stringField,
-                                "operatingHour", stringField
+                                "operatingHour", stringField,
+                                "averageRating", numberField,
+                                "checkInPoints", integerField
                         )
                 )
                 .required(
@@ -165,7 +190,9 @@ public class AIExtractionService {
                                 "city",
                                 "location",
                                 "description",
-                                "operatingHour"
+                                "operatingHour",
+                                "averageRating",
+                                "checkInPoints"
                         )
                 )
                 .build();

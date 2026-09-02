@@ -10,6 +10,8 @@ package com.warisango.dto;
  * @param location geographical location
  * @param description heritage/business description
  * @param operatingHour business operating hours
+ * @param averageRating known average rating, or null when unavailable
+ * @param checkInPoints points awarded for a verified check-in
  */
 public record AIExtractionResponse(
         String name,
@@ -18,6 +20,8 @@ public record AIExtractionResponse(
         String city,
         String location,
         String description,
-        String operatingHour
+        String operatingHour,
+        Double averageRating,
+        Integer checkInPoints
 ) {
 }

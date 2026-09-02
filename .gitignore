@@ -1,5 +1,7 @@
 HELP.md
 target/
+.m2-repository/
+src/main/resources/firebase-service-account.json
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
@@ -32,8 +34,11 @@ build/
 ### VS Code ###
 .vscode/
 
-### Firebase Firestore Private Key ###
-src/main/resources/firebase-service-account.json
+### Local browser sessions ###
+.tiktok-profile/
+
+### Local application configuration and API keys ###
+src/main/resources/application.properties
 
 ### Local review photo uploads ###
 uploads/reviews/

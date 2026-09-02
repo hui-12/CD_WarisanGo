@@ -3,8 +3,8 @@ package com.warisango.exception;
 import com.warisango.dto.ErrorResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -44,7 +44,33 @@ public class GlobalExceptionHandler {
 
         logger.error("Firestore persistence failed.", exception);
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
-                .body(new ErrorResponse("Unable to save the discovery record."));
+                .body(new ErrorResponse("Unable to access heritage businesses."));
+    }
+
+    @ExceptionHandler(TikTokScrapingException.class)
+    public ResponseEntity<ErrorResponse> handleTikTokScraping(
+            TikTokScrapingException exception) {
+
+        logger.warn("TikTok scraping request failed: {}", exception.getMessage());
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(new ErrorResponse(exception.getMessage()));
+    }
+
+    @ExceptionHandler(BusinessNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleBusinessNotFound(
+            BusinessNotFoundException exception) {
+
+        logger.warn("Heritage business lookup failed: {}", exception.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ErrorResponse(exception.getMessage()));
+    }
+
+    @ExceptionHandler(DiscoveryJobNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleDiscoveryJobNotFound(
+            DiscoveryJobNotFoundException exception) {
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ErrorResponse(exception.getMessage()));
     }
 
     @ExceptionHandler(RoleAccessDeniedException.class)

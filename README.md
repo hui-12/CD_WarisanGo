@@ -1,5 +1,91 @@
 # Project Setup Guide
 
+## WarisanGo Introduction
+
+WarisanGo is a Spring Boot web application for discovering Malaysian heritage food businesses. Its AI discovery
+workflow searches YouTube and TikTok, downloads video media, converts speech to text with AssemblyAI, extracts
+structured business information with Gemini, and stores approved records in Firebase Cloud Firestore.
+
+## Prerequisites
+
+Install these tools before running the project:
+
+- Java Development Kit (JDK) 21
+- Git
+- Maven 3.9 or use the included Maven Wrapper (`mvnw.cmd` on Windows)
+- `yt-dlp`, available on the system `PATH`, for downloading and extracting YouTube audio
+- FFmpeg, available on the system `PATH`, for media conversion
+- Playwright Chromium for TikTok search and video downloading
+
+You will also need:
+
+- A Firebase project and Firebase service-account JSON file
+- A YouTube Data API v3 key
+- An AssemblyAI API key
+- A Google Gemini API key
+
+## Quick Setup
+
+1. Clone the repository and enter its directory:
+
+   ```powershell
+   git clone <repository-url>
+   cd CD_WarisanGo
+   ```
+
+2. Confirm that the required command-line tools are available:
+
+   ```powershell
+   java -version
+   .\mvnw.cmd -version
+   git --version
+   yt-dlp --version
+   ffmpeg -version
+   ```
+
+3. Install `yt-dlp` and FFmpeg if they are unavailable. Both executables must be accessible through `PATH`.
+
+4. Download the Playwright Chromium browser used by the TikTok services:
+
+   ```powershell
+   .\mvnw.cmd exec:java "-Dexec.mainClass=com.microsoft.playwright.CLI" "-Dexec.args=install chromium"
+   ```
+
+5. Download a Firebase Admin SDK service-account key from your Firebase project and save it locally as:
+
+   ```text
+   src/main/resources/firebase-service-account.json
+   ```
+
+   This file is ignored by Git and must never be committed or shared.
+
+6. Configure API keys through environment variables. Reference them from `application.properties` as follows:
+
+   ```properties
+   youtube.api.key=${YOUTUBE_API_KEY}
+   youtube.base.url=https://www.googleapis.com/youtube/v3
+   assemblyai.api.key=${ASSEMBLYAI_API_KEY}
+   assemblyai.api.url=https://api.assemblyai.com/v2
+   gemini.api.key=${GEMINI_API_KEY}
+   gemini.model=gemini-3.6-flash
+   ```
+
+   Then define `YOUTUBE_API_KEY`, `ASSEMBLYAI_API_KEY`, and `GEMINI_API_KEY` in the IDE run configuration or the
+   operating system environment. Never commit real API keys.
+
+7. Build and run the application:
+
+   ```powershell
+   .\mvnw.cmd clean test
+   .\mvnw.cmd spring-boot:run
+   ```
+
+8. Open `http://localhost:8080` in a browser.
+
+The first TikTok operation opens a visible Chromium window and automatically creates `.tiktok-profile/`. Complete
+any TikTok login or CAPTCHA challenge manually. The folder retains the local browser session to reduce repeated
+verification and is ignored by Git.
+
 ## 1. Required Software Installation
 
 Before running the project, install the following software:

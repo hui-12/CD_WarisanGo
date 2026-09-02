@@ -16,8 +16,4 @@ public class AdminController {
         return "admin/PendingListPage";
     }
 
-    @GetMapping("/admin/audit-log")
-    public String auditLogPage() {
-        return "admin/AuditLogPage";
-    }
 }
