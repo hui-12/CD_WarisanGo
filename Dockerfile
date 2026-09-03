@@ -13,6 +13,7 @@ RUN apt-get update \
 		ffmpeg \
 		curl \
 		python3 \
+		nodejs \
 		libglib2.0-0 \
 		libnss3 \
 		libnspr4 \
@@ -39,6 +40,7 @@ RUN curl -L --fail --silent --show-error \
 		https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp \
 	&& chmod a+rx /usr/local/bin/yt-dlp \
 	&& python3 --version \
+	&& node --version \
 	&& yt-dlp --version \
 	&& ffmpeg -version | head -n 1
 
