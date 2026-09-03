@@ -107,8 +107,18 @@ document.addEventListener('DOMContentLoaded', function () {
         ),
       });
 
+      const contentType = response.headers.get('content-type') || '';
+
       if (!response.ok) {
         throw new Error(await getErrorMessage(response));
+      }
+
+      if (!contentType.includes('application/json')) {
+        throw new Error(
+          response.url.includes('/login')
+            ? 'Your admin session has expired. Please log in again.'
+            : 'TikTok search returned an unexpected response. Check the server deployment and logs.'
+        );
       }
 
       const videos = await response.json();
@@ -441,6 +451,16 @@ document.addEventListener('DOMContentLoaded', function () {
   // ERROR HANDLING
   async function getErrorMessage(response) {
     try {
+      const contentType = response.headers.get('content-type') || '';
+
+      if (!contentType.includes('application/json')) {
+        if (response.url.includes('/login')) {
+          return 'Your admin session has expired. Please log in again.';
+        }
+
+        return 'Server returned an unexpected HTML response (HTTP ' + response.status + ').';
+      }
+
       const data = await response.json();
 
       return data.message || data.error || 'Server error: ' + response.status;
