@@ -12,6 +12,7 @@ RUN apt-get update \
 	&& apt-get install -y --no-install-recommends \
 		ffmpeg \
 		curl \
+		python3 \
 		libglib2.0-0 \
 		libnss3 \
 		libnspr4 \
@@ -36,7 +37,10 @@ RUN apt-get update \
 RUN curl -L --fail --silent --show-error \
 		-o /usr/local/bin/yt-dlp \
 		https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp \
-	&& chmod a+rx /usr/local/bin/yt-dlp
+	&& chmod a+rx /usr/local/bin/yt-dlp \
+	&& python3 --version \
+	&& yt-dlp --version \
+	&& ffmpeg -version | head -n 1
 
 COPY --from=build /app/target/warisango-0.0.1-SNAPSHOT.jar app.jar
 
