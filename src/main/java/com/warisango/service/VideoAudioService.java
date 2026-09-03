@@ -289,6 +289,10 @@ public class VideoAudioService {
         if (lowercaseOutput.contains("no supported javascript runtime")) {
             return "YouTube extraction requires Node.js. Redeploy the latest Docker image.";
         }
+        if (lowercaseOutput.contains("unable to download video data")
+                && lowercaseOutput.contains("403")) {
+            return "YouTube rejected the media download. Configure YOUTUBE_COOKIES_FILE with a valid cookies file and redeploy.";
+        }
         return "Unable to extract audio from the video.";
     }
 
