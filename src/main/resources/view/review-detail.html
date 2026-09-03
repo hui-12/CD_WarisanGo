@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <th:block th:replace="~{fragments/fragments :: head('Review Detail | WarisanGo')}"></th:block>
+    <link rel="stylesheet" th:href="@{/css/review.css}" />
+  </head>
+  <body>
+    <header th:replace="~{fragments/fragments :: navbar('directory')}"></header>
+
+    <main class="review-detail-page">
+      <article class="review-detail-shell">
+        <section class="review-detail-business">
+          <img
+            th:src="${business.businessImage}"
+            src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=900&q=80"
+            alt="Heritage business"
+          />
+
+          <div class="review-detail-business-copy">
+            <p class="review-kicker">Heritage Food</p>
+
+            <h1 class="review-detail-business-name" th:text="${business.businessName}">Heritage Business</h1>
+
+            <p class="review-detail-business-address" th:text="${business.businessAddress}">Business Address</p>
+          </div>
+        </section>
+
+        <section class="review-detail-body">
+          <div class="review-detail-user">
+            <div
+              class="review-detail-avatar"
+              th:text="${review.touristName != null and !review.touristName.isEmpty()
+                     ? #strings.substring(review.touristName,0,1).toUpperCase()
+                     : 'U'}"
+            >
+              A
+            </div>
+
+            <div>
+              <h2 class="review-detail-user-name" th:text="${review.touristName}">Visitor Name</h2>
+
+              <div class="review-stars">
+                <span
+                  th:each="star : ${#numbers.sequence(1,5)}"
+                  th:classappend="${star <= review.rating} ? ' filled' : ''"
+                >
+                  ★
+                </span>
+              </div>
+
+              <p class="review-detail-date">Reviewed on <span th:text="${review.createdAt}">2026-08-14</span></p>
+            </div>
+          </div>
+
+          <p class="review-detail-text" th:text="${review.reviewText}">Full review content.</p>
+
+          <div class="review-detail-photos" th:if="${review.photoUrls != null and !#lists.isEmpty(review.photoUrls)}">
+            <img
+              th:each="photo : ${review.photoUrls}"
+              class="review-photo-open"
+              th:src="${photo}"
+              th:attr="data-photo-src=${photo}"
+              tabindex="0"
+              role="button"
+              aria-label="Open review photo"
+              alt="Review photo"
+            />
+          </div>
+
+          <div class="review-detail-actions">
+            <button
+              class="review-detail-action"
+              type="button"
+              data-review-like
+              th:attr="data-like-url=@{/reviews/like/{id}(id=${review.reviewId})},data-liked=${review.likedByCurrentUser},aria-pressed=${review.likedByCurrentUser}"
+              th:classappend="${review.likedByCurrentUser} ? ' liked' : ''"
+            >
+              <span data-like-icon th:text="${review.likedByCurrentUser ? '♥' : '♡'}">♡</span>
+              Like <span data-like-count th:text="${review.likeCount}">0</span>
+            </button>
+
+            <a class="review-detail-action" href="#comments"> 💬 Comments </a>
+
+            <button
+              class="review-detail-action review-report-trigger"
+              type="button"
+              data-report-target="REVIEW"
+              th:attr="data-review-id=${review.reviewId}"
+            >
+              ⚑ Report
+            </button>
+          </div>
+
+          <h2 id="comments" class="review-comments-title">Comments</h2>
+
+          <p class="review-field-error" th:if="${commentError != null}" th:text="${commentError}">
+            The comment could not be saved.
+          </p>
+
+          <div class="review-comment-feed" th:if="${comments != null and !#lists.isEmpty(comments)}">
+            <article
+              class="review-comment-full"
+              th:each="comment : ${comments}"
+              th:id="${'comment-' + comment.commentId}"
+            >
+              <p class="review-comment-full-user" th:text="${comment.touristName}">Visitor</p>
+
+              <span class="review-comment-full-date" th:text="${comment.createdAt}"> 2026-08-14 </span>
+
+              <p
+                class="review-comment-reply-target"
+                th:if="${comment.replyToTouristName != null and !#strings.isEmpty(comment.replyToTouristName)}"
+              >
+                Replying to <span th:text="${comment.replyToTouristName}">Visitor</span>
+              </p>
+
+              <form
+                class="review-comment-edit-form"
+                th:if="${editingCommentId == comment.commentId}"
+                th:action="@{/reviews/comments/update}"
+                th:object="${commentEdit}"
+                method="post"
+                data-content-form
+              >
+                <input type="hidden" th:field="*{commentId}" />
+                <input type="hidden" th:field="*{reviewId}" />
+
+                <textarea
+                  class="review-comment-textarea"
+                  th:field="*{commentText}"
+                  data-moderated-text
+                  data-review-counter="commentEditCharacterCount"
+                  maxlength="500"
+                ></textarea>
+
+                <div class="review-comment-form-meta">
+                  <span
+                    class="review-field-error"
+                    th:if="${#fields.hasErrors('commentText')}"
+                    th:errors="*{commentText}"
+                  >
+                    Comment cannot be empty.
+                  </span>
+                  <span class="review-counter"> <span id="commentEditCharacterCount">0</span>/500 </span>
+                </div>
+
+                <div class="review-comment-edit-actions">
+                  <button class="review-btn-primary" type="submit">Save</button>
+                  <a class="review-btn-outline" th:href="@{/reviews/detail/{id}(id=${review.reviewId})}"> Cancel </a>
+                </div>
+              </form>
+
+              <p
+                class="review-comment-full-text"
+                th:unless="${editingCommentId == comment.commentId}"
+                th:text="${comment.commentText}"
+              >
+                Comment text.
+              </p>
+
+              <div class="review-comment-actions" th:unless="${editingCommentId == comment.commentId}">
+                <button
+                  type="button"
+                  class="review-detail-action review-reply-trigger"
+                  data-reply-trigger
+                  th:attr="data-reply-comment-id=${comment.commentId},data-reply-tourist-name=${comment.touristName}"
+                >
+                  ↩ Reply
+                </button>
+
+                <button
+                  type="button"
+                  class="review-detail-action"
+                  data-comment-like
+                  th:attr="data-like-url=@{/reviews/comments/like/{id}(id=${comment.commentId})},data-liked=${comment.likedByCurrentUser},aria-pressed=${comment.likedByCurrentUser}"
+                  th:classappend="${comment.likedByCurrentUser} ? ' liked' : ''"
+                >
+                  <span data-like-icon th:text="${comment.likedByCurrentUser ? '♥' : '♡'}">♡</span>
+                  Like <span data-like-count th:text="${comment.likeCount}">0</span>
+                </button>
+
+                <button
+                  type="button"
+                  class="review-detail-action review-report-trigger"
+                  data-report-target="COMMENT"
+                  th:attr="data-review-id=${review.reviewId},data-comment-id=${comment.commentId}"
+                >
+                  ⚑ Report
+                </button>
+
+                <div
+                  class="review-comment-owner-actions"
+                  th:if="${currentUserId != null and comment.touristId == currentUserId}"
+                >
+                  <a
+                    class="review-comment-icon-btn"
+                    th:href="@{/reviews/detail/{id}(id=${review.reviewId},editComment=${comment.commentId})}"
+                    title="Edit comment"
+                    aria-label="Edit comment"
+                  >
+                    ✎
+                  </a>
+
+                  <form th:action="@{/reviews/comments/delete/{id}(id=${comment.commentId})}" method="post">
+                    <input type="hidden" name="reviewId" th:value="${review.reviewId}" />
+
+                    <button
+                      type="submit"
+                      class="review-comment-icon-btn delete"
+                      title="Delete comment"
+                      aria-label="Delete comment"
+                    >
+                      🗑
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </article>
+          </div>
+
+          <div class="review-empty" th:if="${comments == null or #lists.isEmpty(comments)}">
+            <p class="review-empty-text">No comments yet.</p>
+          </div>
+
+          <form
+            class="review-comment-form"
+            th:action="@{/reviews/comments/create}"
+            th:object="${comment}"
+            method="post"
+            data-content-form
+            data-comment-form
+          >
+            <input type="hidden" th:field="*{reviewId}" />
+            <input type="hidden" th:field="*{replyToCommentId}" />
+
+            <label for="commentText"> Add a comment </label>
+
+            <p class="review-reply-selection" id="replyTarget" hidden>
+              Replying to <strong data-reply-name></strong>
+              <button type="button" class="review-reply-cancel" data-cancel-reply>Cancel reply</button>
+            </p>
+
+            <textarea
+              id="commentText"
+              class="review-comment-textarea"
+              th:field="*{commentText}"
+              data-moderated-text
+              data-review-counter="commentCharacterCount"
+              maxlength="500"
+              placeholder="Join the discussion..."
+            ></textarea>
+
+            <div class="review-comment-form-meta">
+              <span class="review-field-error" th:if="${#fields.hasErrors('commentText')}" th:errors="*{commentText}">
+                Comment cannot be empty.
+              </span>
+              <span class="review-counter"> <span id="commentCharacterCount">0</span>/500 </span>
+            </div>
+
+            <button class="review-btn-primary" type="submit">Post Comment</button>
+          </form>
+
+          <div class="review-bottom-actions">
+            <a class="review-btn-outline" th:href="@{/reviews/{id}(id=${business.businessId})}"> Back to Reviews </a>
+
+            <a
+              class="review-btn-primary"
+              th:if="${currentUserId != null and review.touristId == currentUserId}"
+              th:href="@{/reviews/edit/{id}(id=${review.reviewId})}"
+            >
+              Edit Review
+            </a>
+          </div>
+        </section>
+      </article>
+    </main>
+
+    <div
+      id="reviewPhotoViewer"
+      class="review-photo-viewer"
+      hidden
+      aria-hidden="true"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Review photo preview"
+    >
+      <div class="review-photo-viewer-content">
+        <button
+          type="button"
+          class="review-photo-viewer-close"
+          data-close-photo-viewer
+          aria-label="Close photo preview"
+        >
+          ×
+        </button>
+
+        <img data-review-photo-viewer-image alt="Expanded review photo" />
+      </div>
+    </div>
+
+    <div id="reviewReportModal" class="review-modal" aria-hidden="true">
+      <div class="review-modal-card">
+        <button type="button" class="review-modal-close" data-cancel-report aria-label="Close">×</button>
+
+        <h3 class="review-modal-title">Report Content</h3>
+
+        <p class="review-modal-text">Select a reason. Our team will review this content.</p>
+
+        <form class="review-report-form" data-report-form method="post" th:action="@{/reviews/reports}">
+          <input type="hidden" name="targetType" />
+          <input type="hidden" name="reviewId" />
+          <input type="hidden" name="commentId" />
+
+          <label for="reportReason">Reason</label>
+          <select id="reportReason" name="reason" class="review-input" required>
+            <option value="">Choose a reason</option>
+            <option value="SPAM">Spam</option>
+            <option value="ABUSIVE_CONTENT">Abusive content</option>
+            <option value="HATE_SPEECH">Hate speech</option>
+            <option value="FALSE_INFORMATION">False information</option>
+            <option value="OTHER">Other</option>
+          </select>
+
+          <p class="review-field-error" data-report-error hidden></p>
+
+          <div class="review-modal-actions">
+            <button type="button" class="review-btn-outline" data-cancel-report>Cancel</button>
+            <button type="submit" class="review-btn-primary">Submit Report</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <footer th:replace="~{fragments/footer :: global}"></footer>
+    <script th:src="@{/js/review.js}"></script>
+  </body>
+</html>

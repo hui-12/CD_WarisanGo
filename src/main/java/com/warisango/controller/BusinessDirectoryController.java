@@ -1,8 +1,8 @@
 package com.warisango.controller;
 
 import com.warisango.dto.HeritageBusinessDTO;
-import com.warisango.model.service.BusinessService;
-import com.warisango.model.service.ReviewService;
+import com.warisango.service.BusinessService;
+import com.warisango.service.ReviewService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,10 +18,15 @@ public class BusinessDirectoryController {
 
     private final BusinessService businessService;
     private final ReviewService reviewService;
+    private final BusinessStreamManager businessStreamManager;
 
-    public BusinessDirectoryController(BusinessService businessService, ReviewService reviewService) {
+    public BusinessDirectoryController(
+            BusinessService businessService,
+            ReviewService reviewService,
+            BusinessStreamManager businessStreamManager) {
         this.businessService = businessService;
         this.reviewService = reviewService;
+        this.businessStreamManager = businessStreamManager;
     }
 
     // Directory page (list)
@@ -29,7 +34,7 @@ public class BusinessDirectoryController {
     public String showBusinessDirectory(Model model) {
         List<HeritageBusinessDTO> businesses = businessService.getApprovedBusinesses();
         model.addAttribute("businesses", businesses);
-        return "BusinessDirectoryPage"; // must match src/main/resources/view/BusinessDirectoryPage.html
+        return "business-directory";
     }
 
     // Details page
@@ -46,12 +51,12 @@ public class BusinessDirectoryController {
         model.addAttribute("business", business);
         model.addAttribute("featuredReview", reviewService.getFeaturedReview(businessId));
         model.addAttribute("totalReviews", reviewService.getTotalReviews(businessId));
-        return "BusinessDetailsPage"; // must match file name
+        return "business-details";
     }
 
     // SSE endpoint for realtime updates (optional front-end subscription)
     @GetMapping("/sse/businesses")
     public SseEmitter streamBusinesses() {
-        return businessService.streamApprovedBusinesses();
+        return businessStreamManager.openStream();
     }
 }

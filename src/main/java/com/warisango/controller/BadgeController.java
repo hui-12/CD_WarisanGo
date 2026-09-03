@@ -2,7 +2,7 @@ package com.warisango.controller;
 
 import com.warisango.dto.BadgeDTO;
 import com.warisango.dto.BadgeSummaryDTO;
-import com.warisango.model.service.BadgeService;
+import com.warisango.service.BadgeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;

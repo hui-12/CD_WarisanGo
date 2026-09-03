@@ -1,5 +1,7 @@
 package com.warisango.util;
 
+import com.google.cloud.Timestamp;
+
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -21,12 +23,42 @@ public final class ReviewDateFormatter {
     private ReviewDateFormatter() {
     }
 
+    public static String format(Timestamp timestamp) {
+        return timestamp == null ? "" : format(timestamp.toDate().toInstant());
+    }
+
+    public static String format(Instant instant) {
+        return instant == null ? "" : instant.atZone(DISPLAY_ZONE).format(DISPLAY_FORMAT);
+    }
+
+    public static String format(String timestampText) {
+        return formatText(timestampText);
+    }
+
+    /**
+     * Compatibility entry point for Firestore values whose stored type may differ between old records.
+     */
     public static String format(Object timestampValue) {
         if (timestampValue == null) {
             return "";
         }
 
-        String timestampText = timestampValue.toString().trim();
+        if (timestampValue instanceof Timestamp timestamp) {
+            return format(timestamp);
+        }
+        if (timestampValue instanceof Instant instant) {
+            return format(instant);
+        }
+
+        return formatText(timestampValue.toString());
+    }
+
+    private static String formatText(String value) {
+        if (value == null) {
+            return "";
+        }
+
+        String timestampText = value.trim();
         if (timestampText.isEmpty()) {
             return "";
         }

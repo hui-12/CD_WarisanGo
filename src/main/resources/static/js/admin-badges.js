@@ -2,11 +2,23 @@ const list = document.getElementById('badge-list');
 const dialog = document.getElementById('badge-dialog');
 const form = document.getElementById('badge-form');
 const message = document.getElementById('badge-message');
+const deleteDialog = document.getElementById('badge-delete-dialog');
+const deleteBadgeName = document.getElementById('badge-delete-name');
 let badges = [];
+let pendingDeleteBadgeId = null;
 
-const escapeHtml = value => String(value ?? '').replace(/[&<>'"]/g, character => ({
-  '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
-})[character]);
+const escapeHtml = (value) =>
+  String(value ?? '').replace(
+    /[&<>'"]/g,
+    (character) =>
+      ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        "'": '&#39;',
+        '"': '&quot;',
+      })[character]
+  );
 
 async function loadBadges() {
   try {
@@ -24,7 +36,9 @@ function renderBadges() {
     list.innerHTML = '<p class="badge-empty">No badges yet. Create the first badge.</p>';
     return;
   }
-  list.innerHTML = badges.map(badge => `<article class="admin-badge-card">
+  list.innerHTML = badges
+    .map(
+      (badge) => `<article class="admin-badge-card">
     <span class="admin-badge-emoji">${escapeHtml(badge.emoji)}</span>
     <h2>${escapeHtml(badge.name)}</h2>
     <p>${escapeHtml(badge.description)}</p>
@@ -33,7 +47,9 @@ function renderBadges() {
       <button class="edit-badge" type="button" data-edit="${escapeHtml(badge.badgeId)}">Edit</button>
       <button class="delete-badge" type="button" data-delete="${escapeHtml(badge.badgeId)}">Delete</button>
     </div>
-  </article>`).join('');
+  </article>`
+    )
+    .join('');
 }
 
 function openForm(badge = null) {
@@ -55,7 +71,7 @@ function showMessage(text, error = false) {
   message.hidden = false;
 }
 
-form.addEventListener('submit', async event => {
+form.addEventListener('submit', async (event) => {
   event.preventDefault();
   const badgeId = document.getElementById('badge-id').value;
   const body = {
@@ -64,12 +80,12 @@ form.addEventListener('submit', async event => {
     description: document.getElementById('badge-description').value.trim(),
     unlockCriteria: document.getElementById('badge-unlock-criteria').value.trim(),
     criteriaType: document.getElementById('badge-criteria-type').value,
-    target: Number(document.getElementById('badge-target').value)
+    target: Number(document.getElementById('badge-target').value),
   };
   const response = await fetch(badgeId ? `/api/admin/badges/${encodeURIComponent(badgeId)}` : '/api/admin/badges', {
     method: badgeId ? 'PUT' : 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify(body)
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
   });
   const result = await response.json().catch(() => ({}));
   if (!response.ok) {
@@ -81,23 +97,44 @@ form.addEventListener('submit', async event => {
   await loadBadges();
 });
 
-list.addEventListener('click', async event => {
+list.addEventListener('click', (event) => {
   const editButton = event.target.closest('[data-edit]');
-  if (editButton) openForm(badges.find(badge => badge.badgeId === editButton.dataset.edit));
+  if (editButton) {
+    openForm(badges.find((badge) => badge.badgeId === editButton.dataset.edit));
+    return;
+  }
   const deleteButton = event.target.closest('[data-delete]');
-  if (!deleteButton || !confirm('Delete this badge and all earned records for it?')) return;
-  const response = await fetch(`/api/admin/badges/${encodeURIComponent(deleteButton.dataset.delete)}`, {
-    method: 'DELETE'
+  if (!deleteButton) return;
+  const badge = badges.find((item) => item.badgeId === deleteButton.dataset.delete);
+  pendingDeleteBadgeId = deleteButton.dataset.delete;
+  deleteBadgeName.textContent = badge?.name || 'this badge';
+  deleteDialog.showModal();
+});
+
+async function deletePendingBadge() {
+  if (!pendingDeleteBadgeId) return;
+  const badgeId = pendingDeleteBadgeId;
+  const response = await fetch(`/api/admin/badges/${encodeURIComponent(badgeId)}`, {
+    method: 'DELETE',
   });
   if (!response.ok) {
+    deleteDialog.close();
+    pendingDeleteBadgeId = null;
     showMessage('Unable to delete badge.', true);
     return;
   }
+  deleteDialog.close();
+  pendingDeleteBadgeId = null;
   showMessage('Badge deleted successfully.');
   await loadBadges();
-});
+}
 
 document.getElementById('create-badge').addEventListener('click', () => openForm());
 document.getElementById('close-dialog').addEventListener('click', () => dialog.close());
 document.getElementById('cancel-badge').addEventListener('click', () => dialog.close());
+document.getElementById('confirm-badge-delete').addEventListener('click', deletePendingBadge);
+document.getElementById('cancel-badge-delete').addEventListener('click', () => {
+  pendingDeleteBadgeId = null;
+  deleteDialog.close();
+});
 loadBadges();

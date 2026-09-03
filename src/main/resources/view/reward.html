@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <th:block th:replace="~{fragments/fragments :: head('WarisanGo — Rewards Dashboard')}"></th:block>
+    <link rel="stylesheet" href="/css/rewards.css" th:href="@{/css/rewards.css}" />
+  </head>
+  <body th:attr="data-current-user-id=${#authentication.name}">
+    <div th:replace="~{fragments/fragments :: navbar('rewards')}"></div>
+    <div id="page-rewards" class="page active">
+      <main>
+        <h1 th:text="${dashboardTitle ?: 'My Rewards Dashboard'}">My Rewards Dashboard</h1>
+        <div class="batik-divider view-reward-1"></div>
+
+        <!-- Tier hero -->
+        <div class="view-reward-2">
+          <div class="batik-bg view-reward-3">
+            <div class="view-reward-4">CURRENT TIER</div>
+            <div id="rw-tier-name" class="view-reward-5">Loading</div>
+            <div id="rw-points" class="view-reward-6">Loading...</div>
+            <div class="view-reward-7">
+              <div id="rw-tier-progress" class="view-reward-8"></div>
+            </div>
+            <div id="rw-next-tier" class="view-reward-9">Loading tier progress...</div>
+          </div>
+          <div class="view-reward-10">
+            <div class="card">
+              <div class="caption">LEADERBOARD RANK</div>
+              <div id="rw-rank" class="mono view-reward-11">Loading...</div>
+              <div id="rw-rank-total" class="view-reward-12">Loading users</div>
+            </div>
+            <div class="card">
+              <div class="caption">BADGES EARNED</div>
+              <div class="view-reward-13">
+                <span id="rw-featured-badge-emoji" class="view-reward-14">🏅</span>
+                <div>
+                  <div id="rw-badges-earned" class="mono view-reward-15">Loading...</div>
+                  <strong id="rw-featured-badge-name" class="view-reward-16">Loading badges</strong>
+                </div>
+              </div>
+              <div id="rw-badges-total" class="view-reward-17">Loading available badges</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="view-reward-18">
+          <button class="rw-tab view-reward-19" data-reward-tab="overview" type="button">Overview</button>
+          <button class="rw-tab view-reward-20" data-reward-tab="history" type="button">Points History</button>
+          <button class="rw-tab view-reward-21" data-reward-tab="leaderboard" type="button">Leaderboard</button>
+        </div>
+
+        <div id="rw-overview">
+          <div class="view-reward-22">
+            <div class="card view-reward-23">
+              <div class="caption">TIER</div>
+              <div class="view-reward-24">Bronze</div>
+              <div class="view-reward-25">0–499 pts</div>
+            </div>
+            <div class="card view-reward-26">
+              <div class="caption">TIER</div>
+              <div class="view-reward-27">Silver</div>
+              <div class="view-reward-28">500–999 pts</div>
+            </div>
+            <div class="card view-reward-29">
+              <div class="caption">TIER</div>
+              <div class="view-reward-30">Gold</div>
+              <div class="view-reward-31">1,000–1,999 pts</div>
+            </div>
+            <div class="card view-reward-32">
+              <div class="caption">TIER</div>
+              <div class="view-reward-33">Platinum</div>
+              <div class="view-reward-34">2,000+ pts</div>
+            </div>
+          </div>
+        </div>
+
+        <div id="rw-history" class="view-reward-35"><div class="card">Loading point history...</div></div>
+
+        <div id="rw-leaderboard" class="view-reward-36">
+          <div class="view-reward-37">
+            <div class="view-reward-38">
+              <span>#</span><span>TOURIST</span><span>TIER</span><span class="view-reward-39">POINTS</span>
+            </div>
+            <div id="lb-rows"></div>
+          </div>
+        </div>
+      </main>
+    </div>
+    <div th:replace="~{fragments/footer :: global}"></div>
+    <script src="/js/rewards.js" th:src="@{/js/rewards.js}" defer></script>
+  </body>
+</html>

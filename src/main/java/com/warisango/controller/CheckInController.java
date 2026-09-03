@@ -3,8 +3,8 @@ package com.warisango.controller;
 import com.warisango.dto.CheckInRequest;
 import com.warisango.dto.CheckInResponse;
 import com.warisango.dto.RecentVisitDTO;
-import com.warisango.dto.UserPointsDTO;
-import com.warisango.model.service.CheckInService;
+import com.warisango.service.CheckInService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -21,20 +21,6 @@ public class CheckInController {
         this.checkInService = checkInService;
     }
 
-    @GetMapping("/user/points")
-    public ResponseEntity<UserPointsDTO> getPoints(Authentication authentication) {
-        String userId = authentication.getName();
-        try {
-            int points = checkInService.getCurrentPoints(userId);
-            return ResponseEntity.ok(new UserPointsDTO(userId, points));
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            return ResponseEntity.internalServerError().build();
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
-        }
-    }
-
     @GetMapping("/visits/recent")
     public ResponseEntity<List<RecentVisitDTO>> getRecentVisits(Authentication authentication) {
         return ResponseEntity.ok(checkInService.findRecentVisits(authentication.getName()));
@@ -42,11 +28,10 @@ public class CheckInController {
 
     @PostMapping("/checkin")
     public ResponseEntity<CheckInResponse> checkIn(
-            @RequestBody CheckInRequest request,
+            @Valid @RequestBody CheckInRequest request,
             Authentication authentication) {
 
-        request.setUserId(authentication.getName());
-        CheckInResponse response = checkInService.processCheckIn(request);
+        CheckInResponse response = checkInService.processCheckIn(authentication.getName(), request);
         return ResponseEntity.ok(response);
     }
 

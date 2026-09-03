@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <th:block th:replace="~{fragments/fragments :: head('Write Review | WarisanGo')}"></th:block>
+    <link rel="stylesheet" th:href="@{/css/review.css}" />
+  </head>
+
+  <body>
+    <header th:replace="~{fragments/fragments :: navbar('directory')}"></header>
+
+    <main class="review-form-page">
+      <section class="review-form-shell">
+        <!-- =========================
+             FORM HEADER
+             ========================= -->
+        <div class="review-form-header">
+          <p class="review-kicker">Review & Rating</p>
+
+          <h1 class="review-title">Write a Review</h1>
+
+          <p class="review-subtitle">Share your experience with this heritage business.</p>
+        </div>
+
+        <div class="review-form-body">
+          <!-- =========================
+                 BUSINESS INFORMATION
+                 ========================= -->
+          <div class="review-form-business">
+            <img
+              th:src="${business.businessImage}"
+              src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=900&q=80"
+              alt="Heritage business"
+            />
+
+            <div>
+              <h2 class="review-form-business-name" th:text="${business.businessName}">Heritage Business</h2>
+
+              <p class="review-form-business-address" th:text="${business.businessAddress}">Business Address</p>
+            </div>
+          </div>
+
+          <!-- =========================
+                 REVIEW FORM
+                 ========================= -->
+          <form
+            th:action="@{/reviews/create}"
+            th:object="${review}"
+            method="post"
+            enctype="multipart/form-data"
+            data-content-form
+          >
+            <!-- Business ID -->
+            <input type="hidden" th:field="*{businessId}" />
+
+            <!-- =========================
+                     RATING
+                     ========================= -->
+            <div class="review-form-field">
+              <label> Rating </label>
+
+              <div class="review-rating-input">
+                <!-- 5 -->
+                <input id="reviewStar5" type="radio" th:field="*{rating}" value="5" />
+
+                <label for="reviewStar5"> ★ </label>
+
+                <!-- 4 -->
+                <input id="reviewStar4" type="radio" th:field="*{rating}" value="4" />
+
+                <label for="reviewStar4"> ★ </label>
+
+                <!-- 3 -->
+                <input id="reviewStar3" type="radio" th:field="*{rating}" value="3" />
+
+                <label for="reviewStar3"> ★ </label>
+
+                <!-- 2 -->
+                <input id="reviewStar2" type="radio" th:field="*{rating}" value="2" />
+
+                <label for="reviewStar2"> ★ </label>
+
+                <!-- 1 -->
+                <input id="reviewStar1" type="radio" th:field="*{rating}" value="1" />
+
+                <label for="reviewStar1"> ★ </label>
+              </div>
+
+              <span class="review-field-error" th:if="${#fields.hasErrors('rating')}" th:errors="*{rating}">
+                Please choose a rating.
+              </span>
+            </div>
+
+            <!-- =========================
+                     REVIEW TEXT
+                     ========================= -->
+            <div class="review-form-field">
+              <label for="reviewText"> Review </label>
+
+              <textarea
+                class="review-textarea"
+                id="reviewText"
+                th:field="*{reviewText}"
+                data-moderated-text
+                data-review-counter="reviewCharacterCount"
+                maxlength="500"
+                placeholder="Share your experience..."
+              ></textarea>
+
+              <div class="review-counter"><span id="reviewCharacterCount">0</span>/500</div>
+
+              <span class="review-field-error" th:if="${#fields.hasErrors('reviewText')}" th:errors="*{reviewText}">
+                Review text is required.
+              </span>
+            </div>
+
+            <!-- =========================
+                     PHOTO UPLOAD
+                     ========================= -->
+            <div class="review-form-field">
+              <label> Photos </label>
+
+              <div
+                class="review-upload-area"
+                id="reviewUploadArea"
+                data-existing-photo-count="0"
+                tabindex="0"
+                role="button"
+                aria-label="Upload review photos"
+              >
+                <!-- Hidden file input -->
+                <input
+                  id="reviewPhotos"
+                  name="photos"
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  multiple
+                  hidden
+                />
+
+                <div class="review-upload-icon">📷</div>
+
+                <p class="review-upload-title">Drag & Drop your photos here</p>
+
+                <p class="review-upload-subtitle">or click to browse</p>
+
+                <p class="review-field-help">JPG / PNG / WebP · Maximum 10 photos</p>
+              </div>
+
+              <span
+                id="reviewPhotoError"
+                class="review-field-error"
+                th:if="${photoError != null}"
+                th:text="${photoError}"
+              >
+                Please select valid image files.
+              </span>
+
+              <!-- Selected photo preview -->
+              <div id="reviewUploadPreview" class="review-upload-preview"></div>
+            </div>
+
+            <!-- =========================
+                     ACTION BUTTONS
+                     ========================= -->
+            <div class="review-form-actions">
+              <span class="review-field-error" th:if="${reviewError != null}" th:text="${reviewError}">
+                The review could not be saved.
+              </span>
+
+              <a class="review-btn-outline" th:href="@{/reviews/{id}(id=${business.businessId})}"> Cancel </a>
+
+              <button class="review-btn-primary" type="submit">Submit Review</button>
+            </div>
+          </form>
+        </div>
+      </section>
+    </main>
+
+    <footer th:replace="~{fragments/footer :: global}"></footer>
+
+    <script th:src="@{/js/review.js}"></script>
+  </body>
+</html>

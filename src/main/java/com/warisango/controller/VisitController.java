@@ -1,7 +1,7 @@
 package com.warisango.controller;
 
 import com.warisango.dto.VisitDTO;
-import com.warisango.model.service.VisitService;
+import com.warisango.service.VisitService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;

@@ -6,7 +6,9 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.security.web.access.AccessDeniedHandler;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.context.SecurityContextRepository;
@@ -25,11 +27,20 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http,
                                           SecurityContextRepository securityContextRepository) throws Exception {
         http
-            .csrf(csrf -> csrf.disable())
+            .csrf(csrf -> csrf.ignoringRequestMatchers(
+                    "/api/**",
+                    "/reviews/moderation/check",
+                    "/reviews/like/**",
+                    "/reviews/comments/like/**"
+            ))
             .securityContext(securityContext -> securityContext
                 .securityContextRepository(securityContextRepository)
             )
             .exceptionHandling(exceptionHandling -> exceptionHandling
+                .defaultAuthenticationEntryPointFor(
+                        apiAuthenticationEntryPoint(),
+                        request -> request.getRequestURI().startsWith("/api/")
+                )
                 .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login"))
             )
             .authorizeHttpRequests(auth -> auth
@@ -37,6 +48,9 @@ public class SecurityConfig {
                     "/",
                     "/login",
                     "/heritage-gate",
+                    "/terms-of-service",
+                    "/privacy-policy",
+                    "/how-it-works",
                     "/directory",
                     "/business-directory",
                     "/business/**",
@@ -44,8 +58,6 @@ public class SecurityConfig {
                     "/interactive-map/**",
                     "/sse/businesses",
                     "/challenges",
-                    "/api/approved",
-                    "/api/stream",
                     "/api/auth/login",
                     "/api/auth/admin-login",
                     "/css/**",
@@ -53,6 +65,14 @@ public class SecurityConfig {
                     "/images/**"
                 ).permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/challenges").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/map/**").permitAll()
+                .requestMatchers(
+                    "/api/admin/**",
+                    "/ai-discovery",
+                    "/st-discovery",
+                    "/admin/**",
+                    "/AdminChallengePage"
+                ).hasRole("ADMIN")
                 .requestMatchers(
                     "/profile/**",
                     "/api/checkin",
@@ -63,12 +83,6 @@ public class SecurityConfig {
                     "/api/challenges/*/join",
                     "/api/challenges/*/claim"
                 ).authenticated()
-                .requestMatchers(
-                    "/ai-discovery",
-                    "/st-discovery",
-                    "/admin/**",
-                    "/AdminChallengePage"
-                ).hasRole("ADMIN")
                 .anyRequest().authenticated()
             )
             .exceptionHandling(exceptions -> exceptions.accessDeniedHandler(accessDeniedHandler()));
@@ -77,13 +91,31 @@ public class SecurityConfig {
     }
 
     @Bean
+    public AuthenticationEntryPoint apiAuthenticationEntryPoint() {
+        return (request, response, exception) -> writeJsonError(
+                response,
+                HttpStatus.UNAUTHORIZED,
+                "Authentication required."
+        );
+    }
+
+    @Bean
     public AccessDeniedHandler accessDeniedHandler() {
         return (request, response, exception) -> {
             if (request.getRequestURI().startsWith("/api/")) {
-                response.sendError(HttpStatus.FORBIDDEN.value(), "Admin privileges required.");
+                writeJsonError(response, HttpStatus.FORBIDDEN, "Access denied.");
                 return;
             }
             response.sendRedirect("/profile?error=admin");
         };
+    }
+
+    private static void writeJsonError(
+            jakarta.servlet.http.HttpServletResponse response,
+            HttpStatus status,
+            String message) throws java.io.IOException {
+        response.setStatus(status.value());
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.getWriter().write("{\"message\":\"" + message + "\"}");
     }
 }

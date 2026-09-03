@@ -1,26 +1,33 @@
 package com.warisango.dto;
 
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
 public class CheckInRequest {
-    private String userId;
+
+    @NotBlank(message = "Business ID is required.")
     private String businessId;
-    private double userLatitude;
-    private double userLongitude;
-    private double distanceMeters;
+
+    @NotNull(message = "Latitude is required.")
+    @DecimalMin(value = "-90.0", message = "Latitude must be at least -90.")
+    @DecimalMax(value = "90.0", message = "Latitude must not exceed 90.")
+    private Double userLatitude;
+
+    @NotNull(message = "Longitude is required.")
+    @DecimalMin(value = "-180.0", message = "Longitude must be at least -180.")
+    @DecimalMax(value = "180.0", message = "Longitude must not exceed 180.")
+    private Double userLongitude;
 
     public CheckInRequest() {}
-
-    public String getUserId() { return userId; }
-    public void setUserId(String userId) { this.userId = userId; }
 
     public String getBusinessId() { return businessId; }
     public void setBusinessId(String businessId) { this.businessId = businessId; }
 
-    public double getUserLatitude() { return userLatitude; }
-    public void setUserLatitude(double userLatitude) { this.userLatitude = userLatitude; }
+    public Double getUserLatitude() { return userLatitude; }
+    public void setUserLatitude(Double userLatitude) { this.userLatitude = userLatitude; }
 
-    public double getUserLongitude() { return userLongitude; }
-    public void setUserLongitude(double userLongitude) { this.userLongitude = userLongitude; }
-
-    public double getDistanceMeters() { return distanceMeters; }
-    public void setDistanceMeters(double distanceMeters) { this.distanceMeters = distanceMeters; }
+    public Double getUserLongitude() { return userLongitude; }
+    public void setUserLongitude(Double userLongitude) { this.userLongitude = userLongitude; }
 }

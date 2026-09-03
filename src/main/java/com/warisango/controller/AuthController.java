@@ -1,8 +1,9 @@
 package com.warisango.controller;
 
 import com.warisango.dto.LoginRequest;
+import com.warisango.dto.UserResponse;
 import com.warisango.model.User;
-import com.warisango.model.service.AuthService;
+import com.warisango.service.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -32,23 +33,23 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<User> loginUser(@Valid @RequestBody LoginRequest loginRequest,
+    public ResponseEntity<UserResponse> loginUser(@Valid @RequestBody LoginRequest loginRequest,
                                           HttpServletRequest request,
                                           HttpServletResponse response) {
         User authenticatedUser = authService.authenticateTourist(loginRequest);
 
         saveAuthenticatedUser(authenticatedUser, request, response);
-        return ResponseEntity.ok(authenticatedUser);
+        return ResponseEntity.ok(UserResponse.from(authenticatedUser));
     }
 
     @PostMapping("/admin-login")
-    public ResponseEntity<User> loginAdmin(@Valid @RequestBody LoginRequest loginRequest,
+    public ResponseEntity<UserResponse> loginAdmin(@Valid @RequestBody LoginRequest loginRequest,
                                            HttpServletRequest request,
                                            HttpServletResponse response) {
         User authenticatedUser = authService.authenticateAdmin(loginRequest);
 
         saveAuthenticatedUser(authenticatedUser, request, response);
-        return ResponseEntity.ok(authenticatedUser);
+        return ResponseEntity.ok(UserResponse.from(authenticatedUser));
     }
 
     private void saveAuthenticatedUser(User authenticatedUser,

@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <th:block th:replace="~{fragments/fragments :: head('How WarisanGo Works')}"></th:block>
+    <link rel="stylesheet" href="/css/home.css" th:href="@{/css/home.css}" />
+  </head>
+  <body>
+    <div th:replace="~{fragments/fragments :: navbar('how-it-works')}"></div>
+    <main class="how-it-works-page">
+      <header class="how-it-works-hero">
+        <p class="section-tagline">EXPLORE MALAYSIA'S FOOD HERITAGE</p>
+        <h1>Discover the stories behind every flavour.</h1>
+        <p>WarisanGo connects visitors with verified heritage food businesses, community knowledge, and rewarding cultural journeys.</p>
+      </header>
+      <section class="how-it-works-section" aria-labelledby="how-it-works-title">
+        <p class="section-tagline">YOUR JOURNEY</p>
+        <h2 id="how-it-works-title" class="section-title">How it works</h2>
+        <div class="feature-cards-grid">
+          <article class="feature-card">
+            <div class="feature-icon" aria-hidden="true">&#128269;</div>
+            <h3 class="feature-title">Discover heritage businesses</h3>
+            <p class="feature-desc">Search a curated directory and interactive map of approved Malaysian heritage food destinations.</p>
+            <a class="btn-card-action how-it-works-link" th:href="@{/directory}">Browse Directory &rarr;</a>
+          </article>
+          <article class="feature-card">
+            <div class="feature-icon" aria-hidden="true">&#128205;</div>
+            <h3 class="feature-title">Visit and check in</h3>
+            <p class="feature-desc">Members can check in at participating locations, record their visits, and receive points.</p>
+            <a class="btn-card-action how-it-works-link" th:href="@{/map}">Explore the Map &rarr;</a>
+          </article>
+          <article class="feature-card">
+            <div class="feature-icon" aria-hidden="true">&#11088;</div>
+            <h3 class="feature-title">Share community reviews</h3>
+            <p class="feature-desc">Verified visitors can share ratings, stories, and photos to help other explorers.</p>
+          </article>
+          <article class="feature-card">
+            <div class="feature-icon" aria-hidden="true">&#127942;</div>
+            <h3 class="feature-title">Earn rewards</h3>
+            <p class="feature-desc">Complete challenges, unlock badges, advance through membership tiers, and climb the leaderboard.</p>
+          </article>
+        </div>
+      </section>
+      <section class="how-it-works-join">
+        <p class="section-tagline">READY TO BEGIN?</p>
+        <h2>Start your heritage food journey.</h2>
+        <a th:href="@{/login}">Join WarisanGo</a>
+      </section>
+    </main>
+    <div th:replace="~{fragments/footer :: global}"></div>
+  </body>
+</html>

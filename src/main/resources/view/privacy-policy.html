@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <th:block th:replace="~{fragments/fragments :: head('Privacy Policy | WarisanGo')}"></th:block>
+  </head>
+  <body>
+    <div th:replace="~{fragments/fragments :: navbar('legal')}"></div>
+    <main class="legal-page">
+      <article class="legal-card">
+        <p class="legal-kicker">WARISANGO</p>
+        <h1>Privacy Policy</h1>
+        <p class="legal-updated">Effective 3 September 2026</p>
+        <section>
+          <h2>Information we use</h2>
+          <p>WarisanGo uses your Google account identity, profile information, activity, reviews, saved listings, and check-ins to provide its features.</p>
+        </section>
+        <section>
+          <h2>Location and uploaded media</h2>
+          <p>Location is used when checking in and calculating nearby places. Review photos and profile images are stored only when you choose to upload them.</p>
+        </section>
+        <section>
+          <h2>How information is shared</h2>
+          <p>Public profile names and community contributions may be visible to other users. We do not sell personal information.</p>
+        </section>
+        <section>
+          <h2>Your choices</h2>
+          <p>You may update supported profile fields and contact the project administrator about access, correction, or deletion requests.</p>
+        </section>
+      </article>
+    </main>
+    <div th:replace="~{fragments/footer :: global}"></div>
+  </body>
+</html>

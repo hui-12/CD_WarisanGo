@@ -1,7 +1,7 @@
 package com.warisango.controller;
 
 import com.warisango.dto.HeritageBusinessUpdateRequest;
-import com.warisango.model.service.PendingHeritageBusinessService;
+import com.warisango.service.PendingHeritageBusinessService;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -39,7 +39,7 @@ public class PendingHeritageBusinessController {
         var business = pendingHeritageBusinessService.findById(businessId);
         model.addAttribute("business", business);
         if (!model.containsAttribute("businessUpdate")) {
-            model.addAttribute("businessUpdate", toUpdateRequest(business));
+            model.addAttribute("businessUpdate", pendingHeritageBusinessService.createUpdateRequest(business));
         }
         return "admin/pending-details";
     }
@@ -91,20 +91,4 @@ public class PendingHeritageBusinessController {
         return "redirect:/admin/pending-list";
     }
 
-    private HeritageBusinessUpdateRequest toUpdateRequest(
-            com.warisango.dto.HeritageBusinessView business) {
-        HeritageBusinessUpdateRequest request = new HeritageBusinessUpdateRequest();
-        request.setName(business.name());
-        request.setAddress(business.address());
-        request.setState(business.state());
-        request.setCity(business.city());
-        request.setDescription(business.description());
-        request.setLatitude(business.latitude());
-        request.setLongitude(business.longitude());
-        request.setOperatingHour(business.operatingHour());
-        request.setAverageRating(business.averageRating());
-        request.setCheckInPoints(business.checkInPoints());
-        request.setSourceVideoLink(business.sourceVideoLink());
-        return request;
-    }
 }

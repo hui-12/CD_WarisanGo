@@ -11,10 +11,10 @@ public class YoutubeConfig {
     private final String baseUrl;
 
     public YoutubeConfig(
-            @Value("${youtube.api.key}") String apiKey,
-            @Value("${youtube.base.url}") String baseUrl) {
+            @Value("${youtube.api.key:}") String apiKey,
+            @Value("${youtube.base.url:https://www.googleapis.com/youtube/v3}") String baseUrl) {
         this.apiKey = apiKey == null ? "" : apiKey.trim();
-        this.baseUrl = baseUrl;
+        this.baseUrl = baseUrl.strip().replaceAll("/+$", "");
     }
 
     public String getApiKey() {

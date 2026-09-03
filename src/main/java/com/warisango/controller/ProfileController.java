@@ -1,10 +1,12 @@
 package com.warisango.controller;
 
 import com.warisango.model.User;
-import com.warisango.model.service.AuthService;
-import com.warisango.model.service.UserService;
-import com.warisango.model.service.VisitService;
-import com.warisango.model.service.BadgeService;
+import com.warisango.dto.ProfileUpdateRequest;
+import com.warisango.exception.ProfileUpdateException;
+import com.warisango.service.AuthService;
+import com.warisango.service.ProfileService;
+import com.warisango.service.VisitService;
+import com.warisango.service.BadgeService;
 import com.warisango.util.TierCalculator;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -21,14 +23,14 @@ import java.time.format.DateTimeFormatter;
 public class ProfileController {
 
     private final AuthService authService;
-    private final UserService userService;
+    private final ProfileService profileService;
     private final VisitService visitService;
     private final BadgeService badgeService;
 
-    public ProfileController(AuthService authService, UserService userService,
+    public ProfileController(AuthService authService, ProfileService profileService,
                              VisitService visitService, BadgeService badgeService) {
         this.authService = authService;
-        this.userService = userService;
+        this.profileService = profileService;
         this.visitService = visitService;
         this.badgeService = badgeService;
     }
@@ -37,7 +39,7 @@ public class ProfileController {
     public String profile(Authentication authentication, Model model) {
         String touristId = authentication.getName();
         authService.findUserByUid(touristId).ifPresent(user -> addProfileModel(model, user, touristId));
-        return "ProfilePage";
+        return "profile";
     }
 
     @PostMapping("/profile")
@@ -47,9 +49,13 @@ public class ProfileController {
                                 @RequestParam(required = false) String aboutMe,
                                 RedirectAttributes redirectAttributes) {
         try {
-            userService.updateProfile(authentication.getName(), name, gender, aboutMe);
+            ProfileUpdateRequest request = new ProfileUpdateRequest();
+            request.setDisplayName(name);
+            request.setGender(gender);
+            request.setAboutMe(aboutMe);
+            profileService.updateProfile(authentication.getName(), request);
             redirectAttributes.addFlashAttribute("profileMessage", "Profile updated successfully.");
-        } catch (IllegalArgumentException exception) {
+        } catch (ProfileUpdateException | IllegalArgumentException exception) {
             redirectAttributes.addFlashAttribute("profileError", exception.getMessage());
         }
         return "redirect:/profile";
@@ -64,6 +70,9 @@ public class ProfileController {
                     .format(user.getCreatedAt().toDate().toInstant());
         }
         model.addAttribute("memberSince", memberSince);
+        if ("admin".equalsIgnoreCase(user.getRole())) {
+            return;
+        }
         var visits = visitService.getVisits(touristId);
         model.addAttribute("calculatedTier", TierCalculator.tierFor(user.getTotalPoints()));
         model.addAttribute("visits", visits);

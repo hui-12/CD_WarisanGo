@@ -1,8 +1,9 @@
 package com.warisango.controller;
 
 import com.warisango.dto.BusinessCorrectionRequest;
-import com.warisango.model.BusinessReport;
-import com.warisango.model.service.BusinessReportService;
+import com.warisango.dto.BusinessReportSummary;
+import com.warisango.dto.BusinessReportView;
+import com.warisango.service.BusinessReportService;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -33,28 +34,30 @@ public class BusinessReportController {
             businessReportService.submit(authentication.getName(), businessId, reason, details);
             redirectAttributes.addFlashAttribute("businessReportMessage",
                     "Thank you. Your correction report is pending admin review.");
+            return "redirect:/business/" + businessId;
         } catch (RuntimeException exception) {
             redirectAttributes.addFlashAttribute("businessReportError", exception.getMessage());
+            return "redirect:/business/" + businessId + "#report-business";
         }
-        return "redirect:/business/" + businessId + "#report-business";
     }
 
     @GetMapping("/admin/business-reports")
     public String queue(Authentication authentication, Model model) {
-        List<BusinessReport> reports = businessReportService.getAll(authentication.getName());
+        List<BusinessReportView> reports = businessReportService.getAll(authentication.getName());
+        BusinessReportSummary summary = businessReportService.summarize(reports);
         model.addAttribute("reports", reports);
-        model.addAttribute("totalReports", reports.size());
-        model.addAttribute("pendingReports", count(reports, "PENDING_REVIEW"));
-        model.addAttribute("resolvedReports", count(reports, "RESOLVED"));
-        model.addAttribute("dismissedReports", count(reports, "DISMISSED"));
-        return "admin/BusinessReportQueuePage";
+        model.addAttribute("totalReports", summary.total());
+        model.addAttribute("pendingReports", summary.pending());
+        model.addAttribute("resolvedReports", summary.resolved());
+        model.addAttribute("dismissedReports", summary.dismissed());
+        return "admin/business-report-queue";
     }
 
     @GetMapping("/admin/business-reports/{reportId}")
     public String detail(@PathVariable String reportId, Authentication authentication, Model model) {
         model.addAttribute("report", businessReportService.get(reportId, authentication.getName()));
         model.addAttribute("correction", new BusinessCorrectionRequest());
-        return "admin/BusinessReportDetailPage";
+        return "admin/business-report-detail";
     }
 
     @PostMapping("/admin/business-reports/{reportId}/resolve")
@@ -87,7 +90,4 @@ public class BusinessReportController {
         }
     }
 
-    private long count(List<BusinessReport> reports, String status) {
-        return reports.stream().filter(report -> status.equalsIgnoreCase(report.getStatus())).count();
-    }
 }

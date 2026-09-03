@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <th:block th:replace="~{fragments/fragments :: head('Terms of Service | WarisanGo')}"></th:block>
+  </head>
+  <body>
+    <div th:replace="~{fragments/fragments :: navbar('legal')}"></div>
+    <main class="legal-page">
+      <article class="legal-card">
+        <p class="legal-kicker">WARISANGO</p>
+        <h1>Terms of Service</h1>
+        <p class="legal-updated">Effective 3 September 2026</p>
+        <section>
+          <h2>Using WarisanGo</h2>
+          <p>Use the service lawfully and provide accurate information when posting reviews, reports, and check-ins.</p>
+        </section>
+        <section>
+          <h2>Community content</h2>
+          <p>You remain responsible for content you submit. We may moderate content that is harmful, unlawful, misleading, or violates community rules.</p>
+        </section>
+        <section>
+          <h2>Rewards and availability</h2>
+          <p>Points, badges, challenges, listings, and external integrations may change as the service develops. Abuse may result in rewards being withdrawn.</p>
+        </section>
+        <section>
+          <h2>Contact</h2>
+          <p>Questions about these terms can be sent to the WarisanGo project administrator.</p>
+        </section>
+      </article>
+    </main>
+    <div th:replace="~{fragments/footer :: global}"></div>
+  </body>
+</html>

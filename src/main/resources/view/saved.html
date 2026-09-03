@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <th:block th:replace="~{fragments/fragments :: head('Saved Listings — WarisanGo')}"></th:block>
+    <link rel="stylesheet" href="/css/business-heritage.css" th:href="@{/css/business-heritage.css}" />
+    <link rel="stylesheet" href="/css/saved-listings.css" th:href="@{/css/saved-listings.css}" />
+  </head>
+  <body>
+    <div th:replace="~{fragments/fragments :: navbar('saved')}"></div>
+    <main class="saved-page">
+      <header class="saved-header">
+        <p class="saved-kicker">Your collection</p>
+        <h1>Saved Listings</h1>
+        <p id="saved-summary">Loading your saved heritage businesses…</p>
+      </header>
+
+      <section id="saved-filters" class="directory-toolbar" aria-label="Search and filter saved listings" hidden>
+        <div class="search-field">
+          <label class="sr-only" for="saved-search">Search saved businesses</label>
+          <input id="saved-search" type="search" placeholder="Search saved businesses..." autocomplete="off" />
+          <button id="saved-search-button" class="search-button" type="button">Search</button>
+        </div>
+        <div class="filters">
+          <select id="saved-state" aria-label="Filter by state">
+            <option value="">All States</option>
+          </select>
+          <select id="saved-city" aria-label="Filter by city">
+            <option value="">All Cities</option>
+          </select>
+          <button id="saved-clear" class="clear-filters saved-clear" type="button">Clear filters</button>
+        </div>
+      </section>
+
+      <p id="saved-result-count" class="saved-result-count" aria-live="polite"></p>
+      <section id="saved-results" class="business-grid" aria-live="polite">
+        <p class="saved-loading">Loading saved listings…</p>
+      </section>
+    </main>
+    <div th:replace="~{fragments/footer :: global}"></div>
+    <script src="/js/saved-businesses.js" th:src="@{/js/saved-businesses.js}" defer></script>
+  </body>
+</html>

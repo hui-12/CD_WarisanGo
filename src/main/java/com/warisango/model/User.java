@@ -15,7 +15,9 @@ public class User {
     private String aboutMe;
     private Timestamp createdAt;
 
-    public User() {} // Required for Firestore data mapping
+    public User() {
+        // Required for Firestore data mapping.
+    }
 
     public User(String uid, String email, String name, String avatar, String role) {
         this.uid = uid;
@@ -29,8 +31,6 @@ public class User {
         this.aboutMe = null;
         this.createdAt = Timestamp.now();
     }
-
-    // --- Getters and Setters ---
 
     public String getUid() {
         return uid;
@@ -87,6 +87,7 @@ public class User {
     public void setLastNameChangeTimestamp(Long lastNameChangeTimestamp) {
         this.lastNameChangeTimestamp = lastNameChangeTimestamp;
     }
+
     public String getTierStatus() {
         return tierStatus;
     }
@@ -95,10 +96,27 @@ public class User {
         this.tierStatus = tierStatus == null ? null : tierStatus.trim();
     }
 
-    public String getGender() { return gender; }
-    public void setGender(String gender) { this.gender = gender; }
-    public String getAboutMe() { return aboutMe; }
-    public void setAboutMe(String aboutMe) { this.aboutMe = aboutMe; }
-    public Timestamp getCreatedAt() { return createdAt; }
-    public void setCreatedAt(Timestamp createdAt) { this.createdAt = createdAt; }
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
+    public String getAboutMe() {
+        return aboutMe;
+    }
+
+    public void setAboutMe(String aboutMe) {
+        this.aboutMe = aboutMe;
+    }
+
+    public Timestamp getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Timestamp createdAt) {
+        this.createdAt = createdAt;
+    }
 }

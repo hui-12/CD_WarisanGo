@@ -1,13 +1,12 @@
 package com.warisango.controller;
 
 import com.warisango.dto.CommentDTO;
-import com.warisango.dto.LikeStatusDTO;
 import com.warisango.dto.ReviewDTO;
 import com.warisango.exception.ProhibitedContentException;
-import com.warisango.model.service.CommentService;
-import com.warisango.model.service.CommentLikeService;
-import com.warisango.model.service.ReviewService;
-import com.warisango.model.service.ReviewLikeService;
+import com.warisango.service.CommentService;
+import com.warisango.service.CommentLikeService;
+import com.warisango.service.ReviewService;
+import com.warisango.service.ReviewLikeService;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,10 +21,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 import java.util.Map;
@@ -101,7 +98,7 @@ public class ReviewController {
         model.addAttribute("currentUserId", currentUserId);
         model.addAttribute("commentsByReview", commentsByReview);
 
-        return "ReviewAndRatingPage";
+        return "review-and-rating";
     }
 
     @GetMapping("/create/{businessId}")
@@ -112,7 +109,7 @@ public class ReviewController {
         model.addAttribute("review", review);
         model.addAttribute("business", reviewService.getBusinessInformation(businessId));
 
-        return "ReviewFormPage";
+        return "review-form";
     }
 
     @PostMapping("/create")
@@ -130,7 +127,7 @@ public class ReviewController {
             logger.warn("Review create validation errors: {}", bindingResult.getAllErrors());
             addBusiness(model, review.getBusinessId());
             model.addAttribute("reviewError", "Please correct the highlighted fields.");
-            return "ReviewFormPage";
+            return "review-form";
         }
 
         try {
@@ -138,7 +135,7 @@ public class ReviewController {
         } catch (ProhibitedContentException e) {
             addBusiness(model, review.getBusinessId());
             model.addAttribute("reviewError", e.getMessage());
-            return "ReviewFormPage";
+            return "review-form";
         } catch (IllegalArgumentException | IllegalStateException e) {
             logger.warn("Review create was rejected: {}", e.getMessage(), e);
             addBusiness(model, review.getBusinessId());
@@ -146,12 +143,12 @@ public class ReviewController {
                     ? "The uploaded photo could not be processed."
                     : e.getMessage();
             model.addAttribute("photoError", message);
-            return "ReviewFormPage";
+            return "review-form";
         } catch (RuntimeException e) {
             logger.error("Could not create review for business {}", review.getBusinessId(), e);
             addBusiness(model, review.getBusinessId());
             model.addAttribute("reviewError", "The review could not be saved. Please try again.");
-            return "ReviewFormPage";
+            return "review-form";
         }
 
         return "redirect:/reviews/" + review.getBusinessId();
@@ -174,7 +171,7 @@ public class ReviewController {
         model.addAttribute("review", review);
         model.addAttribute("business", reviewService.getBusinessInformation(review.getBusinessId()));
 
-        return "ReviewEditPage";
+        return "review-edit";
     }
 
     @PostMapping("/update")
@@ -207,7 +204,7 @@ public class ReviewController {
             restoreExistingPhotos(review, existingReview);
             addBusiness(model, existingReview.getBusinessId());
             model.addAttribute("reviewError", "Please correct the highlighted fields.");
-            return "ReviewEditPage";
+            return "review-edit";
         }
 
         try {
@@ -225,7 +222,7 @@ public class ReviewController {
             restoreExistingPhotos(review, existingReview);
             addBusiness(model, existingReview.getBusinessId());
             model.addAttribute("reviewError", e.getMessage());
-            return "ReviewEditPage";
+            return "review-edit";
         } catch (IllegalArgumentException | IllegalStateException e) {
             logger.warn("Review update was rejected: {}", e.getMessage(), e);
             restoreExistingPhotos(review, existingReview);
@@ -234,13 +231,13 @@ public class ReviewController {
                     ? "The uploaded photo could not be processed."
                     : e.getMessage();
             model.addAttribute("photoError", message);
-            return "ReviewEditPage";
+            return "review-edit";
         } catch (RuntimeException e) {
             logger.error("Could not update review {}", existingReview.getReviewId(), e);
             restoreExistingPhotos(review, existingReview);
             addBusiness(model, existingReview.getBusinessId());
             model.addAttribute("reviewError", "The review could not be updated. Please try again.");
-            return "ReviewEditPage";
+            return "review-edit";
         }
 
         return "redirect:/reviews/" + existingReview.getBusinessId();
@@ -293,37 +290,7 @@ public class ReviewController {
                 null
         );
 
-        return "ReviewDetailPage";
-    }
-
-    @PostMapping("/like/{reviewId}")
-    @ResponseBody
-    public ResponseEntity<LikeStatusDTO> toggleReviewLike(@PathVariable String reviewId,
-                                                          Authentication authentication) {
-        if (reviewService.getReview(reviewId) == null) {
-            return ResponseEntity.notFound().build();
-        }
-
-        LikeStatusDTO status = reviewLikeService.toggleLike(
-                reviewId,
-                authentication.getName()
-        );
-        return ResponseEntity.ok(status);
-    }
-
-    @PostMapping("/comments/like/{commentId}")
-    @ResponseBody
-    public ResponseEntity<LikeStatusDTO> toggleCommentLike(@PathVariable String commentId,
-                                                           Authentication authentication) {
-        if (commentService.getComment(commentId) == null) {
-            return ResponseEntity.notFound().build();
-        }
-
-        LikeStatusDTO status = commentLikeService.toggleLike(
-                commentId,
-                authentication.getName()
-        );
-        return ResponseEntity.ok(status);
+        return "review-detail";
     }
 
     @PostMapping("/comments/create")
@@ -358,7 +325,7 @@ public class ReviewController {
                     authentication,
                     "Please correct the comment before submitting."
             );
-            return "ReviewDetailPage";
+            return "review-detail";
         }
 
         try {
@@ -378,7 +345,7 @@ public class ReviewController {
                     authentication,
                     e.getMessage()
             );
-            return "ReviewDetailPage";
+            return "review-detail";
         } catch (RuntimeException e) {
             logger.error("Could not create comment for review {}", reviewId, e);
             addReviewDetailModel(
@@ -391,7 +358,7 @@ public class ReviewController {
                     authentication,
                     "The comment could not be saved. Please try again."
             );
-            return "ReviewDetailPage";
+            return "review-detail";
         }
 
         return "redirect:/reviews/detail/" + reviewId;
@@ -440,7 +407,7 @@ public class ReviewController {
                     authentication,
                     "Please correct the comment before saving."
             );
-            return "ReviewDetailPage";
+            return "review-detail";
         }
 
         try {
@@ -460,7 +427,7 @@ public class ReviewController {
                     authentication,
                     e.getMessage()
             );
-            return "ReviewDetailPage";
+            return "review-detail";
         } catch (RuntimeException e) {
             logger.error("Could not update comment {}", existingComment.getCommentId(), e);
             addReviewDetailModel(
@@ -473,7 +440,7 @@ public class ReviewController {
                     authentication,
                     "The comment could not be updated. Please try again."
             );
-            return "ReviewDetailPage";
+            return "review-detail";
         }
 
         return "redirect:/reviews/detail/" + reviewId;

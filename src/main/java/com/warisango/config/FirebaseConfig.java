@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,16 +29,14 @@ public class FirebaseConfig {
 
     @Bean(destroyMethod = "delete")
     public FirebaseApp firebaseApp(
-            @Value("${warisango.firebase.storage-bucket:warisango.firebasestorage.app}")
-            String storageBucket) {
-        try (
-                InputStream serviceAccount = new ClassPathResource(
-                        "firebase-service-account.json"
-                ).getInputStream()
-        ) {
+            @Value("${warisango.firebase.credentials-location:classpath:firebase-service-account.json}")
+            Resource credentialsResource,
+            @Value("${warisango.firebase.project-id}") String projectId,
+            @Value("${warisango.firebase.storage-bucket}") String storageBucket) {
+        try (InputStream serviceAccount = credentialsResource.getInputStream()) {
             FirebaseOptions options = FirebaseOptions.builder()
                 .setCredentials(GoogleCredentials.fromStream(serviceAccount))
-                .setProjectId("warisango")
+                .setProjectId(projectId)
                 .setStorageBucket(storageBucket)
                 .build();
 
@@ -47,11 +45,11 @@ public class FirebaseConfig {
             }
 
             FirebaseApp firebaseApp = FirebaseApp.initializeApp(options);
-            logger.info("Firebase initialized successfully for project: warisango");
+            logger.info("Firebase initialized successfully for project: {}", projectId);
             return firebaseApp;
         } catch (IOException exception) {
             throw new IllegalStateException(
-                    "Failed to initialize Firebase. Verify firebase-service-account.json.",
+                    "Failed to initialize Firebase. Verify the configured credentials resource.",
                     exception
             );
         }

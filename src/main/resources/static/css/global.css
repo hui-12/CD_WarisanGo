@@ -1,259 +1,417 @@
 /* --- Shared page frame and navigation --- */
-html, body { 
-    min-height: 100%; 
+html,
+body {
+  min-height: 100%;
 }
 
-body { 
-    min-height: 100vh; 
-    display: flex; 
-    flex-direction: column; 
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
-main { 
-    min-height: calc(100vh - 56px - 105px); 
+main {
+  min-height: calc(100vh - 56px - 105px);
 }
 
 .navbar {
-    border-bottom: 1.5px solid #3e2723;
-    background-color: #141413;
-    position: sticky;
-    top: 0;
-    z-index: 50;
-    height: 56px;
+  border-bottom: 1.5px solid #3e2723;
+  background-color: #141413;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  height: 56px;
+}
+
+body:has(.admin-navbar) {
+  background: #f7f5ef;
+}
+
+.navbar.admin-navbar {
+  box-sizing: border-box;
+  display: block;
+  width: calc(100% - 24px);
+  height: 56px;
+  margin: 10px 12px 0;
+  padding: 0;
+  top: 10px;
+  border: 1px solid #141413;
+  background-color: #141413;
+}
+
+.navbar.admin-navbar .nav-container {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  margin: 0 auto;
+  padding-inline: clamp(36px, 4vw, 64px);
 }
 
 .nav-container {
-    max-width: none;
-    width: 100%;
-    margin: 0 auto;
-    padding: 0 32px;
-    box-sizing: border-box;   /* ← this line fixes the overflow */
-    display: flex;
-    align-items: center;
-    height: 100%;
+  max-width: none;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 clamp(28px, 4vw, 64px);
+  box-sizing: border-box; /* ← this line fixes the overflow */
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+.legal-page {
+  width: min(860px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 48px 0 72px;
+}
+
+.legal-card {
+  padding: clamp(26px, 5vw, 52px);
+  border: 1.5px solid #141413;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.legal-card h1 {
+  margin: 6px 0;
+  font: 700 clamp(34px, 6vw, 52px) / 1.1 "Fraunces", Georgia, serif;
+}
+
+.legal-card section {
+  margin-top: 28px;
+}
+
+.legal-card h2 {
+  margin-bottom: 7px;
+  font: 700 20px "Fraunces", Georgia, serif;
+}
+
+.legal-card p {
+  color: #56524d;
+  line-height: 1.7;
+}
+
+.legal-kicker,
+.legal-updated {
+  color: #8a6b18 !important;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
 }
 
 .brand-logo {
-    display: flex;
-    align-items: baseline;
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 0;
-    margin-right: 36px;
-    flex-shrink: 0;
-    text-decoration: none;
+  display: flex;
+  align-items: baseline;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin-right: 36px;
+  flex-shrink: 0;
+  text-decoration: none;
 }
 
 .brand-main {
-    font-family: 'Fraunces', Georgia, serif;
-    font-size: 20px;
-    font-weight: 700;
-    color: #faf9f5;
-    letter-spacing: -0.5px;
+  font-family: "Fraunces", Georgia, serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: #faf9f5;
+  letter-spacing: -0.5px;
 }
 
 .brand-accent {
-    font-family: 'Fraunces', Georgia, serif;
-    font-size: 20px;
-    font-weight: 400;
-    font-style: italic;
-    color: #d9a046;
-    letter-spacing: -0.5px;
+  font-family: "Fraunces", Georgia, serif;
+  font-size: 20px;
+  font-weight: 400;
+  font-style: italic;
+  color: #d9a046;
+  letter-spacing: -0.5px;
 }
 
 .admin-badge {
-    font-size: 10px;
-    font-weight: 600;
-    color: #141413;
-    background-color: #faf9f5;
-    padding: 2px 6px;
-    border-radius: 4px;
-    margin-left: 6px;
-    font-family: 'Inter', Arial, sans-serif;
-    letter-spacing: 0.5px;
+  font-size: 10px;
+  font-weight: 600;
+  color: #141413;
+  background-color: #faf9f5;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-left: 6px;
+  font-family: "Inter", Arial, sans-serif;
+  letter-spacing: 0.5px;
 }
 
 .nav-links {
-    display: flex;
-    gap: 2px;
-    flex: 1;
+  display: flex;
+  gap: 2px;
+  flex: 1;
 }
 
 .nav-item {
-    padding: 6px 11px;
-    background: none;
-    color: #d9d3c8;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 13px;
-    font-weight: 400;
-    font-family: 'Inter', Arial, sans-serif;
-    transition: all 100ms;
-    white-space: nowrap;
-    text-decoration: none;
+  padding: 6px 11px;
+  background: none;
+  color: #d9d3c8;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 400;
+  font-family: "Inter", Arial, sans-serif;
+  transition: all 100ms;
+  white-space: nowrap;
+  text-decoration: none;
 }
 
 /* ACTIVE — solid gold pill, unmistakable against the dark navbar */
 .nav-item.active {
-    background: #d9a046;
-    color: #141413;
-    font-weight: 600;
+  background: #d9a046;
+  color: #141413;
+  font-weight: 600;
 }
 
 /* HOVER — soft translucent highlight, clearly lighter/different from the solid gold active state */
 .nav-item:hover:not(.active) {
-    background: rgba(250, 249, 245, 0.12);
-    color: #faf9f5;
+  background: rgba(250, 249, 245, 0.12);
+  color: #faf9f5;
 }
 
 .nav-actions {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
 }
 
-.guest-nav-actions { display: flex; align-items: center; gap: 10px; }
-.nav-login-link, .nav-signup-link { padding: 7px 11px; color: #faf9f5; font: 600 12px 'Inter', Arial, sans-serif; text-decoration: none; border-radius: 6px; }
-.nav-login-link:hover { color: #c9a84c; }.nav-signup-link { background: #c9a84c; color: #141413; }
+.guest-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.nav-login-link,
+.nav-signup-link {
+  padding: 7px 11px;
+  color: #faf9f5;
+  font:
+    600 12px "Inter",
+    Arial,
+    sans-serif;
+  text-decoration: none;
+  border-radius: 6px;
+}
+.nav-login-link:hover {
+  color: #c9a84c;
+}
+.nav-signup-link {
+  background: #c9a84c;
+  color: #141413;
+}
 
 .btn-role-switch {
-    font-size: 12px;
-    padding: 5px 10px;
-    border: 1.5px solid #d9d3c8;
-    border-radius: 6px;
-    background: none;
-    cursor: pointer;
-    font-family: 'Inter', Arial, sans-serif;
-    color: #faf9f5;
-    font-weight: 500;
+  font-size: 12px;
+  padding: 5px 10px;
+  border: 1.5px solid #d9d3c8;
+  border-radius: 6px;
+  background: none;
+  cursor: pointer;
+  font-family: "Inter", Arial, sans-serif;
+  color: #faf9f5;
+  font-weight: 500;
 }
 
 .user-profile-btn,
 .nav-user-link {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 0;
-    text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: none;
 }
 
 .nav-avatar {
-    display: grid;
-    width: 30px;
-    height: 30px;
-    place-items: center;
-    overflow: hidden;
-    border: 1.5px solid #d9a046;
-    border-radius: 50%;
-    background: #241f1a;
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  overflow: hidden;
+  border: 1.5px solid #d9a046;
+  border-radius: 50%;
+  background: #241f1a;
 }
 
 .nav-avatar-img {
-    width: 30px;
-    height: 30px;
-    object-fit: cover;
+  width: 30px;
+  height: 30px;
+  object-fit: cover;
 }
 
-.nav-avatar-initial { 
-    font: 700 13px 'Fraunces', Georgia, serif; 
-    color: #f3ead0; 
+.nav-avatar-initial {
+  font:
+    700 13px "Fraunces",
+    Georgia,
+    serif;
+  color: #f3ead0;
 }
 
 .user-name {
-    font-size: 13px;
-    font-weight: 500;
-    color: #f3ead0;
+  font-size: 13px;
+  font-weight: 500;
+  color: #f3ead0;
 }
-
 
 /* --- Footer --- */
 .site-footer {
-    margin-top: auto;
-    border-top: 1px solid #e5e0d8;
-    background: transparent;
-    color: #25211e;
-    padding-top: 2rem;
-    padding-bottom: 2rem;
+  margin-top: auto;
+  border-top: 1px solid #e5e0d8;
+  background: transparent;
+  color: #25211e;
+  padding-top: 2rem;
+  padding-bottom: 2rem;
 }
 
 .footer-content {
-    width: 100%;
-    max-width: 1280px;
-    margin: 0 auto;
-    padding: 0 24px;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: .9rem;
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 24px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.9rem;
 }
 
 .footer-links {
-    display: flex;
-    align-items: center;
+  display: flex;
+  align-items: center;
 }
 
 .footer-links a {
-    color: #6b625c;
-    font-size: .85rem;
-    font-weight: 600;
-    text-decoration: none;
-    padding: 0 .85rem;
-    border-right: 1px solid #d8d1c8;
+  color: #6b625c;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  padding: 0 0.85rem;
+  border-right: 1px solid #d8d1c8;
 }
 
-.footer-links a:last-child { 
-    border-right: none; 
+.footer-links a:last-child {
+  border-right: none;
 }
 
-.footer-links a:hover { 
-    color: #3e2723; 
+.footer-links a:hover {
+  color: #3e2723;
+}
+
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
 }
 
 .footer-copyright {
-    margin: 0;
-    padding-top: .75rem;
-    border-top: 1px solid #e5e0d8;
-    width: 100%;
-    max-width: 280px;
-    color: #8c8378;
-    text-align: center;
-    font-size: .85rem;
+  margin: 0;
+  padding-top: 0.75rem;
+  border-top: 1px solid #e5e0d8;
+  width: 100%;
+  max-width: 280px;
+  color: #8c8378;
+  text-align: center;
+  font-size: 0.85rem;
 }
 
 /* Guest feature gate */
-.guest-gate-modal { width: min(440px, calc(100% - 32px)); border: 0; border-radius: 14px; padding: 28px; color: #141413; box-shadow: 0 20px 60px rgba(0,0,0,.35); }
-.guest-gate-modal::backdrop { background: rgba(20,20,19,.68); }.guest-gate-close { position: absolute; top: 10px; right: 14px; border: 0; background: none; font-size: 26px; cursor: pointer; }
-.guest-gate-kicker { margin: 0 0 8px; color: #8f6e20; font-size: 10px; font-weight: 700; letter-spacing: .12em; }.guest-gate-modal h2 { margin: 0; font: 700 26px/1.15 'Fraunces', Georgia, serif; }.guest-gate-modal > p:not(.guest-gate-kicker) { color: #625e58; line-height: 1.6; }
-.guest-gate-actions { display: flex; gap: 10px; margin-top: 22px; }.guest-gate-actions a { padding: 10px 14px; border: 1px solid #141413; border-radius: 7px; color: #141413; font: 600 13px 'Inter', Arial, sans-serif; text-decoration: none; }.guest-gate-actions .guest-gate-primary { background: #141413; color: #fff; }
+.guest-gate-modal {
+  width: min(440px, calc(100% - 32px));
+  border: 0;
+  border-radius: 14px;
+  padding: 28px;
+  color: #141413;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+}
+.guest-gate-modal::backdrop {
+  background: rgba(20, 20, 19, 0.68);
+}
+.guest-gate-close {
+  position: absolute;
+  top: 10px;
+  right: 14px;
+  border: 0;
+  background: none;
+  font-size: 26px;
+  cursor: pointer;
+}
+.guest-gate-kicker {
+  margin: 0 0 8px;
+  color: #8f6e20;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+.guest-gate-modal h2 {
+  margin: 0;
+  font:
+    700 26px/1.15 "Fraunces",
+    Georgia,
+    serif;
+}
+.guest-gate-modal > p:not(.guest-gate-kicker) {
+  color: #625e58;
+  line-height: 1.6;
+}
+.guest-gate-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 22px;
+}
+.guest-gate-actions a {
+  padding: 10px 14px;
+  border: 1px solid #141413;
+  border-radius: 7px;
+  color: #141413;
+  font:
+    600 13px "Inter",
+    Arial,
+    sans-serif;
+  text-decoration: none;
+}
+.guest-gate-actions .guest-gate-primary {
+  background: #141413;
+  color: #fff;
+}
 
 /* --- Admin empty state --- */
 .admin-empty-state {
-    max-width: 720px;
-    margin: 96px auto;
-    padding: 0 24px;
+  max-width: 720px;
+  margin: 96px auto;
+  padding: 0 24px;
 }
 
 .admin-empty-state h1 {
-    margin: 8px 0 16px;
-    font: 700 42px/1.1 'Fraunces', Georgia, serif;
+  margin: 8px 0 16px;
+  font:
+    700 42px/1.1 "Fraunces",
+    Georgia,
+    serif;
 }
 
 .admin-empty-state p {
-    color: #6b6b68;
-    line-height: 1.6;
+  color: #6b6b68;
+  line-height: 1.6;
 }
 
 .admin-empty-kicker {
-    color: #c9a84c !important;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 1px;
-    text-transform: uppercase;
+  color: #c9a84c !important;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
 }

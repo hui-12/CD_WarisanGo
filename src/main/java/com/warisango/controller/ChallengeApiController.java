@@ -1,76 +1,66 @@
 package com.warisango.controller;
 
-import com.warisango.model.service.ChallengeService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.warisango.dto.ChallengeCreatedResponse;
+import com.warisango.dto.ChallengeDefinitionRequest;
+import com.warisango.dto.SuccessResponse;
+import com.warisango.service.ChallengeService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import java.util.Map;
+import java.util.List;
 
 @RestController
 public class ChallengeApiController {
-    private static final Logger logger = LoggerFactory.getLogger(ChallengeApiController.class);
     private final ChallengeService service;
     public ChallengeApiController(ChallengeService service) { this.service = service; }
 
     @GetMapping("/api/challenges")
-    public ResponseEntity<?> list(Authentication authentication) {
-        try {
-            if (authentication == null || !authentication.isAuthenticated()) {
-                return ResponseEntity.ok(service.getGuestChallenges());
-            }
-            return ResponseEntity.ok(service.getChallenges(authentication.getName()));
+    public ResponseEntity<List<Map<String, Object>>> list(Authentication authentication) throws Exception {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.ok(service.getGuestChallenges());
         }
-        catch (Exception e) {
-            logger.error("Unable to load challenges.", e);
-            return ResponseEntity.internalServerError().body("Unable to load challenges.");
-        }
+        return ResponseEntity.ok(service.getChallenges(authentication.getName()));
     }
 
     @PostMapping("/api/challenges/{id}/join")
-    public ResponseEntity<?> join(@PathVariable String id, Authentication authentication) {
-        try { service.join(authentication.getName(),id); return ResponseEntity.ok(Map.of("success",true)); }
-        catch (Exception e) { return ResponseEntity.badRequest().body(Map.of("success",false,"message",e.getMessage())); }
+    public ResponseEntity<SuccessResponse> join(
+            @PathVariable String id,
+            Authentication authentication) throws Exception {
+        service.join(authentication.getName(), id);
+        return ResponseEntity.ok(new SuccessResponse(true));
     }
 
     @PostMapping("/api/challenges/{id}/claim")
-    public ResponseEntity<?> claim(@PathVariable String id, Authentication authentication) {
-        try { return ResponseEntity.ok(service.claim(authentication.getName(),id)); }
-        catch (Exception e) { return ResponseEntity.badRequest().body(Map.of("success",false,"message",e.getMessage())); }
+    public ResponseEntity<Map<String, Object>> claim(
+            @PathVariable String id,
+            Authentication authentication) throws Exception {
+        return ResponseEntity.ok(service.claim(authentication.getName(), id));
     }
 
     @GetMapping("/api/admin/challenges")
-    public ResponseEntity<?> adminList() {
-        try {
-            return ResponseEntity.ok(service.adminList());
-        } catch (Exception exception) {
-            logger.error("Unable to load admin challenges.", exception);
-            return ResponseEntity.internalServerError().build();
-        }
+    public ResponseEntity<List<Map<String, Object>>> adminList() throws Exception {
+        return ResponseEntity.ok(service.adminList());
     }
 
     @PostMapping("/api/admin/challenges")
-    public ResponseEntity<?> create(@RequestBody Map<String, Object> body) {
-        try {
-            return ResponseEntity.ok(Map.of("id", service.create(body)));
-        } catch (Exception exception) {
-            logger.warn("Admin challenge creation rejected: {}", exception.getMessage());
-            return ResponseEntity.badRequest().body(Map.of("message", exception.getMessage()));
-        }
+    public ResponseEntity<ChallengeCreatedResponse> create(
+            @Valid @RequestBody ChallengeDefinitionRequest request) throws Exception {
+        return ResponseEntity.ok(new ChallengeCreatedResponse(service.create(request.toMap())));
     }
 
     @PutMapping("/api/admin/challenges/{id}")
-    public ResponseEntity<?> update(@PathVariable String id, @RequestBody Map<String, Object> body) {
-        try {
-            service.update(id, body);
-            return ResponseEntity.ok(Map.of("success", true));
-        } catch (Exception exception) {
-            logger.warn("Admin challenge update rejected for {}: {}", id, exception.getMessage());
-            return ResponseEntity.badRequest().body(Map.of("message", exception.getMessage()));
-        }
+    public ResponseEntity<SuccessResponse> update(
+            @PathVariable String id,
+            @Valid @RequestBody ChallengeDefinitionRequest request) throws Exception {
+        service.update(id, request.toMap());
+        return ResponseEntity.ok(new SuccessResponse(true));
     }
 
     @DeleteMapping("/api/admin/challenges/{id}")
-    public ResponseEntity<?> delete(@PathVariable String id) { try { service.delete(id); return ResponseEntity.ok(Map.of("success",true)); } catch(Exception e){return ResponseEntity.badRequest().body(Map.of("message",e.getMessage()));} }
+    public ResponseEntity<SuccessResponse> delete(@PathVariable String id) throws Exception {
+        service.delete(id);
+        return ResponseEntity.ok(new SuccessResponse(true));
+    }
 }

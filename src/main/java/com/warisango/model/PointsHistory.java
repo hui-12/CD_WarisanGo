@@ -1,2 +1,0 @@
-package com.warisango.model;
-public class PointsHistory { private String userId; private String activity; private int points; private Long occurredAt; public PointsHistory(){} public String getUserId(){return userId;} public void setUserId(String v){userId=v;} public String getActivity(){return activity;} public void setActivity(String v){activity=v;} public int getPoints(){return points;} public void setPoints(int v){points=v;} public Long getOccurredAt(){return occurredAt;} public void setOccurredAt(Long v){occurredAt=v;} }

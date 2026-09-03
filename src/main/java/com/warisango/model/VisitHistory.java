@@ -1,2 +1,0 @@
-package com.warisango.model;
-public class VisitHistory { private String userId; private String businessName; private Long visitedAt; public VisitHistory(){} public String getUserId(){return userId;} public void setUserId(String v){userId=v;} public String getBusinessName(){return businessName;} public void setBusinessName(String v){businessName=v;} public Long getVisitedAt(){return visitedAt;} public void setVisitedAt(Long v){visitedAt=v;} }

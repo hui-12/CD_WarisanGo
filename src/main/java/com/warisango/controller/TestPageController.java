@@ -1,9 +1,11 @@
 package com.warisango.controller;
 
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
+@Profile("dev")
 public class TestPageController {
 
     @GetMapping("/test/audio-test")
@@ -21,8 +23,4 @@ public class TestPageController {
         return "test/ai-extraction-test";
     }
 
-    @GetMapping("/admin/ai_discovery")
-    public String aiDiscovery() {
-        return "admin/discovery";
-    }
 }

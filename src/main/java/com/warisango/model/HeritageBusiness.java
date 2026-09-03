@@ -18,6 +18,6 @@ public record HeritageBusiness(
         Integer checkInPoints,
         Instant createdAt,
         Instant approveAt,
-        Instant rejectAt
+        Instant rejectedAt
 ) {
 }

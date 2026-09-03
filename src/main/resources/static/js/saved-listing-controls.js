@@ -22,7 +22,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const text = button.querySelector('[data-save-label]');
     if (text) text.textContent = saved ? 'Saved' : 'Save';
-
   };
 
   buttons.forEach((button) => updateButton(button, false));
@@ -30,7 +29,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (document.getElementById('guest-gate-modal')) return;
 
   try {
-    const response = await fetch('/api/saved-listings/ids', {headers: {'Accept': 'application/json'}});
+    const response = await fetch('/api/saved-listings/ids', { headers: { Accept: 'application/json' } });
     if (!response.ok) throw new Error('Unable to load saved listings.');
     const savedIds = new Set(await response.json());
     buttons.forEach((button) => updateButton(button, savedIds.has(button.dataset.businessId)));
@@ -45,7 +44,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       try {
         const response = await fetch(`/api/saved-listings/${encodeURIComponent(button.dataset.businessId)}`, {
           method: wasSaved ? 'DELETE' : 'POST',
-          headers: {'Accept': 'application/json'}
+          headers: { Accept: 'application/json' },
         });
         if (!response.ok) throw new Error('Unable to update saved listing.');
         updateButton(button, !wasSaved);

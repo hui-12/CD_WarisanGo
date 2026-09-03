@@ -40,5 +40,5 @@ build/
 ### Local application configuration and API keys ###
 src/main/resources/application.properties
 
-### Local review photo uploads ###
-uploads/reviews/
+### Local application uploads ###
+uploads/

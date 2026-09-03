@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Business Directory - WarisanGo</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700&family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Global Styles (With static href fallback) -->
+    <link rel="stylesheet" href="/css/global.css" th:href="@{/css/global.css}" />
+    <!-- Page-specific stylesheet -->
+    <link rel="stylesheet" th:href="@{/css/business-heritage.css}" href="/css/business-heritage.css" />
+  </head>
+  <body>
+    <!-- Navbar fragment -->
+    <div th:replace="~{fragments/fragments :: navbar('directory')}"></div>
+
+    <main class="directory-page">
+      <section class="directory-intro" aria-labelledby="directory-title">
+        <p class="eyebrow">Heritage food directory</p>
+        <h1 id="directory-title">Discover Malaysia's <em>living heritage</em></h1>
+        <p class="intro-copy">
+          Every listing has been reviewed and approved — century-old recipes, unchanged atmospheres, and stories passed
+          down through generations.
+        </p>
+      </section>
+
+      <section class="directory-toolbar" aria-label="Search and filter businesses">
+        <div class="search-field">
+          <label class="sr-only" for="searchInput">Search businesses</label>
+          <input id="searchInput" type="search" placeholder="Search businesses..." autocomplete="off" />
+          <button id="searchButton" class="search-button" type="button" aria-label="Search businesses">Search</button>
+        </div>
+        <div class="filters">
+          <select id="stateFilter" aria-label="Filter by state">
+            <option value="">All States</option>
+          </select>
+          <select id="cityFilter" aria-label="Filter by city">
+            <option value="">All Cities</option>
+          </select>
+          <button id="clearFilters" class="clear-filters" type="button">Clear filters</button>
+        </div>
+      </section>
+
+      <p id="resultCount" class="result-count" aria-live="polite"></p>
+
+      <section id="results" class="business-grid" aria-live="polite">
+        <div th:if="${businesses == null or #lists.isEmpty(businesses)}" class="no-results">
+          No heritage businesses found at the moment.
+        </div>
+
+        <article
+          th:each="b : ${businesses}"
+          class="business-card"
+          th:attr="data-state=${b.state},data-city=${b.city},data-business-id=${b.businessId}"
+        >
+          <div class="business-image-wrap">
+            <span class="business-visited-label" hidden>Checked In</span>
+            <button
+              class="save-btn indicator"
+              type="button"
+              data-save-business
+              th:attr="data-business-id=${b.businessId},aria-label=${'Save ' + b.name}"
+            >
+              <span class="bookmark-icon" aria-hidden="true"></span>
+            </button>
+            <img
+              th:if="${not #lists.isEmpty(b.imageUrls)}"
+              th:src="${b.imageUrls[0]}"
+              alt="Business photo"
+              title="Business photo"
+              th:alt="${b.name} + ' photo'"
+              th:title="${b.name} + ' photo'"
+              class="business-image"
+              data-fallback-image="https://images.unsplash.com/photo-1559925393-8be0ec4767c8?auto=format&amp;fit=crop&amp;w=900&amp;q=85"
+            />
+            <img
+              th:if="${#lists.isEmpty(b.imageUrls)}"
+              src="https://images.unsplash.com/photo-1559925393-8be0ec4767c8?auto=format&amp;fit=crop&amp;w=900&amp;q=85"
+              alt="Business photo"
+              title="Business photo"
+              th:alt="${b.name} + ' photo'"
+              th:title="${b.name} + ' photo'"
+              class="business-image"
+            />
+          </div>
+          <div class="business-content">
+            <div class="business-heading">
+              <div>
+                <p class="business-kicker">Heritage business · Approved</p>
+                <h2 th:text="${b.name}">Business Name</h2>
+              </div>
+              <span
+                class="rating"
+                th:classappend="${b.averageRating == null} ? ' unrated'"
+                th:text="${b.averageRating != null ? #numbers.formatDecimal(b.averageRating, 1, 1) : 'Not rated'}"
+                >4.8</span
+              >
+            </div>
+            <p class="business-description" th:text="${b.description}">Business description</p>
+            <div class="business-footer">
+              <span class="business-location" th:text="${b.city} + ', ' + ${b.state}">City, State</span>
+              <a th:href="@{'/business/' + ${b.businessId}}" class="details-link"
+                >View details <span aria-hidden="true">→</span></a
+              >
+            </div>
+          </div>
+        </article>
+      </section>
+    </main>
+
+    <!-- Footer fragment -->
+    <div th:replace="~{fragments/footer :: global}"></div>
+
+    <!-- Page-specific script -->
+    <script src="/js/business-heritage.js" th:src="@{/js/business-heritage.js}"></script>
+    <script src="/js/saved-listing-controls.js" th:src="@{/js/saved-listing-controls.js}"></script>
+  </body>
+</html>

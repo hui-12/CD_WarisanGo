@@ -2,7 +2,8 @@ package com.warisango.controller;
 
 import com.warisango.dto.LeaderboardEntryDTO;
 import com.warisango.dto.PointHistoryDTO;
-import com.warisango.model.service.PointsService;
+import com.warisango.dto.UserPointsDTO;
+import com.warisango.service.PointsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +22,12 @@ public class PointsController {
 
     public PointsController(PointsService pointsService) {
         this.pointsService = pointsService;
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<UserPointsDTO> getCurrentPoints(Authentication authentication) throws Exception {
+        String userId = authentication.getName();
+        return ResponseEntity.ok(new UserPointsDTO(userId, pointsService.getCurrentPoints(userId)));
     }
 
     @GetMapping("/history")

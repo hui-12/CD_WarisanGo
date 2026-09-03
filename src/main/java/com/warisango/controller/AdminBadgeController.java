@@ -1,8 +1,10 @@
 package com.warisango.controller;
 
-import com.warisango.model.service.BadgeService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.warisango.dto.BadgeCreatedResponse;
+import com.warisango.dto.BadgeDefinitionRequest;
+import com.warisango.dto.SuccessResponse;
+import com.warisango.service.BadgeService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,12 +15,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/api/admin/badges")
 public class AdminBadgeController {
-    private static final Logger logger = LoggerFactory.getLogger(AdminBadgeController.class);
     private final BadgeService badgeService;
 
     public AdminBadgeController(BadgeService badgeService) {
@@ -26,49 +28,27 @@ public class AdminBadgeController {
     }
 
     @GetMapping
-    public ResponseEntity<?> list() {
-        try {
-            return ResponseEntity.ok(badgeService.adminList());
-        } catch (Exception exception) {
-            logger.error("Unable to load badges for administration.", exception);
-            return ResponseEntity.internalServerError().body(Map.of("message", "Unable to load badges."));
-        }
+    public ResponseEntity<List<Map<String, Object>>> list() throws Exception {
+        return ResponseEntity.ok(badgeService.adminList());
     }
 
     @PostMapping
-    public ResponseEntity<?> create(@RequestBody Map<String, Object> body) {
-        try {
-            return ResponseEntity.ok(Map.of("badgeId", badgeService.create(body)));
-        } catch (IllegalArgumentException exception) {
-            return ResponseEntity.badRequest().body(Map.of("message", exception.getMessage()));
-        } catch (Exception exception) {
-            logger.error("Unable to create badge.", exception);
-            return ResponseEntity.internalServerError().body(Map.of("message", "Unable to create badge."));
-        }
+    public ResponseEntity<BadgeCreatedResponse> create(
+            @Valid @RequestBody BadgeDefinitionRequest request) throws Exception {
+        return ResponseEntity.ok(new BadgeCreatedResponse(badgeService.create(request.toMap())));
     }
 
     @PutMapping("/{badgeId}")
-    public ResponseEntity<?> update(@PathVariable String badgeId,
-                                    @RequestBody Map<String, Object> body) {
-        try {
-            badgeService.update(badgeId, body);
-            return ResponseEntity.ok(Map.of("success", true));
-        } catch (IllegalArgumentException exception) {
-            return ResponseEntity.badRequest().body(Map.of("message", exception.getMessage()));
-        } catch (Exception exception) {
-            logger.error("Unable to update badge {}.", badgeId, exception);
-            return ResponseEntity.internalServerError().body(Map.of("message", "Unable to update badge."));
-        }
+    public ResponseEntity<SuccessResponse> update(
+            @PathVariable String badgeId,
+            @Valid @RequestBody BadgeDefinitionRequest request) throws Exception {
+        badgeService.update(badgeId, request.toMap());
+        return ResponseEntity.ok(new SuccessResponse(true));
     }
 
     @DeleteMapping("/{badgeId}")
-    public ResponseEntity<?> delete(@PathVariable String badgeId) {
-        try {
-            badgeService.delete(badgeId);
-            return ResponseEntity.ok(Map.of("success", true));
-        } catch (Exception exception) {
-            logger.error("Unable to delete badge {}.", badgeId, exception);
-            return ResponseEntity.internalServerError().body(Map.of("message", "Unable to delete badge."));
-        }
+    public ResponseEntity<SuccessResponse> delete(@PathVariable String badgeId) throws Exception {
+        badgeService.delete(badgeId);
+        return ResponseEntity.ok(new SuccessResponse(true));
     }
 }

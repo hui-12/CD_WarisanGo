@@ -2,12 +2,14 @@ package com.warisango.controller;
 
 import com.warisango.dto.AIExtractionRequest;
 import com.warisango.dto.AIExtractionResult;
-import com.warisango.model.service.AIExtractionService;
+import com.warisango.service.AIExtractionService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.context.annotation.Profile;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@Profile("dev")
 @RequestMapping("/api/ai-extraction")
 public class AIExtractionController {
 

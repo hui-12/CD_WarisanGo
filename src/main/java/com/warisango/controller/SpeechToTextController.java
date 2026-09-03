@@ -1,15 +1,17 @@
 package com.warisango.controller;
 
 import com.warisango.dto.TranscriptionRequest;
-import com.warisango.model.service.SpeechToTextService;
+import com.warisango.service.SpeechToTextService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.context.annotation.Profile;
 import org.springframework.web.bind.annotation.*;
 
 import java.nio.file.Path;
 import java.util.Map;
 
 @RestController
+@Profile("dev")
 @RequestMapping("/api/transcription")
 public class SpeechToTextController {
 

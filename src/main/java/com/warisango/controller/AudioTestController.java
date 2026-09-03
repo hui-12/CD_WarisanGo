@@ -1,15 +1,17 @@
 package com.warisango.controller;
 
 import com.warisango.dto.AudioExtractionRequest;
-import com.warisango.model.service.VideoAudioService;
+import com.warisango.service.VideoAudioService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.context.annotation.Profile;
 import org.springframework.web.bind.annotation.*;
 
 import java.nio.file.Path;
 import java.util.Map;
 
 @RestController
+@Profile("dev")
 @RequestMapping("/api/audio")
 public class AudioTestController {
 

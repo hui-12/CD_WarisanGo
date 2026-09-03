@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <th:block th:replace="~{fragments/fragments :: head('Business Reports — WarisanGo Admin')}"></th:block>
+    <link rel="stylesheet" href="/css/business-reports.css" th:href="@{/css/business-reports.css}" />
+  </head>
+  <body>
+    <div th:replace="~{fragments/fragments :: navbar('business-reports')}"></div>
+    <main class="report-admin-page">
+      <header class="report-page-header">
+        <p>BUSINESS MODERATION</p>
+        <h1>Business Reports</h1>
+        <p>Review corrections submitted for heritage business listings.</p>
+      </header>
+      <section class="report-controls" th:if="${!#lists.isEmpty(reports)}" aria-label="Business report filters">
+        <label>
+          <span>Search</span>
+          <input id="business-report-search" type="search" placeholder="Search business, user, or details" autocomplete="off" />
+        </label>
+        <label>
+          <span>Category</span>
+          <select id="business-report-category">
+            <option value="ALL">All categories</option>
+            <option value="PERMANENTLY_CLOSED">Permanently Closed</option>
+            <option value="INCORRECT_LOCATION">Incorrect Location</option>
+            <option value="OUTDATED_INFO">Outdated Information</option>
+            <option value="NAME_ERROR">Business Name Error</option>
+            <option value="OTHER">Other</option>
+          </select>
+        </label>
+      </section>
+      <section class="report-table-card" aria-labelledby="report-queue-title">
+        <h2 id="report-queue-title" class="sr-only">Report review queue</h2>
+        <div class="report-table-header">
+          <span>Business</span><span>Reported By</span><span>Reason</span><span>Status</span><span>Action</span>
+        </div>
+        <p class="report-empty" th:if="${#lists.isEmpty(reports)}">No business reports have been submitted.</p>
+        <a
+          class="report-table-row"
+          th:each="report : ${reports}"
+          th:attr="data-report-category=${report.reason}"
+          th:href="@{/admin/business-reports/{id}(id=${report.reportId})}"
+        >
+          <span
+            ><strong th:text="${report.reportedBusiness != null ? report.reportedBusiness.name : report.businessId}"
+              >Business</strong
+            ><small th:text="${report.businessId}">ID</small></span
+          >
+          <span
+            ><strong th:text="${report.touristName != null ? report.touristName : 'Tourist'}">Tourist</strong
+            ><small th:text="${report.touristId}">UID</small></span
+          >
+          <span th:text="${#strings.replace(report.reason, '_', ' ')}">Reason</span>
+          <span
+            ><em
+              class="report-status"
+              th:classappend="${#strings.replace(#strings.toLowerCase(report.status), '_', '-')}"
+              th:text="${#strings.replace(report.status, '_', ' ')}"
+              >Status</em
+            ></span
+          >
+          <span class="report-view">View</span>
+        </a>
+        <p id="business-report-no-results" class="report-empty" hidden>No reports match your filters.</p>
+      </section>
+    </main>
+    <div th:replace="~{fragments/footer :: global}"></div>
+    <script src="/js/business-reports.js" th:src="@{/js/business-reports.js}" defer></script>
+  </body>
+</html>

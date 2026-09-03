@@ -1,11 +1,12 @@
 package com.warisango.controller;
 
 import com.warisango.model.User;
-import com.warisango.model.service.AuthService;
+import com.warisango.service.AuthService;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import jakarta.servlet.http.HttpServletRequest;
 
 /** Makes the authenticated Firestore user available to every Thymeleaf page. */
 @ControllerAdvice
@@ -23,5 +24,11 @@ public class CurrentUserModelAdvice {
             return null;
         }
         return authService.findUserByUid(authentication.getName()).orElse(null);
+    }
+
+    @ModelAttribute("adminPage")
+    public boolean adminPage(HttpServletRequest request) {
+        String requestUri = request.getRequestURI();
+        return requestUri.equals("/ai-discovery") || requestUri.startsWith("/admin/");
     }
 }

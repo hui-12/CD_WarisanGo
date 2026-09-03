@@ -1,0 +1,64 @@
+{
+  "properties": [
+    {
+      "name": "youtube.api.key",
+      "type": "java.lang.String",
+      "description": "YouTube Data API key supplied through YOUTUBE_API_KEY."
+    },
+    {
+      "name": "youtube.base.url",
+      "type": "java.lang.String",
+      "description": "Base URL for YouTube Data API requests."
+    },
+    {
+      "name": "assemblyai.api.key",
+      "type": "java.lang.String",
+      "description": "AssemblyAI API key supplied through ASSEMBLYAI_API_KEY."
+    },
+    {
+      "name": "assemblyai.api.url",
+      "type": "java.lang.String",
+      "description": "Base URL for AssemblyAI requests."
+    },
+    {
+      "name": "gemini.api.key",
+      "type": "java.lang.String",
+      "description": "Gemini API key supplied through GEMINI_API_KEY."
+    },
+    {
+      "name": "gemini.model",
+      "type": "java.lang.String",
+      "description": "Gemini model used for AI extraction."
+    },
+    {
+      "name": "firebase.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Whether Firebase configuration is enabled."
+    },
+    {
+      "name": "warisango.firebase.credentials-location",
+      "type": "org.springframework.core.io.Resource",
+      "description": "Location of the Firebase service-account credentials resource."
+    },
+    {
+      "name": "warisango.firebase.project-id",
+      "type": "java.lang.String",
+      "description": "Firebase project identifier."
+    },
+    {
+      "name": "warisango.firebase.storage-bucket",
+      "type": "java.lang.String",
+      "description": "Firebase Storage bucket used for uploaded media."
+    },
+    {
+      "name": "warisango.review.max-photo-size-bytes",
+      "type": "java.lang.Long",
+      "description": "Maximum allowed review-photo size in bytes."
+    },
+    {
+      "name": "warisango.check-in.enforce-distance-limit",
+      "type": "java.lang.Boolean",
+      "description": "Whether check-ins must be within the configured maximum distance."
+    }
+  ]
+}

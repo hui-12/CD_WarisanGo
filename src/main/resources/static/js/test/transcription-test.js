@@ -1,128 +1,81 @@
-const transcriptionTestForm =
-    document.getElementById("transcriptionTestForm");
+const transcriptionTestForm = document.getElementById('transcriptionTestForm');
 
-const audioUrlInput =
-    document.getElementById("audioUrl");
+const audioUrlInput = document.getElementById('audio-url');
 
-const transcribeButton =
-    document.getElementById("transcribeButton");
+const transcribeButton = document.getElementById('transcribeButton');
 
-const resultSection =
-    document.getElementById("resultSection");
+const resultSection = document.getElementById('resultSection');
 
-const statusMessage =
-    document.getElementById("statusMessage");
+const statusMessage = document.getElementById('status-message');
 
-const transcript =
-    document.getElementById("transcript");
+const transcript = document.getElementById('transcript');
 
+transcriptionTestForm.addEventListener('submit', async (event) => {
+  event.preventDefault();
 
-transcriptionTestForm.addEventListener(
-    "submit",
-    async (event) => {
+  const audioUrl = audioUrlInput.value.trim();
 
-        event.preventDefault();
+  if (!audioUrl) {
+    showError('Please enter an audio URL.');
 
-        const audioUrl =
-            audioUrlInput.value.trim();
+    return;
+  }
 
-        if (!audioUrl) {
+  setLoading(true);
 
-            showError(
-                "Please enter an audio URL."
-            );
+  try {
+    const response = await fetch('/api/transcription/test', {
+      method: 'POST',
 
-            return;
-        }
+      headers: {
+        'Content-Type': 'application/json',
+      },
 
-        setLoading(true);
+      body: JSON.stringify({
+        audioUrl: audioUrl,
+      }),
+    });
 
-        try {
+    const data = await response.json();
 
-            const response = await fetch(
-                "/api/transcription/test",
-                {
-                    method: "POST",
+    if (!response.ok) {
+      showError(data.message || 'Transcription failed.');
 
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-
-                    body: JSON.stringify({
-                        audioUrl: audioUrl
-                    })
-                }
-            );
-
-            const data =
-                await response.json();
-
-            if (!response.ok) {
-
-                showError(
-                    data.message ||
-                    "Transcription failed."
-                );
-
-                return;
-            }
-
-            showSuccess(
-                "Transcription completed successfully."
-            );
-
-            transcript.value =
-                data.transcript || "No transcript returned.";
-
-        } catch (error) {
-
-            console.error(error);
-
-            showError(
-                "Unable to connect to the Spring Boot server."
-            );
-
-        } finally {
-
-            setLoading(false);
-        }
+      return;
     }
-);
 
+    showSuccess('Transcription completed successfully.');
+
+    transcript.value = data.transcript || 'No transcript returned.';
+  } catch (error) {
+    console.error(error);
+
+    showError('Unable to connect to the Spring Boot server.');
+  } finally {
+    setLoading(false);
+  }
+});
 
 function showSuccess(message) {
+  resultSection.classList.remove('d-none');
 
-    resultSection.classList.remove("d-none");
+  statusMessage.className = 'alert alert-success';
 
-    statusMessage.className =
-        "alert alert-success";
-
-    statusMessage.textContent =
-        message;
+  statusMessage.textContent = message;
 }
-
 
 function showError(message) {
+  resultSection.classList.remove('d-none');
 
-    resultSection.classList.remove("d-none");
+  statusMessage.className = 'alert alert-danger';
 
-    statusMessage.className =
-        "alert alert-danger";
+  statusMessage.textContent = message;
 
-    statusMessage.textContent =
-        message;
-
-    transcript.value = "";
+  transcript.value = '';
 }
 
-
 function setLoading(isLoading) {
+  transcribeButton.disabled = isLoading;
 
-    transcribeButton.disabled =
-        isLoading;
-
-    transcribeButton.textContent =
-        isLoading
-            ? "Transcribing..."
-            : "Transcribe Audio";
+  transcribeButton.textContent = isLoading ? 'Transcribing...' : 'Transcribe Audio';
 }

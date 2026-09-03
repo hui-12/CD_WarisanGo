@@ -1,464 +1,538 @@
 /* --- Main Dashboard Layout --- */
 .main-layout {
-    max-width: 1280px;
-    margin: 0 auto;
-    padding: 32px 24px;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 32px 24px;
 }
 
 /* --- Hero Banner Section --- */
 .hero-card {
-    background: #141413;
-    border-radius: 16px;
-    padding: 40px 48px;
-    margin-bottom: 28px;
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 32px;
-    align-items: center;
-    position: relative;
-    overflow: hidden;
+  background: #141413;
+  border-radius: 16px;
+  padding: 40px 48px;
+  margin-bottom: 28px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 32px;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
 }
 
 .hero-bg-img {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    opacity: 0.15;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.15;
 }
 
 .hero-left {
-    position: relative;
-    z-index: 1;
+  position: relative;
+  z-index: 1;
 }
 
 .hero-subtitle {
-    font-size: 12px;
-    color: rgba(250, 249, 245, 0.5);
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    margin-bottom: 8px;
+  font-size: 12px;
+  color: rgba(250, 249, 245, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 8px;
 }
 
 .hero-title {
-    font-family: 'Fraunces', Georgia, serif;
-    font-size: 44px;
-    font-weight: 700;
-    color: #faf9f5;
-    line-height: 1.1;
-    margin-bottom: 12px;
+  font-family: "Fraunces", Georgia, serif;
+  font-size: 44px;
+  font-weight: 700;
+  color: #faf9f5;
+  line-height: 1.1;
+  margin-bottom: 12px;
 }
 
 .italic-accent {
-    font-style: italic;
-    color: #c9a84c;
+  font-style: italic;
+  color: #c9a84c;
 }
 
 .hero-description {
-    font-size: 14px;
-    color: rgba(250, 249, 245, 0.65);
-    line-height: 1.6;
-    max-width: 420px;
+  font-size: 14px;
+  color: rgba(250, 249, 245, 0.65);
+  line-height: 1.6;
+  max-width: 420px;
 }
 
 .hero-actions {
-    display: flex;
-    gap: 10px;
-    margin-top: 24px;
+  display: flex;
+  gap: 10px;
+  margin-top: 24px;
 }
 
 .btn-amber {
-    padding: 10px 22px;
-    border: none;
-    border-radius: 8px;
-    background: #c9a84c;
-    color: #141413;
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-    font-family: 'Inter', Arial, sans-serif;
+  padding: 10px 22px;
+  border: none;
+  border-radius: 8px;
+  background: #c9a84c;
+  color: #141413;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: "Inter", Arial, sans-serif;
 }
 
 .btn-hero-outlined {
-    padding: 10px 22px;
-    border: 1.5px solid rgba(250, 249, 245, 0.3);
-    border-radius: 8px;
-    background: none;
-    color: #faf9f5;
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    font-family: 'Inter', Arial, sans-serif;
+  padding: 10px 22px;
+  border: 1.5px solid rgba(250, 249, 245, 0.3);
+  border-radius: 8px;
+  background: none;
+  color: #faf9f5;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: "Inter", Arial, sans-serif;
 }
 
 /* Tier Card Widget */
 .tier-widget {
-    position: relative;
-    z-index: 1;
-    border: 1.5px solid rgba(250, 249, 245, 0.15);
-    border-radius: 12px;
-    padding: 20px 24px;
-    background-color: rgba(250, 249, 245, 0.07);
-    backdrop-filter: blur(8px);
-    min-width: 200px;
+  position: relative;
+  z-index: 1;
+  border: 1.5px solid rgba(250, 249, 245, 0.15);
+  border-radius: 12px;
+  padding: 20px 24px;
+  background-color: rgba(250, 249, 245, 0.07);
+  backdrop-filter: blur(8px);
+  min-width: 200px;
 }
 
 .widget-label {
-    font-size: 11px;
-    color: rgba(250, 249, 245, 0.5);
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    margin-bottom: 4px;
+  font-size: 11px;
+  color: rgba(250, 249, 245, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 4px;
 }
 
 .challenge-widget .widget-label {
-    color: #000;
+  color: #000;
 }
 
 .tier-name {
-    font-family: 'Fraunces', Georgia, serif;
-    font-size: 26px;
-    font-weight: 700;
-    color: #c9a84c;
-    margin-bottom: 4px;
+  font-family: "Fraunces", Georgia, serif;
+  font-size: 26px;
+  font-weight: 700;
+  color: #c9a84c;
+  margin-bottom: 4px;
 }
 
 .tier-points {
-    font-family: 'Fraunces', Georgia, serif;
-    font-size: 32px;
-    font-weight: 700;
-    color: #faf9f5;
-    margin-bottom: 10px;
+  font-family: "Fraunces", Georgia, serif;
+  font-size: 32px;
+  font-weight: 700;
+  color: #faf9f5;
+  margin-bottom: 10px;
 }
 
 .points-unit {
-    font-size: 14px;
-    font-weight: 400;
-    font-family: 'Inter', Arial, sans-serif;
-    color: rgba(250, 249, 245, 0.5);
+  font-size: 14px;
+  font-weight: 400;
+  font-family: "Inter", Arial, sans-serif;
+  color: rgba(250, 249, 245, 0.5);
 }
 
 .progress-bar-bg {
-    height: 4px;
-    background-color: rgba(255, 255, 255, 0.15);
-    border-radius: 2px;
-    overflow: hidden;
-    margin-bottom: 6px;
+  height: 4px;
+  background-color: rgba(255, 255, 255, 0.15);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 6px;
 }
 
 .progress-bar-fill {
-    height: 100%;
-    background-color: #c9a84c;
-    border-radius: 2px;
+  height: 100%;
+  background-color: #c9a84c;
+  border-radius: 2px;
 }
 
 .tier-next-text {
-    font-size: 11px;
-    color: rgba(250, 249, 245, 0.4);
+  font-size: 11px;
+  color: rgba(250, 249, 245, 0.4);
 }
 
 /* --- Dashboard Grid --- */
 .dashboard-grid {
-    display: grid;
-    grid-template-columns: 1fr 340px;
-    gap: 24px;
-    margin-bottom: 32px;
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 24px;
+  margin-bottom: 32px;
 }
 
 .content-card {
-    border: 1.5px solid #141413;
-    border-radius: 12px;
-    overflow: hidden;
-    background-color: #ffffff;
+  border: 1.5px solid #141413;
+  border-radius: 12px;
+  overflow: hidden;
+  background-color: #ffffff;
 }
 
 .card-header {
-    padding: 16px 20px;
-    border-bottom: 1.5px solid #141413;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1.5px solid #141413;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .card-title {
-    font-family: 'Fraunces', Georgia, serif;
-    font-size: 20px;
-    font-weight: 600;
-    color: #141413;
-    margin: 0;
+  font-family: "Fraunces", Georgia, serif;
+  font-size: 20px;
+  font-weight: 600;
+  color: #141413;
+  margin: 0;
 }
 
 .badge-text {
-    font-size: 12px;
-    color: #6b6b68;
+  font-size: 12px;
+  color: #6b6b68;
 }
 
 /* Visits List Items */
 .visit-row {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    padding: 14px 20px;
-    border-bottom: 1px solid #e8e6e0;
-    color: inherit;
-    text-decoration: none;
-    transition: background-color 120ms ease;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 20px;
+  border-bottom: 1px solid #e8e6e0;
+  color: inherit;
+  text-decoration: none;
+  transition: background-color 120ms ease;
 }
 
 .visit-row:hover,
 .visit-row:focus-visible {
-    background-color: #faf9f5;
+  background-color: #faf9f5;
 }
 
 .visit-row:last-child {
-    border-bottom: none;
+  border-bottom: none;
 }
 
 .visit-img {
-    width: 56px;
-    height: 44px;
-    object-fit: cover;
-    border-radius: 6px;
-    border: 1px solid #e8e6e0;
-    flex-shrink: 0;
+  width: 56px;
+  height: 44px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid #e8e6e0;
+  flex-shrink: 0;
 }
 
 .visit-info {
-    flex: 1;
+  flex: 1;
 }
 
 .visit-name {
-    font-size: 13px;
-    font-weight: 600;
-    color: #141413;
+  font-size: 13px;
+  font-weight: 600;
+  color: #141413;
 }
 
 .visit-date {
-    font-size: 11px;
-    color: #6b6b68;
+  font-size: 11px;
+  color: #6b6b68;
 }
 
 .points-tag {
-    font-size: 13px;
-    font-weight: 700;
-    color: #2d7a4f;
-    background-color: #e8f5ee;
-    padding: 4px 10px;
-    border-radius: 20px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #2d7a4f;
+  background-color: #e8f5ee;
+  padding: 4px 10px;
+  border-radius: 20px;
 }
 
 /* --- Sidebar Column --- */
 .sidebar-column {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .challenge-widget {
-    border: 1.5px solid #c9a84c;
-    border-radius: 12px;
-    padding: 20px;
-    background-color: #f5e9c4;
+  border: 1.5px solid #c9a84c;
+  border-radius: 12px;
+  padding: 20px;
+  background-color: #f5e9c4;
 }
 
 .challenge-title {
-    font-family: 'Fraunces', Georgia, serif;
-    font-size: 16px;
-    font-weight: 700;
-    color: #141413;
-    margin-bottom: 8px;
+  font-family: "Fraunces", Georgia, serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: #141413;
+  margin-bottom: 8px;
 }
 
 .challenge-progress-header {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 4px;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
 }
 
 .sub-label {
-    font-size: 12px;
-    color: #6b6b68;
+  font-size: 12px;
+  color: #6b6b68;
 }
 
 .challenge-count {
-    font-size: 12px;
-    font-weight: 600;
-    color: #141413;
+  font-size: 12px;
+  font-weight: 600;
+  color: #141413;
 }
 
 .progress-bar-bg-dark {
-    height: 6px;
-    background-color: rgba(0, 0, 0, 0.1);
-    border-radius: 3px;
-    overflow: hidden;
-    margin-bottom: 12px;
+  height: 6px;
+  background-color: rgba(0, 0, 0, 0.1);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 12px;
 }
 
 .btn-outlined-full {
-    width: 100%;
-    padding: 8px;
-    border: 1.5px solid #141413;
-    border-radius: 8px;
-    background: none;
-    color: #141413;
-    font-size: 13px;
-    cursor: pointer;
-    font-family: 'Inter', Arial, sans-serif;
-    font-weight: 500;
+  width: 100%;
+  padding: 8px;
+  border: 1.5px solid #141413;
+  border-radius: 8px;
+  background: none;
+  color: #141413;
+  font-size: 13px;
+  cursor: pointer;
+  font-family: "Inter", Arial, sans-serif;
+  font-weight: 500;
 }
 
 .card-header-sm {
-    padding: 12px 16px;
-    border-bottom: 1.5px solid #141413;
+  padding: 12px 16px;
+  border-bottom: 1.5px solid #141413;
 }
 
 .card-title-sm {
-    font-size: 12px;
-    font-weight: 600;
-    color: #141413;
+  font-size: 12px;
+  font-weight: 600;
+  color: #141413;
 }
 
 .quick-link-btn {
-    width: 100%;
-    text-align: left;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 16px;
-    border: none;
-    border-bottom: 1px solid #e8e6e0;
-    background: none;
-    cursor: pointer;
-    font-family: 'Inter', Arial, sans-serif;
-    transition: background 100ms;
+  width: 100%;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border: none;
+  border-bottom: 1px solid #e8e6e0;
+  background: none;
+  cursor: pointer;
+  font-family: "Inter", Arial, sans-serif;
+  transition: background 100ms;
 }
 
 .quick-link-btn:last-child {
-    border-bottom: none;
+  border-bottom: none;
 }
 
 .quick-link-icon {
-    font-size: 20px;
-    flex-shrink: 0;
+  font-size: 20px;
+  flex-shrink: 0;
 }
 
 .link-label {
-    font-size: 13px;
-    font-weight: 500;
-    color: #141413;
+  font-size: 13px;
+  font-weight: 500;
+  color: #141413;
 }
 
 .link-sub {
-    font-size: 11px;
-    color: #6b6b68;
+  font-size: 11px;
+  color: #6b6b68;
 }
 
 .link-arrow {
-    margin-left: auto;
-    color: #6b6b68;
-    font-size: 13px;
+  margin-left: auto;
+  color: #6b6b68;
+  font-size: 13px;
 }
 
 /* --- How It Works Section --- */
 .how-it-works-section {
-    margin-top: 8px;
+  margin-top: 8px;
+}
+
+.how-it-works-page {
+  width: min(1180px, calc(100% - 40px));
+  margin: 0 auto;
+  padding: 48px 0 72px;
+}
+
+.how-it-works-hero {
+  padding: clamp(32px, 6vw, 72px);
+  color: #faf9f5;
+  background: #141413;
+  border-radius: 14px;
+}
+
+.how-it-works-hero h1 {
+  max-width: 760px;
+  margin: 10px 0 16px;
+  font: 700 clamp(38px, 7vw, 68px) / 1.04 "Fraunces", Georgia, serif;
+}
+
+.how-it-works-hero > p:last-child {
+  max-width: 680px;
+  color: #d9d3c8;
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+.how-it-works-page .how-it-works-section {
+  margin-top: 54px;
+}
+
+.how-it-works-page .feature-cards-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.how-it-works-link {
+  display: inline-flex;
+  width: fit-content;
+  text-decoration: none;
+}
+
+.how-it-works-join {
+  margin-top: 32px;
+  padding: 38px;
+  text-align: center;
+  border: 1.5px solid #141413;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.how-it-works-join h2 {
+  margin: 8px 0 20px;
+  font: 700 32px "Fraunces", Georgia, serif;
+}
+
+.how-it-works-join a {
+  display: inline-flex;
+  padding: 11px 18px;
+  color: #141413;
+  font-weight: 700;
+  text-decoration: none;
+  background: #d9a046;
+  border-radius: 7px;
+}
+
+@media (max-width: 720px) {
+  .how-it-works-page .feature-cards-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .section-tagline {
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    color: #6b6b68;
-    margin-bottom: 6px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: #6b6b68;
+  margin-bottom: 6px;
 }
 
 .section-title {
-    font-family: 'Fraunces', Georgia, serif;
-    font-size: 28px;
-    font-weight: 700;
-    color: #141413;
-    margin-bottom: 4px;
+  font-family: "Fraunces", Georgia, serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: #141413;
+  margin-bottom: 4px;
 }
 
 .section-subtitle {
-    font-size: 13px;
-    color: #6b6b68;
-    margin-bottom: 24px;
+  font-size: 13px;
+  color: #6b6b68;
+  margin-bottom: 24px;
 }
 
 .feature-cards-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
 }
 
 .feature-card {
-    border: 1.5px solid #141413;
-    border-radius: 12px;
-    padding: 24px;
-    background-color: #ffffff;
-    display: flex;
-    flex-direction: column;
+  border: 1.5px solid #141413;
+  border-radius: 12px;
+  padding: 24px;
+  background-color: #ffffff;
+  display: flex;
+  flex-direction: column;
 }
 
 .feature-icon {
-    font-size: 36px;
-    margin-bottom: 14px;
+  font-size: 36px;
+  margin-bottom: 14px;
 }
 
 .feature-title {
-    font-family: 'Fraunces', Georgia, serif;
-    font-size: 18px;
-    font-weight: 700;
-    color: #141413;
-    margin-bottom: 10px;
-    line-height: 1.3;
+  font-family: "Fraunces", Georgia, serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #141413;
+  margin-bottom: 10px;
+  line-height: 1.3;
 }
 
 .feature-desc {
-    font-size: 13px;
-    color: #6b6b68;
-    line-height: 1.7;
-    flex: 1;
-    margin-bottom: 20px;
+  font-size: 13px;
+  color: #6b6b68;
+  line-height: 1.7;
+  flex: 1;
+  margin-bottom: 20px;
 }
 
 .btn-card-action {
-    padding: 9px 18px;
-    border: 1.5px solid #141413;
-    border-radius: 8px;
-    background: none;
-    color: #141413;
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    font-family: 'Inter', Arial, sans-serif;
-    align-self: flex-start;
+  padding: 9px 18px;
+  border: 1.5px solid #141413;
+  border-radius: 8px;
+  background: none;
+  color: #141413;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: "Inter", Arial, sans-serif;
+  align-self: flex-start;
 }
 
 .visits-container {
-    max-height: 360px;
-    overflow-y: auto;
+  max-height: 360px;
+  overflow-y: auto;
 }
 
 .home-challenge-list {
-    max-height: 250px;
-    margin: 10px 0 14px;
-    overflow-y: auto;
+  max-height: 250px;
+  margin: 10px 0 14px;
+  overflow-y: auto;
 }
 
 .home-challenge-item {
-    padding: 10px 0;
-    border-bottom: 1px solid rgba(20, 20, 19, .15);
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(20, 20, 19, 0.15);
 }
 
 .home-challenge-item:last-child {
-    border-bottom: 0;
+  border-bottom: 0;
 }
 
 .challenge-empty {
-    margin: 12px 0 16px;
-    color: #6b6b68;
-    font-size: 12px;
+  margin: 12px 0 16px;
+  color: #6b6b68;
+  font-size: 12px;
+}
+
+.tier-progress-empty {
+  width: 0;
 }

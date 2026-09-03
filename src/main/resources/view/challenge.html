@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <th:block th:replace="~{fragments/fragments :: head('WarisanGo — Challenges')}"></th:block>
+    <link rel="stylesheet" href="/css/rewards.css" th:href="@{/css/rewards.css}" />
+  </head>
+  <body>
+    <div th:replace="~{fragments/fragments :: navbar('challenges')}"></div>
+    <div id="page-challenges" class="page active">
+      <main>
+        <h1>Challenges</h1>
+        <p class="muted">Join limited-time challenges to earn bonus points and exclusive badges before they expire.</p>
+        <div class="batik-divider view-challenge-1"></div>
+        <div id="challenges-list" class="challenge-groups"></div>
+        <!-- Completion modal -->
+        <div id="complete-modal" class="view-challenge-2 modal-overlay">
+          <div class="batik-bg modal-box view-challenge-3">
+            <div class="view-challenge-4">🎉</div>
+            <h2 class="view-challenge-5">Challenge Complete!</h2>
+            <p class="view-challenge-6">
+              You completed <strong id="done-title" class="view-challenge-7"></strong> and earned:
+            </p>
+            <div class="view-challenge-8">
+              <div>
+                <div id="done-pts" class="view-challenge-9"></div>
+                <div class="view-challenge-10">bonus points</div>
+              </div>
+              <div>
+                <div id="done-badge" class="view-challenge-11"></div>
+                <div class="view-challenge-12">exclusive badge</div>
+              </div>
+            </div>
+            <button class="btn-primary" id="close-complete-modal" type="button">Awesome!</button>
+          </div>
+        </div>
+      </main>
+    </div>
+    <div th:replace="~{fragments/footer :: global}"></div>
+    <script src="/js/challenges.js" th:src="@{/js/challenges.js}" defer></script>
+  </body>
+</html>

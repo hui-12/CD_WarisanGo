@@ -1,7 +1,8 @@
 /* ============================================
    BASE / RESET
    ============================================ */
-html, body {
+html,
+body {
   height: 100vh;
   margin: 0;
   padding: 0;
@@ -12,7 +13,7 @@ html, body {
   width: 100vw;
   background: #faf9f5;
   color: #141413;
-  font-family: 'Inter', Arial, sans-serif;
+  font-family: "Inter", Arial, sans-serif;
 }
 
 .login-layout {
@@ -28,7 +29,6 @@ html, body {
   box-sizing: border-box;
 }
 
-
 /* ============================================
    HERO / LEFT PANEL
    ============================================ */
@@ -40,8 +40,8 @@ html, body {
   overflow: hidden;
   padding: 3rem;
   background:
-    linear-gradient(180deg, rgba(20,10,5,.45) 0%, rgba(20,10,5,.8) 100%),
-    url('https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=1200&h=1400&fit=crop&auto=format') center/cover;
+    linear-gradient(180deg, rgba(20, 10, 5, 0.45) 0%, rgba(20, 10, 5, 0.8) 100%),
+    url("https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=1200&h=1400&fit=crop&auto=format") center/cover;
   color: #fefae0;
   text-align: center;
 }
@@ -68,7 +68,10 @@ html, body {
 .login-brand-accent,
 .login-mobile-brand span,
 .login-mobile-brand em {
-  font: 700 31px 'Fraunces', Georgia, serif;
+  font:
+    700 31px "Fraunces",
+    Georgia,
+    serif;
 }
 
 .login-brand-accent,
@@ -78,11 +81,11 @@ html, body {
 }
 
 .login-campaign {
-  margin: .3rem 0 0;
+  margin: 0.3rem 0 0;
   color: #fefae0d9;
-  font-size: .7rem;
+  font-size: 0.7rem;
   font-weight: 700;
-  letter-spacing: .13em;
+  letter-spacing: 0.13em;
   text-transform: uppercase;
 }
 
@@ -100,8 +103,11 @@ html, body {
 .login-hero h1 {
   margin: 0;
   color: #fff;
-  font: 800 3rem/1.1 'Fraunces', Georgia, serif;
-  text-shadow: 0 3px 12px rgba(0,0,0,.6);
+  font:
+    800 3rem/1.1 "Fraunces",
+    Georgia,
+    serif;
+  text-shadow: 0 3px 12px rgba(0, 0, 0, 0.6);
 }
 
 .login-introduction {
@@ -110,9 +116,8 @@ html, body {
   color: #fefae0;
   font-size: 1.15rem;
   line-height: 1.6;
-  text-shadow: 0 2px 8px rgba(0,0,0,.8);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
 }
-
 
 /* ============================================
    FLAVOUR — NEWSPAPER CLIPPING TILES
@@ -121,9 +126,12 @@ html, body {
 /* ============================================
    FLAVOUR — RANSOM NOTE / DADAIST COLLAGE
    ============================================ */
-.flavour-wrap{ position:relative; width:100%; }
+.flavour-wrap {
+  position: relative;
+  width: 100%;
+}
 
-.flavour-strip{
+.flavour-strip {
   position: relative;
   display: flex;
   align-items: center;
@@ -132,169 +140,195 @@ html, body {
   padding: 0 10px;
 }
 
-.clip{
+.clip {
   position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: zoom-in;
-  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Ccircle cx='13' cy='13' r='9' fill='none' stroke='%23141310' stroke-width='2.5'/%3E%3Cline x1='20' y1='20' x2='29' y2='29' stroke='%23141310' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E") 13 13, zoom-in;
-  transition: transform .2s cubic-bezier(.4,0,.2,1), filter .2s ease;
+  cursor:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Ccircle cx='13' cy='13' r='9' fill='none' stroke='%23141310' stroke-width='2.5'/%3E%3Cline x1='20' y1='20' x2='29' y2='29' stroke='%23141310' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E")
+      13 13,
+    zoom-in;
+  transition:
+    transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+    filter 0.2s ease;
   user-select: none;
 }
 
 .clip:hover,
 .clip:focus-visible,
-.clip.is-active{
+.clip.is-active {
   z-index: 50;
   transform: translateY(-7px) rotate(0deg) scale(1.08) !important;
-  filter: drop-shadow(0 10px 14px rgba(0,0,0,.4));
+  filter: drop-shadow(0 10px 14px rgba(0, 0, 0, 0.4));
   outline: none;
 }
 
-.clip .face{
+.clip .face {
   position: relative;
   padding: 2px 10px 6px;
   color: #141310;
-  line-height: .9;
-  box-shadow: 2px 3px 0 rgba(0,0,0,.28), 0 0 0 1px rgba(0,0,0,.1);
+  line-height: 0.9;
+  box-shadow:
+    2px 3px 0 rgba(0, 0, 0, 0.28),
+    0 0 0 1px rgba(0, 0, 0, 0.1);
 }
 
-.clip .face::before{
+.clip .face::before {
   content: "";
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: repeating-radial-gradient(circle at 25% 30%, rgba(0,0,0,.05) 0 1px, transparent 1px 3px);
+  background: repeating-radial-gradient(circle at 25% 30%, rgba(0, 0, 0, 0.05) 0 1px, transparent 1px 3px);
 }
 
 /* --- individual letters: size, rotation, baseline offset, paper stock, font all deliberately mismatched --- */
-.clip-f{ 
-    margin-right: -10px; 
-    transform: rotate(-9deg) translateY(6px); 
-    z-index: 7; 
+.clip-f {
+  margin-right: -10px;
+  transform: rotate(-9deg) translateY(6px);
+  z-index: 7;
 }
 
-.clip-f .face{ 
-    background: #c9c3b0; 
-    font: 700 italic 3.1rem 'Playfair Display', Georgia, serif; 
-    clip-path: polygon(1% 8%,97% 0%,100% 92%,3% 100%); 
+.clip-f .face {
+  background: #c9c3b0;
+  font:
+    700 italic 3.1rem "Playfair Display",
+    Georgia,
+    serif;
+  clip-path: polygon(1% 8%, 97% 0%, 100% 92%, 3% 100%);
 }
 
-.clip-l{ 
-    margin-right: -6px; 
-    transform: rotate(6deg) translateY(-10px); 
-    z-index: 6; 
+.clip-l {
+  margin-right: -6px;
+  transform: rotate(6deg) translateY(-10px);
+  z-index: 6;
 }
 
-.clip-l .face{ 
-    background: #faf8f2; 
-    font: 700 1.9rem 'Special Elite', monospace; 
-    padding-top: 10px; 
+.clip-l .face {
+  background: #faf8f2;
+  font:
+    700 1.9rem "Special Elite",
+    monospace;
+  padding-top: 10px;
 }
 
-.clip-a{ 
-    margin-right: -8px; 
-    transform: rotate(-4deg) translateY(14px); 
-    z-index: 8; 
+.clip-a {
+  margin-right: -8px;
+  transform: rotate(-4deg) translateY(14px);
+  z-index: 8;
 }
 
-.clip-a .face{ 
-    background: #e0b23c; 
-    color: #211a09; 
-    font: 700 3.6rem/.85 'Bebas Neue', Impact, sans-serif; 
-    letter-spacing: 1px; 
-    padding: 0 8px 4px; 
-    clip-path: polygon(2% 0%,99% 4%,97% 97%,0% 100%); 
+.clip-a .face {
+  background: #e0b23c;
+  color: #211a09;
+  font:
+    700 3.6rem/0.85 "Bebas Neue",
+    Impact,
+    sans-serif;
+  letter-spacing: 1px;
+  padding: 0 8px 4px;
+  clip-path: polygon(2% 0%, 99% 4%, 97% 97%, 0% 100%);
 }
 
-
-.clip-v{ 
-    margin-right: -4px; 
-    transform: rotate(11deg) translateY(-4px); 
-    z-index: 9; 
+.clip-v {
+  margin-right: -4px;
+  transform: rotate(11deg) translateY(-4px);
+  z-index: 9;
 }
 
-.clip-v .face{ 
-    background: #b08d57; 
-    color: #231a0d; 
-    font: 400 2.6rem 'Permanent Marker', cursive; 
-    padding: 4px 10px 2px; 
-    box-shadow: 2px 3px 0 rgba(0,0,0,.32), 0 0 0 1px rgba(0,0,0,.12); 
+.clip-v .face {
+  background: #b08d57;
+  color: #231a0d;
+  font:
+    400 2.6rem "Permanent Marker",
+    cursive;
+  padding: 4px 10px 2px;
+  box-shadow:
+    2px 3px 0 rgba(0, 0, 0, 0.32),
+    0 0 0 1px rgba(0, 0, 0, 0.12);
 }
 
-
-.clip-o{ 
-    margin-right: -10px; 
-    transform: rotate(-7deg) translateY(2px); 
-    z-index: 7; 
+.clip-o {
+  margin-right: -10px;
+  transform: rotate(-7deg) translateY(2px);
+  z-index: 7;
 }
 
-.clip-o .face{ 
-    background: #1c1a16; 
-    color: #f3ead0; 
-    font: 700 2.6rem 'Playfair Display', Georgia, serif; 
-    padding: 4px 10px; 
-    clip-path: polygon(0% 4%,100% 0%,98% 96%,2% 100%); 
+.clip-o .face {
+  background: #1c1a16;
+  color: #f3ead0;
+  font:
+    700 2.6rem "Playfair Display",
+    Georgia,
+    serif;
+  padding: 4px 10px;
+  clip-path: polygon(0% 4%, 100% 0%, 98% 96%, 2% 100%);
 }
 
+.clip-u {
+  margin-right: -5px;
+  transform: rotate(5deg) translateY(-14px);
+  z-index: 8;
+}
+.clip-u .face {
+  background: #ede4c8;
+  font:
+    700 1.9rem "Courier Prime",
+    monospace;
+  padding: 8px 9px 5px;
+}
 
-.clip-u{ 
-    margin-right: -5px; 
-    transform: rotate(5deg) translateY(-14px); 
-    z-index: 8; 
+.clip-r {
+  transform: rotate(-5deg) translateY(10px);
+  z-index: 9;
 }
-.clip-u .face{ 
-    background: #ede4c8; 
-    font: 700 1.9rem 'Courier Prime', monospace; 
-    padding: 8px 9px 5px; 
-}
-
-.clip-r{ 
-    transform: rotate(-5deg) translateY(10px); 
-    z-index: 9; 
-}
-.clip-r .face{ 
-    background: #c2bba6; 
-    font: 700 3.1rem 'Oswald', Impact, sans-serif; 
-    letter-spacing: 1px; 
-    padding: 2px 10px 6px; 
-    clip-path: polygon(2% 0%,100% 6%,98% 100%,0% 94%); 
+.clip-r .face {
+  background: #c2bba6;
+  font:
+    700 3.1rem "Oswald",
+    Impact,
+    sans-serif;
+  letter-spacing: 1px;
+  padding: 2px 10px 6px;
+  clip-path: polygon(2% 0%, 100% 6%, 98% 100%, 0% 94%);
 }
 
 /* pin / tape accents so a couple letters look physically fastened down */
-.pin{ 
-    position: absolute; 
-    top: -6px; 
-    right: -4px; 
-    width: 12px; 
-    height: 12px; 
-    border-radius: 50%; 
-    background: radial-gradient(circle at 35% 30%, #e6493c, #9f2d20); 
-    box-shadow: 0 2px 3px rgba(0,0,0,.4); 
-    z-index: 3; 
+.pin {
+  position: absolute;
+  top: -6px;
+  right: -4px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #e6493c, #9f2d20);
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.4);
+  z-index: 3;
 }
 
-.tape{ 
-    position: absolute; 
-    top: -9px; left: 50%; 
-    width: 30px; height: 13px; 
-    background: rgba(220,205,165,.55); 
-    transform: translateX(-50%) rotate(-5deg); 
-    box-shadow: 0 1px 2px rgba(0,0,0,.2); 
-    z-index: 3; 
+.tape {
+  position: absolute;
+  top: -9px;
+  left: 50%;
+  width: 30px;
+  height: 13px;
+  background: rgba(220, 205, 165, 0.55);
+  transform: translateX(-50%) rotate(-5deg);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  z-index: 3;
 }
 
 /* caption dock — sits BELOW the whole strip so it never covers any tile or the paragraph */
-.caption-dock{ 
-    position: relative; 
-    min-height: 64px; 
-    display: flex; 
-    align-items: flex-start; 
-    justify-content: center; 
+.caption-dock {
+  position: relative;
+  min-height: 64px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
 }
 
-.caption{
+.caption {
   position: absolute;
   top: 0;
   left: 50%;
@@ -302,25 +336,33 @@ html, body {
   max-width: 80vw;
   padding: 10px 14px;
   text-align: left;
-  background: rgba(20,15,10,.86);
+  background: rgba(20, 15, 10, 0.86);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
   border: 1px solid #d9a046;
   border-radius: 2px;
-  box-shadow: 0 8px 18px rgba(0,0,0,.4);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.4);
   color: #f5d061;
-  font: 400 12px/1.5 'Inter', Arial, sans-serif;
+  font:
+    400 12px/1.5 "Inter",
+    Arial,
+    sans-serif;
   opacity: 0;
   visibility: hidden;
   transform: translate(-50%, 6px);
-  transition: opacity .18s ease, transform .18s ease;
+  transition:
+    opacity 0.18s ease,
+    transform 0.18s ease;
   pointer-events: none;
 }
 
-.caption strong{
+.caption strong {
   display: block;
   margin-bottom: 3px;
-  font: 700 13px 'Fraunces', Georgia, serif;
+  font:
+    700 13px "Fraunces",
+    Georgia,
+    serif;
   color: #fff;
 }
 
@@ -338,17 +380,21 @@ html, body {
 .flavour-wrap:has(.clip-u:hover) .caption-u,
 .flavour-wrap:has(.clip-u:focus-visible) .caption-u,
 .flavour-wrap:has(.clip-r:hover) .caption-r,
-.flavour-wrap:has(.clip-r:focus-visible) .caption-r{
+.flavour-wrap:has(.clip-r:focus-visible) .caption-r {
   opacity: 1;
   visibility: visible;
   transform: translate(-50%, 0);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .clip{ transition: none; }
-  .clip:hover, .clip:focus-visible{ transform: none !important; }
+  .clip {
+    transition: none;
+  }
+  .clip:hover,
+  .clip:focus-visible {
+    transform: none !important;
+  }
 }
-
 
 /* ============================================
    FORM / RIGHT PANEL
@@ -368,7 +414,7 @@ html, body {
   border: 1px solid #ded8ce;
   border-radius: 16px;
   background: #fff;
-  box-shadow: 0 22px 55px rgba(62,39,35,.16);
+  box-shadow: 0 22px 55px rgba(62, 39, 35, 0.16);
   transform: translateY(-4px);
 }
 
@@ -387,7 +433,10 @@ html, body {
 
 .login-form-content h2 {
   margin: 0;
-  font: 700 42px/1.1 'Fraunces', Georgia, serif;
+  font:
+    700 42px/1.1 "Fraunces",
+    Georgia,
+    serif;
 }
 
 .login-subtitle {
@@ -413,8 +462,13 @@ html, body {
   border: 1.5px solid #141413;
   border-radius: 9px;
   cursor: pointer;
-  font: 600 16px 'Inter', Arial, sans-serif;
-  transition: transform .15s, background .15s;
+  font:
+    600 16px "Inter",
+    Arial,
+    sans-serif;
+  transition:
+    transform 0.15s,
+    background 0.15s;
 }
 
 .login-button-primary {
@@ -428,7 +482,7 @@ html, body {
 }
 
 .login-button:disabled {
-  opacity: .6;
+  opacity: 0.6;
 }
 
 .google-icon {
@@ -475,7 +529,7 @@ html, body {
   font-weight: 500;
   text-align: center;
   text-decoration: none;
-  transition: color .15s ease;
+  transition: color 0.15s ease;
 }
 
 .login-guest-link:hover,

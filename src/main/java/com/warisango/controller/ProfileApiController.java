@@ -1,9 +1,9 @@
 package com.warisango.controller;
 
 import com.warisango.dto.ProfileUpdateRequest;
+import com.warisango.dto.UserResponse;
 import com.warisango.exception.ProfileUpdateException;
-import com.warisango.model.User;
-import com.warisango.model.service.ProfileService;
+import com.warisango.service.ProfileService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -26,8 +26,11 @@ public class ProfileApiController {
     public ProfileApiController(ProfileService profileService) { this.profileService = profileService; }
 
     @PatchMapping
-    public ResponseEntity<User> update(@Valid @RequestBody ProfileUpdateRequest request, Authentication authentication) {
-        return ResponseEntity.ok(profileService.updateProfile(authentication.getName(), request));
+    public ResponseEntity<UserResponse> update(
+            @Valid @RequestBody ProfileUpdateRequest request,
+            Authentication authentication) {
+        return ResponseEntity.ok(UserResponse.from(
+                profileService.updateProfile(authentication.getName(), request)));
     }
 
     @PostMapping("/upload-avatar")
