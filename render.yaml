@@ -18,6 +18,8 @@ services:
         sync: false
       - key: GEMINI_API_KEY
         sync: false
+      - key: YOUTUBE_COOKIES_FILE
+        value: /etc/secrets/youtube-cookies.txt
       - key: FIREBASE_PROJECT_ID
         sync: false
       - key: FIREBASE_STORAGE_BUCKET
