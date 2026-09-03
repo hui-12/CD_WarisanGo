@@ -248,7 +248,7 @@ public class VideoAudioService {
     public static List<String> createDownloadCommand(String videoUrl, String outputTemplate) {
         List<String> command = new ArrayList<>(List.of("yt-dlp", "--no-playlist"));
         command.addAll(List.of(
-                "--js-runtimes", "node",
+            "--js-runtimes", "node:/usr/bin/node",
                 "--remote-components", "ejs:github",
                 "-f", "bestaudio/best"));
 
@@ -280,6 +280,14 @@ public class VideoAudioService {
         }
         if (lowercaseOutput.contains("unexpected response from webpage request")) {
             return "TikTok rejected the yt-dlp webpage request. Refresh the TikTok browser session and retry.";
+        }
+        if (lowercaseOutput.contains("sign in to confirm")
+                || lowercaseOutput.contains("cookies-from-browser")
+                || lowercaseOutput.contains("not a bot")) {
+            return "YouTube requires authentication for this server. Configure YOUTUBE_COOKIES_FILE with a valid cookies file.";
+        }
+        if (lowercaseOutput.contains("no supported javascript runtime")) {
+            return "YouTube extraction requires Node.js. Redeploy the latest Docker image.";
         }
         return "Unable to extract audio from the video.";
     }

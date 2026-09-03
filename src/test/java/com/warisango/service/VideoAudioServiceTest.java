@@ -35,7 +35,7 @@ class VideoAudioServiceTest {
 
         assertTrue(command.contains("bestaudio/best"));
         assertTrue(command.contains("--js-runtimes"));
-        assertTrue(command.contains("node"));
+        assertTrue(command.contains("node:/usr/bin/node"));
         assertEquals(videoUrl, command.getLast());
     }
 }
