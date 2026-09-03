@@ -279,8 +279,10 @@
         <div class="review-modal-actions">
           <button type="button" class="review-btn-outline" data-cancel-delete>Cancel</button>
 
-          <form id="reviewDeleteForm" method="post">
+          <form id="reviewDeleteForm" method="post" th:action="@{/reviews/delete}">
+            <input type="hidden" name="reviewId" />
             <input type="hidden" name="businessId" th:value="${business.businessId}" />
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
             <button type="submit" class="review-btn-primary review-btn-danger">Delete</button>
           </form>
