@@ -42,7 +42,7 @@ public class TikTokMediaDownloadService {
         try (Playwright playwright = Playwright.create();
              BrowserContext context = playwright.chromium().launchPersistentContext(
                      TikTokScraperService.PROFILE_PATH,
-                     new BrowserType.LaunchPersistentContextOptions().setHeadless(false))) {
+                     new BrowserType.LaunchPersistentContextOptions().setHeadless(isHeadless()))) {
             outputDirectory = Files.createTempDirectory("warisango-audio-");
             Path mediaFile = outputDirectory.resolve("video-" + UUID.randomUUID() + ".mp4");
             Page page = context.pages().isEmpty() ? context.newPage() : context.pages().getFirst();
@@ -119,5 +119,9 @@ public class TikTokMediaDownloadService {
         } catch (IOException exception) {
             logger.warn("Unable to clean the temporary TikTok media directory.", exception);
         }
+    }
+
+    private boolean isHeadless() {
+        return Boolean.parseBoolean(System.getenv().getOrDefault("TIKTOK_HEADLESS", "false"));
     }
 }

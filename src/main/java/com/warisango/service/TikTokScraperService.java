@@ -57,7 +57,7 @@ public class TikTokScraperService {
         try (Playwright playwright = Playwright.create();
              BrowserContext context = playwright.chromium().launchPersistentContext(
                      PROFILE_PATH,
-                     new BrowserType.LaunchPersistentContextOptions().setHeadless(false))) {
+                     new BrowserType.LaunchPersistentContextOptions().setHeadless(isHeadless()))) {
 
             Page page = context.pages().isEmpty() ? context.newPage() : context.pages().getFirst();
             page.navigate(searchUrl, new Page.NavigateOptions().setWaitUntil(WaitUntilState.DOMCONTENTLOADED));
@@ -148,6 +148,10 @@ public class TikTokScraperService {
 
     private String stringValue(Object value, String fallback) {
         return value instanceof String text && !text.isBlank() ? text : fallback;
+    }
+
+    private boolean isHeadless() {
+        return Boolean.parseBoolean(System.getenv().getOrDefault("TIKTOK_HEADLESS", "false"));
     }
 
     public static String normalizeVideoUrl(String url) {
