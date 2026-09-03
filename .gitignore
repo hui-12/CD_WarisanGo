@@ -39,6 +39,7 @@ build/
 
 ### Local application configuration and API keys ###
 src/main/resources/application.properties
+src/main/resources/application-local.properties
 
 ### Local application uploads ###
 uploads/
