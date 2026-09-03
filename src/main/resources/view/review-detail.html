@@ -201,7 +201,11 @@
                     ✎
                   </a>
 
-                  <form th:action="@{/reviews/comments/delete/{id}(id=${comment.commentId})}" method="post">
+                  <form
+                    th:action="@{/reviews/comments/delete/{id}(id=${comment.commentId})}"
+                    method="post"
+                    data-delete-form
+                  >
                     <input type="hidden" name="reviewId" th:value="${review.reviewId}" />
 
                     <button

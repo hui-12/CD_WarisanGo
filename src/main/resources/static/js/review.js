@@ -5,6 +5,7 @@
 
 document.addEventListener('DOMContentLoaded', function () {
   initializeDeleteModal();
+  initializeDeleteFormGuards();
   initializeReportModal();
   initializeLikeButtons();
   initializeCharacterCounters();
@@ -21,6 +22,7 @@ document.addEventListener('DOMContentLoaded', function () {
 function initializeDeleteModal() {
   const modal = document.getElementById('reviewDeleteModal');
   const form = document.getElementById('reviewDeleteForm');
+  const reviewIdInput = form ? form.querySelector("[name='reviewId']") : null;
 
   if (!modal || !form) {
     return;
@@ -36,6 +38,9 @@ function initializeDeleteModal() {
         return;
       }
 
+      if (reviewIdInput) {
+        reviewIdInput.value = reviewId;
+      }
       form.action = '/reviews/delete/' + encodeURIComponent(reviewId);
       modal.classList.add('open');
       modal.setAttribute('aria-hidden', 'false');
@@ -64,6 +69,35 @@ function initializeDeleteModal() {
     modal.setAttribute('aria-hidden', 'true');
     document.body.style.overflow = '';
   }
+
+  form.addEventListener('submit', function (event) {
+    if (form.dataset.submissionInProgress === 'true') {
+      event.preventDefault();
+      return;
+    }
+
+    form.dataset.submissionInProgress = 'true';
+    setSubmitButtonsDisabled(form, true);
+  });
+}
+
+function initializeDeleteFormGuards() {
+  document.querySelectorAll('form[data-delete-form]').forEach(function (form) {
+    form.addEventListener('submit', function (event) {
+      if (form.dataset.submissionInProgress === 'true') {
+        event.preventDefault();
+        return;
+      }
+
+      if (!window.confirm('Delete this comment permanently? This action cannot be undone.')) {
+        event.preventDefault();
+        return;
+      }
+
+      form.dataset.submissionInProgress = 'true';
+      setSubmitButtonsDisabled(form, true);
+    });
+  });
 }
 
 function initializeReportModal() {
@@ -179,6 +213,14 @@ function initializeModerationForms() {
         return;
       }
 
+      if (form.dataset.submissionInProgress === 'true') {
+        event.preventDefault();
+        return;
+      }
+
+      form.dataset.submissionInProgress = 'true';
+      setSubmitButtonsDisabled(form, true);
+
       if (!textarea.value.trim()) {
         return;
       }
@@ -206,6 +248,7 @@ function initializeModerationForms() {
             error.textContent = result.message || 'Please remove prohibited language before submitting.';
             error.hidden = false;
             textarea.focus();
+            resetFormSubmissionState(form);
             return;
           }
 
@@ -219,17 +262,38 @@ function initializeModerationForms() {
         .catch(function (moderationError) {
           error.textContent = moderationError.message;
           error.hidden = false;
+          resetFormSubmissionState(form);
         });
     });
   });
 }
 
+function setSubmitButtonsDisabled(form, disabled) {
+  form.querySelectorAll("button[type='submit'], input[type='submit']").forEach(function (button) {
+    button.disabled = disabled;
+  });
+}
+
+function resetFormSubmissionState(form) {
+  delete form.dataset.submissionInProgress;
+  setSubmitButtonsDisabled(form, false);
+}
+
 function initializeModerationDeleteConfirmation() {
   document.querySelectorAll('form[data-moderation-delete]').forEach(function (form) {
     form.addEventListener('submit', function (event) {
+      if (form.dataset.submissionInProgress === 'true') {
+        event.preventDefault();
+        return;
+      }
+
       if (!window.confirm('Delete this content permanently? This action cannot be undone.')) {
         event.preventDefault();
+        return;
       }
+
+      form.dataset.submissionInProgress = 'true';
+      setSubmitButtonsDisabled(form, true);
     });
   });
 }
