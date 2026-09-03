@@ -248,8 +248,7 @@ public class VideoAudioService {
     public static List<String> createDownloadCommand(String videoUrl, String outputTemplate) {
         List<String> command = new ArrayList<>(List.of("yt-dlp", "--no-playlist"));
         command.addAll(List.of(
-                "--extractor-args", "youtube:player_client=android",
-                "-f", "18"));
+                "-f", "bestaudio/best"));
 
         command.addAll(List.of(
                 "--extract-audio", "--audio-format", "m4a", "--audio-quality", "0",

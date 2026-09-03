@@ -8,6 +8,7 @@ import com.warisango.exception.AIProcessingException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientResponseException;
+import org.springframework.web.util.HtmlUtils;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.ArrayList;
@@ -84,11 +85,11 @@ public class VideoSearchService {
 
             dto.setVideoId(item.path("id").path("videoId").stringValue(""));
 
-            dto.setTitle(item.path("snippet").path("title").stringValue(""));
+            dto.setTitle(decodeYouTubeText(item.path("snippet").path("title").stringValue("")));
 
-            dto.setDescription(item.path("snippet").path("description").stringValue(""));
+            dto.setDescription(decodeYouTubeText(item.path("snippet").path("description").stringValue("")));
 
-            dto.setChannel(item.path("snippet").path("channelTitle").stringValue(""));
+            dto.setChannel(decodeYouTubeText(item.path("snippet").path("channelTitle").stringValue("")));
 
             dto.setPublishedAt(item.path("snippet").path("publishedAt").stringValue(""));
 
@@ -104,5 +105,9 @@ public class VideoSearchService {
         }
 
         return videos;
+    }
+
+    private String decodeYouTubeText(String value) {
+        return HtmlUtils.htmlUnescape(value);
     }
 }

@@ -11,7 +11,7 @@ WORKDIR /app
 RUN apt-get update \
 	&& apt-get install -y --no-install-recommends \
 		ffmpeg \
-		yt-dlp \
+		curl \
 		libglib2.0-0 \
 		libnss3 \
 		libnspr4 \
@@ -32,6 +32,11 @@ RUN apt-get update \
 		libasound2t64 \
 		libxshmfence1 \
 	&& rm -rf /var/lib/apt/lists/*
+
+RUN curl -L --fail --silent --show-error \
+		-o /usr/local/bin/yt-dlp \
+		https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp \
+	&& chmod a+rx /usr/local/bin/yt-dlp
 
 COPY --from=build /app/target/warisango-0.0.1-SNAPSHOT.jar app.jar
 
