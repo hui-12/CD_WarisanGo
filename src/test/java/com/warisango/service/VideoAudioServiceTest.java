@@ -35,7 +35,7 @@ class VideoAudioServiceTest {
 
         assertTrue(command.contains("bestaudio[ext=m4a]/bestaudio/best"));
         assertTrue(command.contains("--js-runtimes"));
-        assertTrue(command.contains("deno:/usr/local/bin/deno,node:/usr/bin/node"));
+        assertTrue(command.contains("deno:/usr/local/bin/deno"));
         assertEquals(videoUrl, command.getLast());
     }
 }
