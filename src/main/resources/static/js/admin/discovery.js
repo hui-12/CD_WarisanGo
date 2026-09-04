@@ -335,8 +335,37 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   async function pollProcessingJob(jobId) {
+    const maximumTransientFailures = 20;
+    let transientFailures = 0;
+
     while (true) {
-      const job = await window.WarisanGoWorkflow.get(jobId);
+      let job;
+
+      try {
+        job = await window.WarisanGoWorkflow.get(jobId);
+        transientFailures = 0;
+      } catch (error) {
+        const isGatewayFailure = [502, 503, 504].includes(error.status);
+        const isNetworkFailure = typeof error.status === 'undefined';
+
+        if (!isGatewayFailure && !isNetworkFailure) {
+          throw error;
+        }
+
+        transientFailures++;
+        processingStatus.className = 'alert alert-warning';
+        processingStatus.innerText = 'Server is temporarily unavailable. Reconnecting...';
+
+        if (transientFailures >= maximumTransientFailures) {
+          throw new Error(
+            'The processing server remained unavailable. Check the Render service logs and try again.'
+          );
+        }
+
+        await waitBeforeNextStatusCheck(3000);
+        continue;
+      }
+
       updateProcessingDisplay(job);
 
       if (job.status === 'COMPLETED') {
@@ -350,10 +379,14 @@ document.addEventListener('DOMContentLoaded', function () {
         throw new Error(job.message || 'AI processing failed.');
       }
 
-      await new Promise(function (resolve) {
-        setTimeout(resolve, 1500);
-      });
+      await waitBeforeNextStatusCheck(1500);
     }
+  }
+
+  function waitBeforeNextStatusCheck(delayMilliseconds) {
+    return new Promise(function (resolve) {
+      setTimeout(resolve, delayMilliseconds);
+    });
   }
 
   function updateProcessingDisplay(job) {

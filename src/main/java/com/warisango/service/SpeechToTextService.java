@@ -164,12 +164,9 @@ public class SpeechToTextService {
 
         try {
 
-            byte[] audioBytes =
-                    Files.readAllBytes(audioFile);
-
             logger.info(
                     "Uploading audio file to AssemblyAI: {} bytes",
-                    audioBytes.length
+                    Files.size(audioFile)
             );
 
             HttpRequest request =
@@ -192,7 +189,7 @@ public class SpeechToTextService {
                             )
                             .POST(
                                     HttpRequest.BodyPublishers
-                                            .ofByteArray(audioBytes)
+                                            .ofFile(audioFile)
                             )
                             .build();
 
