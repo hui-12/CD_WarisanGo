@@ -25,10 +25,10 @@ function renderAdminRows() {
   }
   container.innerHTML = adminChallenges
     .map((ch, i) => {
-      const expired = ch.expiry && new Date(ch.expiry) < new Date();
+      const expired = !!ch.expired;
       const encodedId = encodeURIComponent(ch.id).replace(/'/g, '%27');
       return `<div style="display:grid;grid-template-columns:1fr 80px 130px 110px 130px;padding:14px 20px;border-bottom:${i < adminChallenges.length - 1 ? '1px solid #e8e6e0' : 'none'};background:${expired ? '#f5e9c4' : i % 2 === 0 ? '#faf9f5' : '#fff'};align-items:center">
-      <div><div class="view-admin-challenge-js-3">${escapeHtml(ch.title || '')}</div><div class="view-admin-challenge-js-4">${escapeHtml(ch.description || '')}</div><div style="font-size:9px;margin-top:4px;color:${String(ch.status).toUpperCase() === 'ACTIVE' ? '#2d7a4f' : '#9b9b98'}">${escapeHtml(ch.status || 'ACTIVE')}</div></div>
+      <div><div class="view-admin-challenge-js-3">${escapeHtml(ch.title || '')}</div><div class="view-admin-challenge-js-4">${escapeHtml(ch.description || '')}</div><div style="font-size:9px;margin-top:4px;color:${String(ch.status).toUpperCase() === 'ACTIVE' ? '#2d7a4f' : expired ? '#9b5a00' : '#9b9b98'}">${escapeHtml(ch.status || 'ACTIVE')}</div></div>
       <div class="view-admin-challenge-js-5">+${Number(ch.rewardPoints || 0)}</div>
       <div class="view-admin-challenge-js-6">${escapeHtml(ch.badge || '')}</div>
       <div class="view-admin-challenge-js-7">${escapeHtml(ch.expiry || '—')}</div>
