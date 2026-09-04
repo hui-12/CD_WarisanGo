@@ -33,9 +33,9 @@ class VideoAudioServiceTest {
 
         List<String> command = VideoAudioService.createDownloadCommand(videoUrl, "audio.%(ext)s");
 
-        assertTrue(command.contains("bestaudio/best"));
+        assertTrue(command.contains("bestaudio[ext=m4a]/bestaudio/best"));
         assertTrue(command.contains("--js-runtimes"));
-        assertTrue(command.contains("node:/usr/bin/node"));
+        assertTrue(command.contains("deno:/usr/local/bin/deno,node:/usr/bin/node"));
         assertEquals(videoUrl, command.getLast());
     }
 }

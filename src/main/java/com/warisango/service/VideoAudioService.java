@@ -248,9 +248,9 @@ public class VideoAudioService {
     public static List<String> createDownloadCommand(String videoUrl, String outputTemplate) {
         List<String> command = new ArrayList<>(List.of("yt-dlp", "--no-playlist"));
         command.addAll(List.of(
-            "--js-runtimes", "node:/usr/bin/node",
+            "--js-runtimes", "deno:/usr/local/bin/deno,node:/usr/bin/node",
                 "--remote-components", "ejs:github",
-                "-f", "bestaudio/best"));
+                "-f", "bestaudio[ext=m4a]/bestaudio/best"));
 
         String cookiesFile = System.getenv("YOUTUBE_COOKIES_FILE");
         if (cookiesFile != null && !cookiesFile.isBlank()) {

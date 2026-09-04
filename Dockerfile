@@ -12,6 +12,7 @@ RUN apt-get update \
 	&& apt-get install -y --no-install-recommends \
 		ffmpeg \
 		curl \
+		unzip \
 		python3 \
 		nodejs \
 		libglib2.0-0 \
@@ -35,12 +36,15 @@ RUN apt-get update \
 		libxshmfence1 \
 	&& rm -rf /var/lib/apt/lists/*
 
+RUN curl -fsSL https://deno.land/install.sh | DENO_INSTALL=/usr/local sh
+
 RUN curl -L --fail --silent --show-error \
 		-o /usr/local/bin/yt-dlp \
 		https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp \
 	&& chmod a+rx /usr/local/bin/yt-dlp \
 	&& python3 --version \
 	&& node --version \
+	&& deno --version \
 	&& yt-dlp --version \
 	&& ffmpeg -version | head -n 1
 
