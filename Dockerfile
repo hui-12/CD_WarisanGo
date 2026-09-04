@@ -38,6 +38,8 @@ RUN apt-get update \
 
 RUN curl -fsSL https://deno.land/install.sh | DENO_INSTALL=/usr/local sh
 
+ARG YT_DLP_BUILD_VERSION=2026-09-04
+
 RUN curl -L --fail --silent --show-error \
 		-o /usr/local/bin/yt-dlp \
 		https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp \

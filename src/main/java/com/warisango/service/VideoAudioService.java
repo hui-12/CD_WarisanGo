@@ -255,7 +255,11 @@ public class VideoAudioService {
             String videoUrl,
             String outputTemplate,
             Path cookiesFile) {
-        List<String> command = new ArrayList<>(List.of("yt-dlp", "--no-playlist"));
+            List<String> command = new ArrayList<>(List.of(
+                    "yt-dlp",
+                    "--verbose",
+                    "--no-playlist"
+));
         command.addAll(List.of(
             "--js-runtimes", "deno:/usr/local/bin/deno,node:/usr/bin/node",
                 "--remote-components", "ejs:github",
