@@ -51,6 +51,7 @@ public class SecurityConfig {
                     "/terms-of-service",
                     "/privacy-policy",
                     "/how-it-works",
+                    "/actuator/health",
                     "/directory",
                     "/business-directory",
                     "/business/**",
