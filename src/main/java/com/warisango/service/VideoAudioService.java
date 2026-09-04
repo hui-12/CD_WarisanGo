@@ -261,7 +261,7 @@ public class VideoAudioService {
                     "--no-playlist"
 ));
         command.addAll(List.of(
-            "--js-runtimes", "deno:/usr/local/bin/deno",
+            "--js-runtimes", "deno",
                 "--remote-components", "ejs:github",
                 "-f", "bestaudio[ext=m4a]/bestaudio/best"));
 
