@@ -58,8 +58,10 @@ public class VideoAudioService {
                             "audio-" + UUID.randomUUID() + ".%(ext)s"
                     ).toString();
 
+                Path writableCookiesFile = copyCookiesFile(outputDirectory);
+
             ProcessBuilder processBuilder = new ProcessBuilder(
-                    createDownloadCommand(videoUrl, outputTemplate));
+                    createDownloadCommand(videoUrl, outputTemplate, writableCookiesFile));
 
             processBuilder.redirectErrorStream(true);
 
@@ -246,21 +248,43 @@ public class VideoAudioService {
     }
 
     public static List<String> createDownloadCommand(String videoUrl, String outputTemplate) {
+        return createDownloadCommand(videoUrl, outputTemplate, configuredCookiesFile());
+    }
+
+    private static List<String> createDownloadCommand(
+            String videoUrl,
+            String outputTemplate,
+            Path cookiesFile) {
         List<String> command = new ArrayList<>(List.of("yt-dlp", "--no-playlist"));
         command.addAll(List.of(
             "--js-runtimes", "deno:/usr/local/bin/deno,node:/usr/bin/node",
                 "--remote-components", "ejs:github",
                 "-f", "bestaudio[ext=m4a]/bestaudio/best"));
 
-        String cookiesFile = System.getenv("YOUTUBE_COOKIES_FILE");
-        if (cookiesFile != null && !cookiesFile.isBlank()) {
-            command.addAll(List.of("--cookies", cookiesFile));
+        if (cookiesFile != null) {
+            command.addAll(List.of("--cookies", cookiesFile.toString()));
         }
 
         command.addAll(List.of(
                 "--extract-audio", "--audio-format", "m4a", "--audio-quality", "0",
                 "-o", outputTemplate, videoUrl));
         return command;
+    }
+
+    private static Path configuredCookiesFile() {
+        String cookiesFile = System.getenv("YOUTUBE_COOKIES_FILE");
+        return cookiesFile == null || cookiesFile.isBlank() ? null : Path.of(cookiesFile);
+    }
+
+    private static Path copyCookiesFile(Path outputDirectory) throws IOException {
+        Path configuredFile = configuredCookiesFile();
+        if (configuredFile == null) {
+            return null;
+        }
+
+        Path writableFile = outputDirectory.resolve("youtube-cookies.txt");
+        Files.copy(configuredFile, writableFile);
+        return writableFile;
     }
 
     private boolean isTikTokUrl(String videoUrl) {
