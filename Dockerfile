@@ -54,5 +54,5 @@ COPY --from=build /app/target/warisango-0.0.1-SNAPSHOT.jar app.jar
 
 EXPOSE 8080
 ENV TIKTOK_HEADLESS=true
-ENV JAVA_TOOL_OPTIONS="-XX:MaxRAMPercentage=65 -XX:+ExitOnOutOfMemoryError"
+ENV JAVA_TOOL_OPTIONS="-XX:MaxRAMPercentage=45 -XX:+ExitOnOutOfMemoryError --enable-native-access=ALL-UNNAMED"
 ENTRYPOINT ["sh", "-c", "exec java -Dserver.port=${PORT:-8080} -jar app.jar"]

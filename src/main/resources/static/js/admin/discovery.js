@@ -433,6 +433,15 @@ document.addEventListener('DOMContentLoaded', function () {
       await pollProcessingJob(activeJob.jobId);
     } catch (error) {
       localStorage.removeItem(activeJobStorageKey);
+
+      if (error.status === 404) {
+        resetWorkflow();
+        processingStatus.className = 'alert alert-warning';
+        processingStatus.innerText =
+          'The previous processing job expired after the server restarted. Please process the video again.';
+        return;
+      }
+
       processingStatus.className = 'alert alert-danger';
       processingStatus.innerText = error.message || 'Unable to restore processing status.';
     }
