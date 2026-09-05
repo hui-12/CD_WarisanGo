@@ -28,13 +28,14 @@ function renderChallenges() {
         const pct = Math.min(100, (progress / total) * 100);
         const joined = !!ch.joined;
         const done = !!ch.done;
+        const expired = !!ch.expired;
         const reward = Number(ch.rewardPoints || 0);
         const encodedChallengeId = encodeURIComponent(ch.id).replace(/'/g, '%27');
         return `<div class="card view-challenge-js-2">
       <div>
         <div class="view-challenge-js-3">
           <span class="view-challenge-js-4">${escapeHtml(ch.title || 'Challenge')}</span>
-          ${done ? '<span class="view-challenge-js-5">COMPLETED</span>' : ''}
+          ${done ? '<span class="view-challenge-js-5">COMPLETED</span>' : expired ? '<span class="view-challenge-js-5">EXPIRED</span>' : ''}
         </div>
         <p class="view-challenge-js-6">${escapeHtml(ch.description || '')}</p>
         <div class="view-challenge-js-7">
@@ -46,14 +47,15 @@ function renderChallenges() {
         <div class="view-challenge-js-13">+${reward} pts</div>
         <div class="view-challenge-js-14">${escapeHtml(ch.badge || '')}</div>
         <div class="view-challenge-js-15">Expires ${escapeHtml(ch.expiry || '—')}</div>
-        ${done ? '<button class="btn-secondary" disabled>Completed</button>' : !joined ? `<button class="btn-primary" data-challenge-action="join" data-challenge-id="${encodedChallengeId}">Join Challenge</button>` : progress >= total ? `<button class="btn-primary" data-challenge-action="claim" data-challenge-id="${encodedChallengeId}">Claim Reward</button>` : '<button class="btn-secondary" disabled>In Progress</button>'}
+        ${done ? '<button class="btn-secondary" disabled>Completed</button>' : expired ? '<button class="btn-secondary" disabled>Expired</button>' : !joined ? `<button class="btn-primary" data-challenge-action="join" data-challenge-id="${encodedChallengeId}">Join Challenge</button>` : progress >= total ? `<button class="btn-primary" data-challenge-action="claim" data-challenge-id="${encodedChallengeId}">Claim Reward</button>` : '<button class="btn-secondary" disabled>In Progress</button>'}
       </div>
     </div>`;
       })
       .join('');
 
-  const available = challenges.filter((challenge) => !challenge.joined && !challenge.done);
-  const inProgress = challenges.filter((challenge) => challenge.joined && !challenge.done);
+  const expired = challenges.filter((challenge) => challenge.expired && !challenge.done);
+  const available = challenges.filter((challenge) => !challenge.expired && !challenge.joined && !challenge.done);
+  const inProgress = challenges.filter((challenge) => !challenge.expired && challenge.joined && !challenge.done);
   const completed = challenges.filter((challenge) => challenge.done);
   const group = (title, items, emptyMessage) => `<section class="challenge-group">
     <div class="challenge-group-heading"><h2>${title}</h2><span>${items.length}</span></div>
@@ -65,13 +67,15 @@ function renderChallenges() {
   container.innerHTML =
     group('Active', available, 'No challenges are currently available to join.') +
     group('In Progress', inProgress, 'You have no challenges in progress.') +
-    group('Completed', completed, 'You have not completed a challenge yet.');
+    group('Completed', completed, 'You have not completed a challenge yet.') +
+    group('Expired', expired, 'There are no expired challenges.');
 }
 
 async function joinChallenge(id) {
   const response = await fetch(`/api/challenges/${encodeURIComponent(id)}/join`, { method: 'POST' });
   if (!response.ok) {
-    alert('Unable to join challenge.');
+    const result = await response.json().catch(() => ({}));
+    alert(result.message || 'Unable to join challenge.');
     return;
   }
   await loadChallenges();

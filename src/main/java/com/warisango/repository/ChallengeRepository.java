@@ -121,7 +121,9 @@ public class ChallengeRepository {
 
     public String createChallenge(Map<String, Object> data) throws Exception {
         DocumentReference reference = firestore.collection(CHALLENGES).document();
-        reference.set(data).get();
+        Map<String, Object> challenge = new HashMap<>(data);
+        challenge.put("createdDate", FieldValue.serverTimestamp());
+        reference.set(challenge).get();
         return reference.getId();
     }
 
