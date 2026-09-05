@@ -63,6 +63,7 @@ public class SecurityConfig {
                     "/api/auth/admin-login",
                     "/css/**",
                     "/js/**",
+                    "/favicon.ico",
                     "/images/**"
                 ).permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/challenges").permitAll()
