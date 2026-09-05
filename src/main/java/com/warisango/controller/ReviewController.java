@@ -466,11 +466,23 @@ public class ReviewController {
                 : "redirect:/reviews/detail/" + reviewId;
     }
 
-    @PostMapping("/delete/{reviewId}")
+    @PostMapping({"/delete/{reviewId}", "/delete"})
     public String deleteReview(
-            @PathVariable String reviewId,
+            @PathVariable(name = "reviewId", required = false) String pathReviewId,
+            @RequestParam(name = "reviewId", required = false) String formReviewId,
             @RequestParam(name = "businessId", required = false) String requestedBusinessId,
             Authentication authentication) {
+
+        String reviewId = pathReviewId == null || pathReviewId.isBlank()
+                ? formReviewId
+                : pathReviewId;
+
+        if (reviewId == null || reviewId.isBlank()) {
+            return "redirect:/reviews/"
+                    + (requestedBusinessId == null || requestedBusinessId.isBlank()
+                    ? "BUS00"
+                    : requestedBusinessId);
+        }
 
         ReviewDTO existingReview = reviewService.getReview(reviewId);
         String businessId = existingReview == null
