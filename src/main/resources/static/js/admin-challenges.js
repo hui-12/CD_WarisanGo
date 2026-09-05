@@ -97,11 +97,13 @@ async function saveAdminForm() {
     !body.description ||
     !body.requirement ||
     body.target < 1 ||
+    body.target > 300 ||
     body.rewardPoints < 1 ||
+    body.rewardPoints > 10000 ||
     !body.badge ||
     !body.expiry
   ) {
-    alert('Please complete all fields with valid values.');
+    alert('Target check-ins must be 1–300 and bonus points must be 1–10,000.');
     return;
   }
   const operation = adminMode;

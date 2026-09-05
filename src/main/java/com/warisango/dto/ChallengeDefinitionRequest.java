@@ -1,6 +1,7 @@
 package com.warisango.dto;
 
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotBlank;
 
 import java.util.Map;
@@ -11,8 +12,8 @@ public record ChallengeDefinitionRequest(
         @NotBlank String requirement,
         @NotBlank String badge,
         @NotBlank String expiry,
-        @Min(1) int target,
-        @Min(1) int rewardPoints,
+        @Min(1) @Max(300) int target,
+        @Min(1) @Max(10000) int rewardPoints,
         @NotBlank String status) {
 
     public Map<String, Object> toMap() {

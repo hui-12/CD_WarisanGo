@@ -18,6 +18,8 @@ import java.util.Set;
 @Service
 public class ChallengeService {
     private static final ZoneId CHALLENGE_TIME_ZONE = ZoneId.of("Asia/Kuala_Lumpur");
+    private static final int CHECK_IN_TARGET_MAXIMUM = 300;
+    private static final int BONUS_POINTS_MAXIMUM = 10_000;
     private final ChallengeRepository challengeRepository;
 
     public ChallengeService(ChallengeRepository challengeRepository) {
@@ -220,8 +222,11 @@ public class ChallengeService {
         if (title.isBlank() || description.isBlank() || requirement.isBlank() || badge.isBlank()) {
             throw new IllegalArgumentException("All challenge text fields are required.");
         }
-        if (target < 1 || rewardPoints < 1) {
-            throw new IllegalArgumentException("Target and reward points must be positive.");
+        if (target < 1 || target > CHECK_IN_TARGET_MAXIMUM) {
+            throw new IllegalArgumentException("Target check-ins must be between 1 and 300.");
+        }
+        if (rewardPoints < 1 || rewardPoints > BONUS_POINTS_MAXIMUM) {
+            throw new IllegalArgumentException("Bonus points must be between 1 and 10000.");
         }
         try {
             LocalDate.parse(expiry);

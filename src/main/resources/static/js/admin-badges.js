@@ -6,6 +6,14 @@ const deleteDialog = document.getElementById('badge-delete-dialog');
 const deleteBadgeName = document.getElementById('badge-delete-name');
 let badges = [];
 let pendingDeleteBadgeId = null;
+const badgeCriteriaType = document.getElementById('badge-criteria-type');
+const badgeTarget = document.getElementById('badge-target');
+
+function updateTargetLimit() {
+  const maximum = badgeCriteriaType.value === 'pointsEarned' ? 10000 : 300;
+  badgeTarget.max = String(maximum);
+  if (Number(badgeTarget.value) > maximum) badgeTarget.value = String(maximum);
+}
 
 const escapeHtml = (value) =>
   String(value ?? '').replace(
@@ -62,6 +70,7 @@ function openForm(badge = null) {
   document.getElementById('badge-unlock-criteria').value = badge?.unlockCriteria ?? '';
   document.getElementById('badge-criteria-type').value = badge?.criteriaType ?? 'checkInCount';
   document.getElementById('badge-target').value = badge?.target ?? 1;
+  updateTargetLimit();
   dialog.showModal();
 }
 
@@ -130,6 +139,7 @@ async function deletePendingBadge() {
 }
 
 document.getElementById('create-badge').addEventListener('click', () => openForm());
+badgeCriteriaType.addEventListener('change', updateTargetLimit);
 document.getElementById('close-dialog').addEventListener('click', () => dialog.close());
 document.getElementById('cancel-badge').addEventListener('click', () => dialog.close());
 document.getElementById('confirm-badge-delete').addEventListener('click', deletePendingBadge);
