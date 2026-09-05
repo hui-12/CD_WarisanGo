@@ -482,6 +482,8 @@ select {
 }
 .view-reward-35 {
   display: none;
+  max-height: 520px;
+  overflow-y: auto;
 }
 .view-reward-36 {
   display: none;
@@ -503,6 +505,10 @@ select {
 }
 .view-reward-39 {
   text-align: right;
+}
+#lb-rows {
+  max-height: 520px;
+  overflow-y: auto;
 }
 .view-admin-challenge-1 {
   display: none;
