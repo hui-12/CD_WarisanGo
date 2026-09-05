@@ -94,4 +94,9 @@ public class BadgeRepository {
         data.put("touristId", touristId);
         firestore.collection(TOURIST_BADGES).document(documentId).set(data).get();
     }
+
+    public void revokeBadge(String touristId, String badgeId) throws Exception {
+        String documentId = touristId + "_" + badgeId;
+        firestore.collection(TOURIST_BADGES).document(documentId).delete().get();
+    }
 }

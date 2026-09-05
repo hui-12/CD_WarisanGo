@@ -48,8 +48,11 @@ public class BadgeService {
             for (Map<String, Object> definition : definitions) {
                 String badgeId = text(definition.get("badgeId"));
                 BadgeMetric metric = metricFor(definition, progress);
-                if (metric.progress() >= metric.target() && !earned.containsKey(badgeId)) {
+                boolean qualifies = metric.progress() >= metric.target();
+                if (qualifies && !earned.containsKey(badgeId)) {
                     badgeRepository.awardBadge(touristId, badgeId);
+                } else if (!qualifies && earned.containsKey(badgeId)) {
+                    badgeRepository.revokeBadge(touristId, badgeId);
                 }
             }
 
