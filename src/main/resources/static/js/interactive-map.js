@@ -425,7 +425,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const popupStatus = document.createElement('p');
       popupStatus.className = 'popup-check-in-status';
       popupStatus.setAttribute('aria-live', 'polite');
-      popupStatus.textContent = 'Distance verification is disabled during testing.';
 
       const btnDetails = document.createElement('button');
       btnDetails.className = 'btn-popup-primary';

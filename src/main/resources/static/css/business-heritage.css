@@ -585,6 +585,9 @@ body {
   margin-top: 5px;
   color: #76624c;
 }
+.check-in-panel .check-in-status:empty {
+  display: none;
+}
 .check-in-panel .check-in-success {
   color: #2d7a4f;
   font-weight: 600;

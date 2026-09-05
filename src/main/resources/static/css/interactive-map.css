@@ -241,6 +241,10 @@
   line-height: 1.4;
 }
 
+.popup-check-in-status:empty {
+  display: none;
+}
+
 .popup-check-in-status.check-in-success {
   color: #2d7a4f;
   font-weight: 600;
