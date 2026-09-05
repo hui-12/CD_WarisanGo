@@ -88,11 +88,13 @@ public class AuthService {
             user.setEmail(decodedToken.getEmail());
             changed = true;
         }
-        if (hasText(decodedToken.getName()) && !decodedToken.getName().equals(user.getName())) {
+        // Google identity data provides defaults, but must not overwrite profile
+        // values that the user has deliberately changed inside WarisanGo.
+        if (!hasText(user.getName()) && hasText(decodedToken.getName())) {
             user.setName(decodedToken.getName());
             changed = true;
         }
-        if (hasText(decodedToken.getPicture()) && !decodedToken.getPicture().equals(user.getAvatar())) {
+        if (!hasText(user.getAvatar()) && hasText(decodedToken.getPicture())) {
             user.setAvatar(decodedToken.getPicture());
             changed = true;
         }
