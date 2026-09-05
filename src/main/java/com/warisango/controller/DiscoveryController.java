@@ -13,12 +13,14 @@ import com.warisango.service.DiscoveryService;
 import com.warisango.service.DiscoveryJobService;
 import com.warisango.service.TikTokScraperService;
 import jakarta.validation.Valid;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
+@Profile("admin-local")
 @RequestMapping("/api/discovery")
 public class DiscoveryController {
 

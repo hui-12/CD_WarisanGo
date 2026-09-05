@@ -52,7 +52,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleTikTokScraping(
             TikTokScrapingException exception) {
 
-        logger.warn("TikTok scraping request failed: {}", exception.getMessage());
+        logger.warn("TikTok scraping request failed: {}", exception.getMessage(), exception);
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                 .body(new ErrorResponse(exception.getMessage()));
     }

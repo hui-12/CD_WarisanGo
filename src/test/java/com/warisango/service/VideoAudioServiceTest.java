@@ -28,13 +28,14 @@ class VideoAudioServiceTest {
     }
 
     @Test
-    void preservesYouTubeDownloadArguments() {
+    void usesCompatibleYouTubeDownloadArguments() {
         String videoUrl = "https://www.youtube.com/watch?v=video123";
 
         List<String> command = VideoAudioService.createDownloadCommand(videoUrl, "audio.%(ext)s");
 
-        assertTrue(command.contains("youtube:player_client=android"));
-        assertTrue(command.contains("18"));
+        assertTrue(command.contains("bestaudio[ext=m4a]/bestaudio/best"));
+        assertTrue(command.contains("--js-runtimes"));
+        assertTrue(command.contains("deno"));
         assertEquals(videoUrl, command.getLast());
     }
 }

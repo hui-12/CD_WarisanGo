@@ -36,9 +36,27 @@ build/
 
 ### Local browser sessions ###
 .tiktok-profile/
+playwright-report/
+test-results/
+trace.zip
 
-### Local application configuration and API keys ###
-src/main/resources/application.properties
+### Local secrets and environment overrides ###
+src/main/resources/application-local.properties
+.env
+.env.*
+!.env.example
+cookies.txt
+youtube-cookies*.txt
+src/main/resources/*service-account*.json
+*.pem
+*.p12
+*.pfx
 
 ### Local application uploads ###
 uploads/
+
+### Runtime logs and JVM crash reports ###
+logs/
+*.log
+hs_err_pid*.log
+replay_pid*.log

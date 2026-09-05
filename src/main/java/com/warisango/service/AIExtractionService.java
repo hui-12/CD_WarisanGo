@@ -2,6 +2,7 @@ package com.warisango.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.genai.Client;
+import com.google.genai.errors.ServerException;
 import com.google.genai.types.GenerateContentConfig;
 import com.google.genai.types.GenerateContentResponse;
 import com.google.genai.types.Schema;
@@ -20,6 +21,8 @@ public class AIExtractionService {
 
     private static final Logger logger =
             LoggerFactory.getLogger(AIExtractionService.class);
+        private static final int MAX_GENERATION_ATTEMPTS = 3;
+        private static final long RETRY_DELAY_MILLISECONDS = 2_000;
 
     private final Client geminiClient;
     private final ObjectMapper objectMapper;
@@ -60,12 +63,7 @@ public class AIExtractionService {
                             .temperature(0.0f)
                             .build();
 
-            GenerateContentResponse response =
-                    geminiClient.models.generateContent(
-                            model,
-                            prompt,
-                            config
-                    );
+            GenerateContentResponse response = generateContentWithRetry(prompt, config);
 
             String json = response.text();
 
@@ -82,6 +80,13 @@ public class AIExtractionService {
                     AIExtractionResult.class
             );
 
+        } catch (InterruptedException exception) {
+            Thread.currentThread().interrupt();
+            logger.warn("AI extraction was interrupted.", exception);
+            throw new AIProcessingException(
+                    "AI extraction was interrupted.",
+                    exception
+            );
         } catch (Exception exception) {
 
             logger.error(
@@ -95,6 +100,30 @@ public class AIExtractionService {
             );
         }
     }
+
+        private GenerateContentResponse generateContentWithRetry(
+                        String prompt,
+                        GenerateContentConfig config) throws InterruptedException {
+
+                for (int attempt = 1; attempt <= MAX_GENERATION_ATTEMPTS; attempt++) {
+                        try {
+                                return geminiClient.models.generateContent(model, prompt, config);
+                        } catch (ServerException exception) {
+                                if (attempt == MAX_GENERATION_ATTEMPTS) {
+                                        throw exception;
+                                }
+
+                                logger.warn(
+                                                "Gemini service temporarily unavailable. Retrying attempt {}/{}.",
+                                                attempt + 1,
+                                                MAX_GENERATION_ATTEMPTS
+                                );
+                                Thread.sleep(RETRY_DELAY_MILLISECONDS * attempt);
+                        }
+                }
+
+                throw new IllegalStateException("Gemini generation attempts were exhausted.");
+        }
 
     /**
      * Prompt for Gemini.

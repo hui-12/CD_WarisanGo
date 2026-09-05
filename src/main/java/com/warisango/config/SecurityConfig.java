@@ -51,6 +51,7 @@ public class SecurityConfig {
                     "/terms-of-service",
                     "/privacy-policy",
                     "/how-it-works",
+                    "/actuator/health",
                     "/directory",
                     "/business-directory",
                     "/business/**",
@@ -62,6 +63,7 @@ public class SecurityConfig {
                     "/api/auth/admin-login",
                     "/css/**",
                     "/js/**",
+                    "/favicon.ico",
                     "/images/**"
                 ).permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/challenges").permitAll()

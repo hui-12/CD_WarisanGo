@@ -26,6 +26,8 @@ public class TikTokMediaDownloadService {
 
     private static final Logger logger = LoggerFactory.getLogger(TikTokMediaDownloadService.class);
     private static final long MEDIA_TIMEOUT_MILLISECONDS = 60_000;
+    private static final int MAX_PAGE_REFRESHES = 2;
+    private static final int PAGE_CHECK_ATTEMPTS = 120;
 
     /**
      * Downloads the media response loaded by TikTok's authenticated browser session.
@@ -42,7 +44,7 @@ public class TikTokMediaDownloadService {
         try (Playwright playwright = Playwright.create();
              BrowserContext context = playwright.chromium().launchPersistentContext(
                      TikTokScraperService.PROFILE_PATH,
-                     new BrowserType.LaunchPersistentContextOptions().setHeadless(false))) {
+                     new BrowserType.LaunchPersistentContextOptions().setHeadless(isHeadless()))) {
             outputDirectory = Files.createTempDirectory("warisango-audio-");
             Path mediaFile = outputDirectory.resolve("video-" + UUID.randomUUID() + ".mp4");
             Page page = context.pages().isEmpty() ? context.newPage() : context.pages().getFirst();
@@ -50,7 +52,7 @@ public class TikTokMediaDownloadService {
 
             page.onResponse(response -> captureMediaResponse(response, mediaResponse));
             page.navigate(videoUrl, new Page.NavigateOptions().setWaitUntil(WaitUntilState.DOMCONTENTLOADED));
-            page.locator("video").first().waitFor();
+            waitForVideoPage(page, mediaResponse);
             page.locator("video").first().evaluate("video => video.play().catch(() => {})");
 
             Response response = waitForMediaResponse(page, mediaResponse);
@@ -81,6 +83,37 @@ public class TikTokMediaDownloadService {
                     "Unable to download the TikTok video. Complete any verification in Chromium and retry.",
                     exception);
         }
+    }
+
+    /**
+     * Refreshes only TikTok's temporary error page, before transcription or persistence starts.
+     * Polling also detects error pages rendered after navigation; verification pages are left for manual action.
+     */
+    void waitForVideoPage(Page page, AtomicReference<Response> mediaResponse) {
+        int refreshes = 0;
+        for (int attempt = 0; attempt < PAGE_CHECK_ATTEMPTS; attempt++) {
+            boolean temporaryError = page.getByText("Oops! Something went wrong").first().isVisible()
+                    && page.getByText("Please contact your administrator with the error code:")
+                            .first().isVisible();
+            if (temporaryError) {
+                if (refreshes >= MAX_PAGE_REFRESHES) {
+                    throw new AIProcessingException(
+                            "TikTok still shows a temporary error after two automatic refreshes. Please retry later.");
+                }
+                refreshes++;
+                logger.info("TikTok temporary error page detected. Refreshing page ({}/{}).",
+                        refreshes, MAX_PAGE_REFRESHES);
+                page.waitForTimeout(2_000);
+                mediaResponse.set(null);
+                page.reload(new Page.ReloadOptions().setWaitUntil(WaitUntilState.DOMCONTENTLOADED));
+            } else if (page.locator("video").first().isVisible()) {
+                return;
+            } else {
+                page.waitForTimeout(500);
+            }
+        }
+        throw new AIProcessingException(
+                "TikTok did not load the video. Complete any verification in Chromium and retry.");
     }
 
     private void captureMediaResponse(Response response, AtomicReference<Response> mediaResponse) {
@@ -119,5 +152,9 @@ public class TikTokMediaDownloadService {
         } catch (IOException exception) {
             logger.warn("Unable to clean the temporary TikTok media directory.", exception);
         }
+    }
+
+    private boolean isHeadless() {
+        return Boolean.parseBoolean(System.getenv().getOrDefault("TIKTOK_HEADLESS", "false"));
     }
 }

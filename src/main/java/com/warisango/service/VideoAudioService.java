@@ -58,8 +58,10 @@ public class VideoAudioService {
                             "audio-" + UUID.randomUUID() + ".%(ext)s"
                     ).toString();
 
+                Path writableCookiesFile = copyCookiesFile(outputDirectory);
+
             ProcessBuilder processBuilder = new ProcessBuilder(
-                    createDownloadCommand(videoUrl, outputTemplate));
+                    createDownloadCommand(videoUrl, outputTemplate, writableCookiesFile));
 
             processBuilder.redirectErrorStream(true);
 
@@ -246,15 +248,47 @@ public class VideoAudioService {
     }
 
     public static List<String> createDownloadCommand(String videoUrl, String outputTemplate) {
-        List<String> command = new ArrayList<>(List.of("yt-dlp", "--no-playlist"));
+        return createDownloadCommand(videoUrl, outputTemplate, configuredCookiesFile());
+    }
+
+    private static List<String> createDownloadCommand(
+            String videoUrl,
+            String outputTemplate,
+            Path cookiesFile) {
+            List<String> command = new ArrayList<>(List.of(
+                    "yt-dlp",
+                    "--verbose",
+                    "--no-playlist"
+));
         command.addAll(List.of(
-                "--extractor-args", "youtube:player_client=android",
-                "-f", "18"));
+            "--js-runtimes", "deno",
+                "--remote-components", "ejs:github",
+                "-f", "bestaudio[ext=m4a]/bestaudio/best"));
+
+        if (cookiesFile != null) {
+            command.addAll(List.of("--cookies", cookiesFile.toString()));
+        }
 
         command.addAll(List.of(
                 "--extract-audio", "--audio-format", "m4a", "--audio-quality", "0",
                 "-o", outputTemplate, videoUrl));
         return command;
+    }
+
+    private static Path configuredCookiesFile() {
+        String cookiesFile = System.getenv("YOUTUBE_COOKIES_FILE");
+        return cookiesFile == null || cookiesFile.isBlank() ? null : Path.of(cookiesFile);
+    }
+
+    private static Path copyCookiesFile(Path outputDirectory) throws IOException {
+        Path configuredFile = configuredCookiesFile();
+        if (configuredFile == null) {
+            return null;
+        }
+
+        Path writableFile = outputDirectory.resolve("youtube-cookies.txt");
+        Files.copy(configuredFile, writableFile);
+        return writableFile;
     }
 
     private boolean isTikTokUrl(String videoUrl) {
@@ -274,6 +308,18 @@ public class VideoAudioService {
         }
         if (lowercaseOutput.contains("unexpected response from webpage request")) {
             return "TikTok rejected the yt-dlp webpage request. Refresh the TikTok browser session and retry.";
+        }
+        if (lowercaseOutput.contains("sign in to confirm")
+                || lowercaseOutput.contains("cookies-from-browser")
+                || lowercaseOutput.contains("not a bot")) {
+            return "YouTube requires authentication for this server. Configure YOUTUBE_COOKIES_FILE with a valid cookies file.";
+        }
+        if (lowercaseOutput.contains("no supported javascript runtime")) {
+            return "YouTube extraction requires Node.js. Redeploy the latest Docker image.";
+        }
+        if (lowercaseOutput.contains("unable to download video data")
+                && lowercaseOutput.contains("403")) {
+            return "YouTube rejected the media download. Configure YOUTUBE_COOKIES_FILE with a valid cookies file and redeploy.";
         }
         return "Unable to extract audio from the video.";
     }

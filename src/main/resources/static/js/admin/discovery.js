@@ -107,8 +107,18 @@ document.addEventListener('DOMContentLoaded', function () {
         ),
       });
 
+      const contentType = response.headers.get('content-type') || '';
+
       if (!response.ok) {
         throw new Error(await getErrorMessage(response));
+      }
+
+      if (!contentType.includes('application/json')) {
+        throw new Error(
+          response.url.includes('/login')
+            ? 'Your admin session has expired. Please log in again.'
+            : 'TikTok search returned an unexpected response. Check the server deployment and logs.'
+        );
       }
 
       const videos = await response.json();
@@ -325,8 +335,37 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   async function pollProcessingJob(jobId) {
+    const maximumTransientFailures = 20;
+    let transientFailures = 0;
+
     while (true) {
-      const job = await window.WarisanGoWorkflow.get(jobId);
+      let job;
+
+      try {
+        job = await window.WarisanGoWorkflow.get(jobId);
+        transientFailures = 0;
+      } catch (error) {
+        const isGatewayFailure = [502, 503, 504].includes(error.status);
+        const isNetworkFailure = typeof error.status === 'undefined';
+
+        if (!isGatewayFailure && !isNetworkFailure) {
+          throw error;
+        }
+
+        transientFailures++;
+        processingStatus.className = 'alert alert-warning';
+        processingStatus.innerText = 'Server is temporarily unavailable. Reconnecting...';
+
+        if (transientFailures >= maximumTransientFailures) {
+          throw new Error(
+            'The processing server remained unavailable. Check the Render service logs and try again.'
+          );
+        }
+
+        await waitBeforeNextStatusCheck(3000);
+        continue;
+      }
+
       updateProcessingDisplay(job);
 
       if (job.status === 'COMPLETED') {
@@ -340,10 +379,14 @@ document.addEventListener('DOMContentLoaded', function () {
         throw new Error(job.message || 'AI processing failed.');
       }
 
-      await new Promise(function (resolve) {
-        setTimeout(resolve, 1500);
-      });
+      await waitBeforeNextStatusCheck(1500);
     }
+  }
+
+  function waitBeforeNextStatusCheck(delayMilliseconds) {
+    return new Promise(function (resolve) {
+      setTimeout(resolve, delayMilliseconds);
+    });
   }
 
   function updateProcessingDisplay(job) {
@@ -390,6 +433,15 @@ document.addEventListener('DOMContentLoaded', function () {
       await pollProcessingJob(activeJob.jobId);
     } catch (error) {
       localStorage.removeItem(activeJobStorageKey);
+
+      if (error.status === 404) {
+        resetWorkflow();
+        processingStatus.className = 'alert alert-warning';
+        processingStatus.innerText =
+          'The previous processing job expired after the server restarted. Please process the video again.';
+        return;
+      }
+
       processingStatus.className = 'alert alert-danger';
       processingStatus.innerText = error.message || 'Unable to restore processing status.';
     }
@@ -441,6 +493,16 @@ document.addEventListener('DOMContentLoaded', function () {
   // ERROR HANDLING
   async function getErrorMessage(response) {
     try {
+      const contentType = response.headers.get('content-type') || '';
+
+      if (!contentType.includes('application/json')) {
+        if (response.url.includes('/login')) {
+          return 'Your admin session has expired. Please log in again.';
+        }
+
+        return 'Server returned an unexpected HTML response (HTTP ' + response.status + ').';
+      }
+
       const data = await response.json();
 
       return data.message || data.error || 'Server error: ' + response.status;

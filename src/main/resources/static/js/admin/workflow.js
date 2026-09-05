@@ -25,7 +25,9 @@
     });
 
     if (!response.ok) {
-      throw new Error(data.message || data.error || 'Unable to read processing status.');
+      const error = new Error(data.message || data.error || 'Unable to read processing status.');
+      error.status = response.status;
+      throw error;
     }
 
     return data;
