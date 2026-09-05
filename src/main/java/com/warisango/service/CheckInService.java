@@ -18,6 +18,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class CheckInService {
@@ -92,6 +93,13 @@ public class CheckInService {
     public boolean hasCheckedInToday(String touristId, String businessId) throws Exception {
         if (touristId == null || touristId.isBlank() || businessId == null || businessId.isBlank()) return false;
         return checkInRepository.hasCheckedInToday(touristId, businessId, CHECK_IN_TIME_ZONE);
+    }
+
+    public Set<String> getCheckedInBusinessIdsToday(String touristId) throws Exception {
+        if (touristId == null || touristId.isBlank()) {
+            throw new IllegalArgumentException("Authenticated user ID is required.");
+        }
+        return checkInRepository.findCheckedInBusinessIdsToday(touristId, CHECK_IN_TIME_ZONE);
     }
 
     private void validateRequest(String userId, CheckInRequest request) {

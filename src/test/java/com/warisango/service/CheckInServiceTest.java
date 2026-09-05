@@ -8,12 +8,27 @@ import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 class CheckInServiceTest {
+
+    @Test
+    void getCheckedInBusinessIdsTodayReturnsRepositoryResult() throws Exception {
+        CheckInRepository repository = mock(CheckInRepository.class);
+        BusinessRepository businessRepository = mock(BusinessRepository.class);
+        CheckInService service = new CheckInService(businessRepository, repository, false);
+        String userId = "user-123";
+        Set<String> checkedInBusinessIds = Set.of("business-1", "business-2");
+
+        when(repository.findCheckedInBusinessIdsToday(userId, java.time.ZoneId.of("Asia/Kuala_Lumpur")))
+                .thenReturn(checkedInBusinessIds);
+
+        assertEquals(checkedInBusinessIds, service.getCheckedInBusinessIdsToday(userId));
+    }
 
     @Test
     void findRecentVisitsReturnsFiveNewestRecordsForUser() {

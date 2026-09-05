@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api")
@@ -42,6 +43,18 @@ public class CheckInController {
         try {
             boolean checkedInToday = checkInService.hasCheckedInToday(authentication.getName(), businessId);
             return ResponseEntity.ok(Map.of("checkedInToday", checkedInToday));
+        } catch (InterruptedException exception) {
+            Thread.currentThread().interrupt();
+            return ResponseEntity.internalServerError().build();
+        } catch (Exception exception) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @GetMapping("/checkin/statuses")
+    public ResponseEntity<Set<String>> getCheckedInBusinessIdsToday(Authentication authentication) {
+        try {
+            return ResponseEntity.ok(checkInService.getCheckedInBusinessIdsToday(authentication.getName()));
         } catch (InterruptedException exception) {
             Thread.currentThread().interrupt();
             return ResponseEntity.internalServerError().build();

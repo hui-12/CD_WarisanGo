@@ -16,7 +16,9 @@ import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 @Repository
 public class CheckInRepository {
@@ -31,13 +33,20 @@ public class CheckInRepository {
 
     public boolean hasCheckedInToday(String touristId, String businessId, ZoneId zoneId)
             throws ExecutionException, InterruptedException {
+        return findCheckedInBusinessIdsToday(touristId, zoneId).contains(businessId);
+    }
+
+    public Set<String> findCheckedInBusinessIdsToday(String touristId, ZoneId zoneId)
+            throws ExecutionException, InterruptedException {
+        LocalDate today = LocalDate.now(zoneId);
         return firestore.collection(CHECK_INS).whereEqualTo("touristId", touristId).get().get()
                 .getDocuments().stream()
-                .filter(document -> businessId.equals(document.getString("businessId")))
-                .map(document -> document.getTimestamp("checkInTimestamp"))
-                .filter(timestamp -> timestamp != null)
-                .map(timestamp -> timestamp.toDate().toInstant().atZone(zoneId).toLocalDate())
-                .anyMatch(LocalDate.now(zoneId)::equals);
+                .filter(document -> document.getTimestamp("checkInTimestamp") != null)
+                .filter(document -> today.equals(document.getTimestamp("checkInTimestamp")
+                        .toDate().toInstant().atZone(zoneId).toLocalDate()))
+                .map(document -> document.getString("businessId"))
+                .filter(businessId -> businessId != null && !businessId.isBlank())
+                .collect(Collectors.toUnmodifiableSet());
     }
 
     public int getCurrentPoints(String touristId) throws ExecutionException, InterruptedException {

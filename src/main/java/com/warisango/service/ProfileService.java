@@ -48,8 +48,15 @@ public class ProfileService {
             if (lastChanged != null) {
                 long remaining = NAME_CHANGE_COOLDOWN.toMillis() - (now - lastChanged);
                 if (remaining > 0) {
-                    long days = Math.max(1, (long) Math.ceil(remaining / (double) Duration.ofDays(1).toMillis()));
-                    throw new ProfileUpdateException("displayName", "Display name changes are limited to once every 30 days.", days);
+                    long days = Math.max(
+                            1,
+                            (long) Math.ceil(remaining / (double) Duration.ofDays(1).toMillis())
+                    );
+                    throw new ProfileUpdateException(
+                            "displayName",
+                            "Display name changes are limited to once every 30 days.",
+                            days
+                    );
                 }
             }
             user.setName(name);

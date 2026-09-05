@@ -135,7 +135,9 @@
             <div>
               <h2 id="check-in-title">Check In</h2>
               <p>Earn <strong th:text="${business.checkInPoints}">50</strong> points for this visit.</p>
-              <p id="check-in-status" class="check-in-status" aria-live="polite"></p>
+              <p id="check-in-status" class="check-in-status" aria-live="polite">
+                Allow GPS access to verify that you are within 50 metres of this business.
+              </p>
             </div>
             <button
               class="check-in-button"
@@ -344,5 +346,6 @@
     <div th:replace="~{fragments/footer :: global}"></div>
     <script src="/js/business-heritage.js" th:src="@{/js/business-heritage.js}"></script>
     <script src="/js/saved-listing-controls.js" th:src="@{/js/saved-listing-controls.js}"></script>
+    <script src="/js/check-in.js" th:src="@{/js/check-in.js}"></script>
   </body>
 </html>

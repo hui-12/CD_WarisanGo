@@ -1,4 +1,9 @@
 (function () {
+  const MAX_CACHED_LOCATION_AGE_MS = 30_000;
+  const MAX_CACHED_LOCATION_ACCURACY_METERS = 50;
+  const FRESH_LOCATION_TIMEOUT_MS = 30_000;
+  const BROWSER_LOCATION_CACHE_AGE_MS = 10_000;
+
   const locateUser = () =>
     new Promise((resolve, reject) => {
       if (!navigator.geolocation) {
@@ -7,10 +12,32 @@
       }
       navigator.geolocation.getCurrentPosition(resolve, reject, {
         enableHighAccuracy: true,
-        timeout: 15000,
-        maximumAge: 0,
+        timeout: FRESH_LOCATION_TIMEOUT_MS,
+        maximumAge: BROWSER_LOCATION_CACHE_AGE_MS,
       });
     });
+
+  const isUsableCachedLocation = (location) =>
+    Number.isFinite(location?.latitude) &&
+    Number.isFinite(location?.longitude) &&
+    Number.isFinite(location?.accuracy) &&
+    location.accuracy <= MAX_CACHED_LOCATION_ACCURACY_METERS &&
+    Number.isFinite(location?.timestamp) &&
+    Date.now() - location.timestamp >= 0 &&
+    Date.now() - location.timestamp <= MAX_CACHED_LOCATION_AGE_MS;
+
+  const locationErrorMessage = (error) => {
+    if (error?.code === 1) {
+      return 'Location permission was denied. Please allow location access and try again.';
+    }
+    if (error?.code === 2) {
+      return 'Your location is currently unavailable. Check location services and try again.';
+    }
+    if (error?.code === 3) {
+      return 'Unable to obtain an accurate location in time. Move to an open area and try again.';
+    }
+    return error?.message || 'Unable to determine your location.';
+  };
 
   const parseResponse = async (response) => {
     const contentType = response.headers.get('content-type') || '';
@@ -46,18 +73,30 @@
     }
   };
 
-  const checkIn = async (business, button, statusElement) => {
+  const checkIn = async (business, button, statusElement, cachedLocation = null) => {
     if (!business?.businessId || button?.disabled) return;
     const originalLabel = button?.textContent || 'Check In';
+    const useCachedLocation = isUsableCachedLocation(cachedLocation);
 
     if (button) {
       button.disabled = true;
-      button.textContent = 'Finding location...';
+      button.textContent = useCachedLocation ? 'Saving check-in...' : 'Finding location...';
     }
-    if (statusElement) statusElement.textContent = 'Requesting your current GPS location...';
+    if (statusElement) {
+      statusElement.textContent = useCachedLocation
+        ? 'Using your current map location...'
+        : 'Requesting your current GPS location...';
+    }
 
     try {
-      const position = await locateUser();
+      const position = useCachedLocation
+        ? {
+            coords: {
+              latitude: cachedLocation.latitude,
+              longitude: cachedLocation.longitude,
+            },
+          }
+        : await locateUser();
       if (button) button.textContent = 'Saving check-in...';
       const response = await fetch('/api/checkin', {
         method: 'POST',
@@ -91,10 +130,7 @@
       );
       window.alert(message);
     } catch (error) {
-      const message =
-        error.code === 1
-          ? 'Location permission was denied. Please allow location access and try again.'
-          : error.message || 'Unable to determine your location.';
+      const message = locationErrorMessage(error);
       if (statusElement) {
         statusElement.textContent = message;
         statusElement.classList.remove('check-in-success');

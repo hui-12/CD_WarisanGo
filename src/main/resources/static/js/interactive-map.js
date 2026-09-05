@@ -64,6 +64,8 @@ document.addEventListener('DOMContentLoaded', () => {
   let userMarker = null;
   let touristLat = null;
   let touristLng = null;
+  let touristAccuracy = null;
+  let touristLocationTimestamp = null;
   let isInitialLocationSet = false;
   let watchId = null;
 
@@ -122,6 +124,8 @@ document.addEventListener('DOMContentLoaded', () => {
         (position) => {
           touristLat = position.coords.latitude;
           touristLng = position.coords.longitude;
+          touristAccuracy = position.coords.accuracy;
+          touristLocationTimestamp = position.timestamp || Date.now();
 
           if (userMarker) {
             userMarker.setLatLng([touristLat, touristLng]);
@@ -152,6 +156,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
           touristLat = null;
           touristLng = null;
+          touristAccuracy = null;
+          touristLocationTimestamp = null;
           isInitialLocationSet = false;
 
           applyFilters();
@@ -178,6 +184,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             touristLat = null;
             touristLng = null;
+            touristAccuracy = null;
+            touristLocationTimestamp = null;
             isInitialLocationSet = false;
             applyFilters();
           }
@@ -446,7 +454,12 @@ document.addEventListener('DOMContentLoaded', () => {
       btnCheckIn.type = 'button';
       btnCheckIn.textContent = 'Check In';
       btnCheckIn.addEventListener('click', () => {
-        window.WarisanGoCheckIn.checkIn(loc, btnCheckIn, popupStatus);
+        window.WarisanGoCheckIn.checkIn(loc, btnCheckIn, popupStatus, {
+          latitude: touristLat,
+          longitude: touristLng,
+          accuracy: touristAccuracy,
+          timestamp: touristLocationTimestamp,
+        });
       });
 
       if (checkedInToday.has(loc.businessId)) {
@@ -454,13 +467,6 @@ document.addEventListener('DOMContentLoaded', () => {
         btnCheckIn.textContent = 'Checked In Today';
         popupStatus.textContent = 'You have already checked in at this business today.';
         popupStatus.classList.add('check-in-success');
-      } else {
-        window.WarisanGoCheckIn.refreshStatus(loc.businessId, btnCheckIn, popupStatus).then((isCheckedIn) => {
-          if (isCheckedIn) {
-            checkedInToday.add(loc.businessId);
-            markSidebarCheckedInToday(loc.businessId);
-          }
-        });
       }
 
       popupActions.appendChild(btnDetails);
@@ -626,6 +632,15 @@ document.addEventListener('DOMContentLoaded', () => {
       .then((response) => (response.ok ? response.json() : Promise.reject(new Error('Unable to load saved listings.'))))
       .then((ids) => {
         ids.forEach((id) => savedBusinessIds.add(id));
+        applyFilters();
+      })
+      .catch((error) => console.error(error));
+
+  if (!document.getElementById('guest-gate-modal'))
+    fetch('/api/checkin/statuses', { headers: { Accept: 'application/json' } })
+      .then((response) => (response.ok ? response.json() : Promise.reject(new Error('Unable to load check-ins.'))))
+      .then((businessIds) => {
+        businessIds.forEach((businessId) => checkedInToday.add(businessId));
         applyFilters();
       })
       .catch((error) => console.error(error));
