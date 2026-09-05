@@ -254,7 +254,7 @@ const renderActiveChallenges = async () => {
     const response = await fetch('/api/challenges');
     if (!response.ok) throw new Error('Unable to load challenges');
     const challenges = await response.json();
-    const active = challenges.filter((challenge) => challenge.joined && !challenge.done);
+    const active = challenges.filter((challenge) => challenge.joined && !challenge.done && !challenge.expired);
 
     if (!active.length) {
       widget.innerHTML =

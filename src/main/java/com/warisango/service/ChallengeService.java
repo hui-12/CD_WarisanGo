@@ -2,9 +2,12 @@ package com.warisango.service;
 
 import com.warisango.exception.OperationConflictException;
 import com.warisango.repository.ChallengeRepository;
+import com.google.cloud.Timestamp;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,6 +17,7 @@ import java.util.Set;
 
 @Service
 public class ChallengeService {
+    private static final ZoneId CHALLENGE_TIME_ZONE = ZoneId.of("Asia/Kuala_Lumpur");
     private final ChallengeRepository challengeRepository;
 
     public ChallengeService(ChallengeRepository challengeRepository) {
@@ -153,7 +157,7 @@ public class ChallengeService {
      */
     private boolean isExpired(Map<String, Object> challenge) {
         try {
-            return LocalDate.parse(textValue(challenge.get("expiry"))).isBefore(LocalDate.now());
+            return LocalDate.parse(textValue(challenge.get("expiry"))).isBefore(LocalDate.now(CHALLENGE_TIME_ZONE));
         } catch (Exception exception) {
             return true;
         }
@@ -169,7 +173,38 @@ public class ChallengeService {
     }
 
     private boolean isEligible(Map<String, Object> checkIn, Map<String, Object> challenge) {
-        return checkIn.get("businessId") != null;
+        if (checkIn.get("businessId") == null) {
+            return false;
+        }
+
+        Instant checkInTime = timestampAsInstant(checkIn.get("checkInTimestamp"));
+        Instant createdTime = timestampAsInstant(challenge.get("createdDate"));
+        if (checkInTime == null || createdTime == null || checkInTime.isBefore(createdTime)) {
+            return false;
+        }
+
+        try {
+            Instant expiryEnd = LocalDate.parse(textValue(challenge.get("expiry")))
+                    .plusDays(1)
+                    .atStartOfDay(CHALLENGE_TIME_ZONE)
+                    .toInstant();
+            return checkInTime.isBefore(expiryEnd);
+        } catch (Exception exception) {
+            return false;
+        }
+    }
+
+    private Instant timestampAsInstant(Object value) {
+        if (value instanceof Timestamp timestamp) {
+            return timestamp.toDate().toInstant();
+        }
+        if (value instanceof java.util.Date date) {
+            return date.toInstant();
+        }
+        if (value instanceof Instant instant) {
+            return instant;
+        }
+        return null;
     }
 
     private Map<String, Object> normalize(Map<String, Object> input) {
