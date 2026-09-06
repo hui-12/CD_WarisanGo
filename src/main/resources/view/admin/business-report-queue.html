@@ -32,7 +32,8 @@
       <section class="report-table-card" aria-labelledby="report-queue-title">
         <h2 id="report-queue-title" class="sr-only">Report review queue</h2>
         <div class="report-table-header">
-          <span>Business</span><span>Reported By</span><span>Reason</span><span>Status</span><span>Action</span>
+          <span>Business</span><span>Reported By</span><span>Reason</span><span>Reported At</span><span>Status</span
+          ><span>Action</span>
         </div>
         <p class="report-empty" th:if="${#lists.isEmpty(reports)}">No business reports have been submitted.</p>
         <a
@@ -51,6 +52,9 @@
             ><small th:text="${report.touristId}">UID</small></span
           >
           <span th:text="${#strings.replace(report.reason, '_', ' ')}">Reason</span>
+          <span th:text="${#strings.isEmpty(report.submittedAtDisplay) ? 'Date unavailable' : report.submittedAtDisplay}"
+            >6 Sep 2026, 8:40 AM</span
+          >
           <span
             ><em
               class="report-status"

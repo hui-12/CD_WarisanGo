@@ -36,6 +36,12 @@
                   <dt>Tourist</dt>
                   <dd th:text="${report.touristName != null ? report.touristName : report.touristId}">Tourist</dd>
                 </div>
+                <div>
+                  <dt>Reported At</dt>
+                  <dd th:text="${#strings.isEmpty(report.submittedAtDisplay) ? 'Date unavailable' : report.submittedAtDisplay}"
+                    >6 Sep 2026, 8:40 AM</dd
+                  >
+                </div>
                 <div class="wide">
                   <dt>Tourist ID</dt>
                   <dd th:text="${report.touristId}">UID</dd>
