@@ -6,6 +6,8 @@ import com.google.cloud.firestore.FieldValue;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.SetOptions;
 import com.warisango.exception.OperationConflictException;
+import com.warisango.model.Challenge;
+import com.warisango.model.ChallengeParticipation;
 import com.warisango.util.TierCalculator;
 import org.springframework.stereotype.Repository;
 
@@ -28,18 +30,17 @@ public class ChallengeRepository {
         this.firestore = firestore;
     }
 
-    public List<Map<String, Object>> findAllChallenges() throws Exception {
-        List<Map<String, Object>> challenges = new ArrayList<>();
+    public List<Challenge> findAllChallenges() throws Exception {
+        List<Challenge> challenges = new ArrayList<>();
         for (DocumentSnapshot document : firestore.collection(CHALLENGES).get().get().getDocuments()) {
-            Map<String, Object> challenge = dataWithId(document);
-            challenges.add(challenge);
+            challenges.add(toChallenge(document));
         }
         return challenges;
     }
 
-    public Map<String, Object> findChallenge(String challengeId) throws Exception {
+    public Challenge findChallenge(String challengeId) throws Exception {
         DocumentSnapshot document = firestore.collection(CHALLENGES).document(challengeId).get().get();
-        return document.exists() ? dataWithId(document) : null;
+        return document.exists() ? toChallenge(document) : null;
     }
 
     public List<Map<String, Object>> findCheckIns(String touristId) throws Exception {
@@ -53,7 +54,7 @@ public class ChallengeRepository {
                 .toList();
     }
 
-    public Map<String, Object> findParticipation(String touristId, String challengeId) throws Exception {
+    public ChallengeParticipation findParticipation(String touristId, String challengeId) throws Exception {
         return firestore.collection(PARTICIPATIONS)
                 .whereEqualTo("challengeId", challengeId)
                 .get()
@@ -62,15 +63,15 @@ public class ChallengeRepository {
                 .stream()
                 .filter(document -> touristId.equals(document.getString("touristId")))
                 .findFirst()
-                .map(this::dataWithId)
+                .map(this::toParticipation)
                 .orElse(null);
     }
 
-    public void saveParticipation(String participationId, Map<String, Object> data) throws Exception {
+    public void saveParticipation(String participationId, ChallengeParticipation participation) throws Exception {
         DocumentReference reference = participationId == null
                 ? firestore.collection(PARTICIPATIONS).document()
                 : firestore.collection(PARTICIPATIONS).document(participationId);
-        reference.set(data, SetOptions.merge()).get();
+        reference.set(toDocument(participation), SetOptions.merge()).get();
     }
 
     public void updateParticipationProgress(String participationId, String progress) throws Exception {
@@ -119,16 +120,16 @@ public class ChallengeRepository {
         }).get();
     }
 
-    public String createChallenge(Map<String, Object> data) throws Exception {
+    public String createChallenge(Challenge data) throws Exception {
         DocumentReference reference = firestore.collection(CHALLENGES).document();
-        Map<String, Object> challenge = new HashMap<>(data);
+        Map<String, Object> challenge = toDocument(data);
         challenge.put("createdDate", FieldValue.serverTimestamp());
         reference.set(challenge).get();
         return reference.getId();
     }
 
-    public void updateChallenge(String id, Map<String, Object> data) throws Exception {
-        firestore.collection(CHALLENGES).document(id).set(data, SetOptions.merge()).get();
+    public void updateChallenge(String id, Challenge data) throws Exception {
+        firestore.collection(CHALLENGES).document(id).set(toDocument(data), SetOptions.merge()).get();
     }
 
     public void deleteChallenge(String id) throws Exception {
@@ -146,11 +147,47 @@ public class ChallengeRepository {
                 .count();
     }
 
-    private Map<String, Object> dataWithId(DocumentSnapshot document) {
+    private Challenge toChallenge(DocumentSnapshot document) {
+        Long target = document.getLong("target");
+        Long rewardPoints = document.getLong("rewardPoints");
+        return new Challenge(document.getId(), document.getString("title"), document.getString("description"),
+                document.getString("requirement"), target == null ? 0 : target.intValue(),
+                rewardPoints == null ? 0 : rewardPoints.intValue(), document.getString("badge"),
+                document.getString("expiry"), document.getString("status"), toInstant(document, "createdDate"));
+    }
+
+    private ChallengeParticipation toParticipation(DocumentSnapshot document) {
+        return new ChallengeParticipation(document.getId(), document.getString("touristId"),
+                document.getString("challengeId"), document.getString("progress"), document.getString("status"),
+                toInstant(document, "completedDate"));
+    }
+
+    private Map<String, Object> toDocument(Challenge challenge) {
         Map<String, Object> data = new HashMap<>();
-        if (document.getData() != null) data.putAll(document.getData());
-        data.put("id", document.getId());
+        data.put("title", challenge.title());
+        data.put("description", challenge.description());
+        data.put("requirement", challenge.requirement());
+        data.put("target", challenge.target());
+        data.put("rewardPoints", challenge.rewardPoints());
+        data.put("badge", challenge.badge());
+        data.put("expiry", challenge.expiry());
+        data.put("status", challenge.status());
         return data;
+    }
+
+    private Map<String, Object> toDocument(ChallengeParticipation participation) {
+        Map<String, Object> data = new HashMap<>();
+        data.put("touristId", participation.touristId());
+        data.put("challengeId", participation.challengeId());
+        data.put("progress", participation.progress());
+        data.put("status", participation.status());
+        data.put("completedDate", participation.completedDate());
+        return data;
+    }
+
+    private java.time.Instant toInstant(DocumentSnapshot document, String field) {
+        var timestamp = document.getTimestamp(field);
+        return timestamp == null ? null : timestamp.toDate().toInstant();
     }
 
     private Map<String, Object> copyData(Map<String, Object> source) {

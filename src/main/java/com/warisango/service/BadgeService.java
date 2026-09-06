@@ -3,6 +3,8 @@ package com.warisango.service;
 import com.warisango.dto.BadgeDTO;
 import com.warisango.dto.BadgeSummaryDTO;
 import com.warisango.exception.FirebasePersistenceException;
+import com.warisango.model.Badge;
+import com.warisango.model.TouristBadge;
 import com.warisango.repository.BadgeRepository;
 import com.warisango.repository.ChallengeRepository;
 import com.warisango.repository.CheckInRepository;
@@ -42,11 +44,11 @@ public class BadgeService {
     public List<BadgeDTO> getBadges(String touristId) {
         try {
             BadgeProgress progress = loadProgress(touristId);
-            Map<String, Instant> earned = badgeRepository.findEarnedBadges(touristId);
-            List<Map<String, Object>> definitions = badgeRepository.findAllDefinitions();
+            Map<String, Instant> earned = earnedByBadgeId(badgeRepository.findEarnedBadges(touristId));
+            List<Badge> definitions = badgeRepository.findAllDefinitions();
 
-            for (Map<String, Object> definition : definitions) {
-                String badgeId = text(definition.get("badgeId"));
+            for (Badge definition : definitions) {
+                String badgeId = definition.badgeId();
                 BadgeMetric metric = metricFor(definition, progress);
                 boolean qualifies = metric.progress() >= metric.target();
                 if (qualifies && !earned.containsKey(badgeId)) {
@@ -56,18 +58,15 @@ public class BadgeService {
                 }
             }
 
-            earned = badgeRepository.findEarnedBadges(touristId);
+            earned = earnedByBadgeId(badgeRepository.findEarnedBadges(touristId));
             List<BadgeDTO> badges = new ArrayList<>();
-            for (Map<String, Object> definition : definitions) {
-                String badgeId = text(definition.get("badgeId"));
+            for (Badge definition : definitions) {
+                String badgeId = definition.badgeId();
                 BadgeMetric metric = metricFor(definition, progress);
                 badges.add(new BadgeDTO(
                         badgeId,
-                        text(definition.get("name")),
-                        text(definition.get("emoji")),
-                        text(definition.get("description")),
-                        text(definition.get("unlockCriteria")),
-                        text(definition.get("criteriaType")),
+                        definition.name(), definition.emoji(), definition.description(),
+                        definition.unlockCriteria(), definition.criteriaType(),
                         earned.containsKey(badgeId),
                         earned.get(badgeId),
                         Math.min(metric.progress(), metric.target()),
@@ -91,7 +90,7 @@ public class BadgeService {
     }
 
     public List<Map<String, Object>> adminList() throws Exception {
-        return badgeRepository.findAllDefinitions();
+        return badgeRepository.findAllDefinitions().stream().map(this::toMap).toList();
     }
 
     public String create(Map<String, Object> input) throws Exception {
@@ -117,9 +116,9 @@ public class BadgeService {
         return new BadgeProgress(visits, reviews, points, challenges);
     }
 
-    private BadgeMetric metricFor(Map<String, Object> definition, BadgeProgress progress) {
-        String criteriaType = text(definition.get("criteriaType"));
-        int target = intValue(definition.get("target"), 1);
+    private BadgeMetric metricFor(Badge definition, BadgeProgress progress) {
+        String criteriaType = definition.criteriaType();
+        int target = definition.target();
         int current = switch (criteriaType) {
             case "checkInCount" -> progress.visits();
             case "reviewCount" -> progress.reviews();
@@ -130,7 +129,7 @@ public class BadgeService {
         return new BadgeMetric(current, target);
     }
 
-    private Map<String, Object> normalize(Map<String, Object> input) {
+    private Badge normalize(Map<String, Object> input) {
         String name = text(input.get("name"));
         String emoji = text(input.get("emoji"));
         String description = text(input.get("description"));
@@ -153,14 +152,25 @@ public class BadgeService {
             throw new IllegalArgumentException("Badge target must not exceed " + maximumTarget + ".");
         }
 
-        Map<String, Object> definition = new HashMap<>();
-        definition.put("name", name);
-        definition.put("emoji", emoji);
-        definition.put("description", description);
-        definition.put("unlockCriteria", unlockCriteria);
-        definition.put("criteriaType", criteriaType);
-        definition.put("target", target);
-        return definition;
+        return new Badge(null, name, emoji, description, unlockCriteria, criteriaType, target);
+    }
+
+    private Map<String, Instant> earnedByBadgeId(List<TouristBadge> awards) {
+        Map<String, Instant> earned = new HashMap<>();
+        awards.forEach(award -> earned.put(award.badgeId(), award.dateEarned()));
+        return earned;
+    }
+
+    private Map<String, Object> toMap(Badge badge) {
+        Map<String, Object> result = new HashMap<>();
+        result.put("badgeId", badge.badgeId());
+        result.put("name", badge.name());
+        result.put("emoji", badge.emoji());
+        result.put("description", badge.description());
+        result.put("unlockCriteria", badge.unlockCriteria());
+        result.put("criteriaType", badge.criteriaType());
+        result.put("target", badge.target());
+        return result;
     }
 
     private int intValue(Object value, int fallback) {

@@ -1,6 +1,7 @@
 package com.warisango.repository;
 
 import com.warisango.exception.FirebasePersistenceException;
+import com.warisango.model.Admin;
 
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
@@ -25,16 +26,25 @@ public class AdminRepository {
         }
 
         try {
-            return !firestore
+            return findByUserId(userId) != null;
+        } catch (Exception e) {
+            throw new FirebasePersistenceException("Failed to verify Admin membership.", e);
+        }
+    }
+
+    private Admin findByUserId(String userId) throws Exception {
+        for (QueryDocumentSnapshot document : firestore
                     .collection(COLLECTION)
                     .whereEqualTo("userId", userId)
                     .limit(1)
                     .get()
                     .get()
-                    .isEmpty();
-        } catch (Exception e) {
-            throw new FirebasePersistenceException("Failed to verify Admin membership.", e);
+                    .getDocuments()) {
+            String adminId = document.getString("adminId");
+            return new Admin(adminId == null || adminId.isBlank() ? document.getId() : adminId,
+                    document.getString("userId"));
         }
+        return null;
     }
 
     public String findAdminIdByUserId(String userId) {
@@ -43,19 +53,8 @@ public class AdminRepository {
         }
 
         try {
-            for (QueryDocumentSnapshot document : firestore
-                    .collection(COLLECTION)
-                    .whereEqualTo("userId", userId)
-                    .limit(1)
-                    .get()
-                    .get()
-                    .getDocuments()) {
-                String adminId = document.getString("adminId");
-                return adminId == null || adminId.isBlank()
-                        ? document.getId()
-                        : adminId;
-            }
-            return "";
+            Admin admin = findByUserId(userId);
+            return admin == null ? "" : admin.adminId();
         } catch (Exception e) {
             throw new FirebasePersistenceException("Failed to load Admin ID.", e);
         }

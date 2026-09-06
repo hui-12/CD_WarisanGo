@@ -1,6 +1,8 @@
 package com.warisango.service;
 
 import com.warisango.exception.OperationConflictException;
+import com.warisango.model.Challenge;
+import com.warisango.model.ChallengeParticipation;
 import com.warisango.repository.ChallengeRepository;
 import com.google.cloud.Timestamp;
 import org.springframework.stereotype.Service;
@@ -30,23 +32,23 @@ public class ChallengeService {
         List<Map<String, Object>> result = new ArrayList<>();
         List<Map<String, Object>> checkIns = challengeRepository.findCheckIns(touristId);
 
-        for (Map<String, Object> challenge : challengeRepository.findAllChallenges()) {
+        for (Challenge challenge : challengeRepository.findAllChallenges()) {
             if (!isVisibleToTourists(challenge)) continue;
 
-            String challengeId = textValue(challenge.get("id"));
-            int target = intValue(challenge.get("target"), 1);
+            String challengeId = challenge.challengeId();
+            int target = challenge.target();
             int progress = (int) checkIns.stream().filter(checkIn -> isEligible(checkIn, challenge)).count();
-            Map<String, Object> participation = challengeRepository.findParticipation(touristId, challengeId);
+            ChallengeParticipation participation = challengeRepository.findParticipation(touristId, challengeId);
             boolean joined = participation != null;
-            boolean completed = joined && "completed".equalsIgnoreCase(textValue(participation.get("status")));
+            boolean completed = joined && "completed".equalsIgnoreCase(participation.status());
             boolean expired = isExpired(challenge);
 
             if (joined && !completed && !expired) {
                 challengeRepository.updateParticipationProgress(
-                        textValue(participation.get("id")), Math.min(progress, target) + "/" + target);
+                        participation.participationId(), Math.min(progress, target) + "/" + target);
             }
 
-            Map<String, Object> challengeResponse = new HashMap<>(challenge);
+            Map<String, Object> challengeResponse = toMap(challenge);
             challengeResponse.put("target", target);
             challengeResponse.put("progress", Math.min(progress, target));
             challengeResponse.put("joined", joined);
@@ -63,11 +65,11 @@ public class ChallengeService {
      */
     public List<Map<String, Object>> getGuestChallenges() throws Exception {
         List<Map<String, Object>> result = new ArrayList<>();
-        for (Map<String, Object> challenge : challengeRepository.findAllChallenges()) {
+        for (Challenge challenge : challengeRepository.findAllChallenges()) {
             if (!isVisibleToTourists(challenge)) {
                 continue;
             }
-            Map<String, Object> guestChallenge = new HashMap<>(challenge);
+            Map<String, Object> guestChallenge = toMap(challenge);
             guestChallenge.put("progress", 0);
             guestChallenge.put("joined", false);
             guestChallenge.put("done", false);
@@ -79,27 +81,24 @@ public class ChallengeService {
     }
 
     public void join(String touristId, String challengeId) throws Exception {
-        Map<String, Object> challenge = requireChallenge(challengeId);
+        Challenge challenge = requireChallenge(challengeId);
         ensureJoinable(challenge);
-        Map<String, Object> existing = challengeRepository.findParticipation(touristId, challengeId);
-        if (existing != null && "completed".equalsIgnoreCase(textValue(existing.get("status")))) {
+        ChallengeParticipation existing = challengeRepository.findParticipation(touristId, challengeId);
+        if (existing != null && "completed".equalsIgnoreCase(existing.status())) {
             throw new OperationConflictException("This challenge has already been completed.");
         }
 
-        int target = intValue(challenge.get("target"), 1);
-        Map<String, Object> participation = new HashMap<>();
-        participation.put("touristId", touristId);
-        participation.put("challengeId", challengeId);
-        participation.put("progress", "0/" + target);
-        participation.put("status", "in_progress");
-        participation.put("completedDate", null);
-        challengeRepository.saveParticipation(existing == null ? null : textValue(existing.get("id")), participation);
+        int target = challenge.target();
+        ChallengeParticipation participation = new ChallengeParticipation(
+                existing == null ? null : existing.participationId(), touristId, challengeId,
+                "0/" + target, "in_progress", null);
+        challengeRepository.saveParticipation(existing == null ? null : existing.participationId(), participation);
     }
 
     public Map<String, Object> claim(String touristId, String challengeId) throws Exception {
-        Map<String, Object> challenge = requireChallenge(challengeId);
+        Challenge challenge = requireChallenge(challengeId);
         ensureJoinable(challenge);
-        int target = intValue(challenge.get("target"), 1);
+        int target = challenge.target();
         int progress = (int) challengeRepository.findCheckIns(touristId).stream()
                 .filter(checkIn -> isEligible(checkIn, challenge))
                 .count();
@@ -107,21 +106,21 @@ public class ChallengeService {
             throw new OperationConflictException("Challenge requirements are not completed.");
         }
 
-        Map<String, Object> participation = challengeRepository.findParticipation(touristId, challengeId);
+        ChallengeParticipation participation = challengeRepository.findParticipation(touristId, challengeId);
         if (participation == null) {
             throw new OperationConflictException("Join the challenge first.");
         }
 
-        int reward = intValue(challenge.get("rewardPoints"), 0);
+        int reward = challenge.rewardPoints();
         int currentPoints = challengeRepository.claimReward(
-                touristId, challengeId, textValue(participation.get("id")), reward, target);
+                touristId, challengeId, participation.participationId(), reward, target);
         return Map.of("success", true, "pointsEarned", reward, "currentPoints", currentPoints);
     }
 
     public List<Map<String, Object>> adminList() throws Exception {
         return challengeRepository.findAllChallenges().stream()
                 .map(challenge -> {
-                    Map<String, Object> response = new HashMap<>(challenge);
+                    Map<String, Object> response = toMap(challenge);
                     boolean expired = isExpired(challenge);
                     response.put("expired", expired);
                     if (expired) {
@@ -144,28 +143,28 @@ public class ChallengeService {
         challengeRepository.deleteChallenge(id);
     }
 
-    private Map<String, Object> requireChallenge(String challengeId) throws Exception {
-        Map<String, Object> challenge = challengeRepository.findChallenge(challengeId);
+    private Challenge requireChallenge(String challengeId) throws Exception {
+        Challenge challenge = challengeRepository.findChallenge(challengeId);
         if (challenge == null) throw new IllegalArgumentException("Challenge not found.");
         return challenge;
     }
 
-    private boolean isVisibleToTourists(Map<String, Object> challenge) {
-        return "ACTIVE".equalsIgnoreCase(textValue(challenge.getOrDefault("status", "ACTIVE")));
+    private boolean isVisibleToTourists(Challenge challenge) {
+        return "ACTIVE".equalsIgnoreCase(challenge.status() == null ? "ACTIVE" : challenge.status());
     }
 
     /**
      * An expiry date remains valid until the end of that local calendar day.
      */
-    private boolean isExpired(Map<String, Object> challenge) {
+    private boolean isExpired(Challenge challenge) {
         try {
-            return LocalDate.parse(textValue(challenge.get("expiry"))).isBefore(LocalDate.now(CHALLENGE_TIME_ZONE));
+            return LocalDate.parse(challenge.expiry()).isBefore(LocalDate.now(CHALLENGE_TIME_ZONE));
         } catch (Exception exception) {
             return true;
         }
     }
 
-    private void ensureJoinable(Map<String, Object> challenge) {
+    private void ensureJoinable(Challenge challenge) {
         if (!isVisibleToTourists(challenge)) {
             throw new OperationConflictException("This challenge is not active.");
         }
@@ -174,19 +173,19 @@ public class ChallengeService {
         }
     }
 
-    private boolean isEligible(Map<String, Object> checkIn, Map<String, Object> challenge) {
+    private boolean isEligible(Map<String, Object> checkIn, Challenge challenge) {
         if (checkIn.get("businessId") == null) {
             return false;
         }
 
         Instant checkInTime = timestampAsInstant(checkIn.get("checkInTimestamp"));
-        Instant createdTime = timestampAsInstant(challenge.get("createdDate"));
+        Instant createdTime = challenge.createdDate();
         if (checkInTime == null || createdTime == null || checkInTime.isBefore(createdTime)) {
             return false;
         }
 
         try {
-            Instant expiryEnd = LocalDate.parse(textValue(challenge.get("expiry")))
+            Instant expiryEnd = LocalDate.parse(challenge.expiry())
                     .plusDays(1)
                     .atStartOfDay(CHALLENGE_TIME_ZONE)
                     .toInstant();
@@ -209,7 +208,7 @@ public class ChallengeService {
         return null;
     }
 
-    private Map<String, Object> normalize(Map<String, Object> input) {
+    private Challenge normalize(Map<String, Object> input) {
         String title = textValue(input.get("title"));
         String description = textValue(input.get("description"));
         String requirement = textValue(input.get("requirement"));
@@ -237,15 +236,22 @@ public class ChallengeService {
             throw new IllegalArgumentException("Status must be ACTIVE or INACTIVE.");
         }
 
+        return new Challenge(null, title, description, requirement, target, rewardPoints,
+                badge, expiry, status, null);
+    }
+
+    private Map<String, Object> toMap(Challenge challenge) {
         Map<String, Object> data = new HashMap<>();
-        data.put("title", title);
-        data.put("description", description);
-        data.put("requirement", requirement);
-        data.put("target", target);
-        data.put("rewardPoints", rewardPoints);
-        data.put("badge", badge);
-        data.put("expiry", expiry);
-        data.put("status", status);
+        data.put("id", challenge.challengeId());
+        data.put("title", challenge.title());
+        data.put("description", challenge.description());
+        data.put("requirement", challenge.requirement());
+        data.put("target", challenge.target());
+        data.put("rewardPoints", challenge.rewardPoints());
+        data.put("badge", challenge.badge());
+        data.put("expiry", challenge.expiry());
+        data.put("status", challenge.status());
+        data.put("createdDate", challenge.createdDate());
         return data;
     }
 
