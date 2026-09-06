@@ -13,7 +13,7 @@ document.addEventListener('click', (event) => {
     admin: '/ai-discovery',
     'ai-discovery': '/ai-discovery',
     'pending-list': '/admin/pending-list',
-    'audit-log': '/admin/audit-log',
+    'processed-businesses': '/admin/processed-businesses',
     'admin-challenges': '/admin/challenges',
   };
   const route = routes[button.dataset.navigate];

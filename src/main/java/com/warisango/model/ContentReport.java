@@ -1,6 +1,6 @@
 package com.warisango.model;
 
-/** Represents a document in the Firestore reports collection. */
+/** Represents a document in the Firestore reviewReports collection. */
 public record ContentReport(
         String reportId,
         String reporterTouristId,

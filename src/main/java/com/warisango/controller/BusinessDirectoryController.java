@@ -2,6 +2,7 @@ package com.warisango.controller;
 
 import com.warisango.dto.HeritageBusinessDTO;
 import com.warisango.service.BusinessService;
+import com.warisango.service.BusinessPhotoService;
 import com.warisango.service.ReviewService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -19,14 +20,17 @@ public class BusinessDirectoryController {
     private final BusinessService businessService;
     private final ReviewService reviewService;
     private final BusinessStreamManager businessStreamManager;
+    private final BusinessPhotoService businessPhotoService;
 
     public BusinessDirectoryController(
             BusinessService businessService,
             ReviewService reviewService,
-            BusinessStreamManager businessStreamManager) {
+            BusinessStreamManager businessStreamManager,
+            BusinessPhotoService businessPhotoService) {
         this.businessService = businessService;
         this.reviewService = reviewService;
         this.businessStreamManager = businessStreamManager;
+        this.businessPhotoService = businessPhotoService;
     }
 
     // Directory page (list)
@@ -49,6 +53,7 @@ public class BusinessDirectoryController {
         String businessId = business.getBusinessId();
 
         model.addAttribute("business", business);
+        model.addAttribute("businessPhotos", businessPhotoService.getPhotos(businessId));
         model.addAttribute("featuredReview", reviewService.getFeaturedReview(businessId));
         model.addAttribute("totalReviews", reviewService.getTotalReviews(businessId));
         return "business-details";

@@ -27,10 +27,14 @@
         </div>
 
         <div class="review-actions">
-          <form th:action="@{/admin/pending-list/{id}/reject(id=${business.businessId})}" method="post">
+          <form th:action="@{/admin/pending-list/{id}/reject(id=${business.businessId})}" method="post"
+                data-confirm-message="Reject this business? It will not be visible to tourists."
+                data-confirm-label="Reject Business" data-confirm-danger="true">
             <button class="btn btn-outline-danger review-button" type="submit">Reject Business</button>
           </form>
-          <form th:action="@{/admin/pending-list/{id}/approve(id=${business.businessId})}" method="post">
+          <form th:action="@{/admin/pending-list/{id}/approve(id=${business.businessId})}" method="post"
+                data-confirm-message="Approve this business and make it available to tourists?"
+                data-confirm-label="Approve Business">
             <button class="btn btn-success review-button" type="submit">Approve Business</button>
           </form>
         </div>
@@ -43,6 +47,8 @@
           th:action="@{/admin/pending-list/{id}/update(id=${business.businessId})}"
           th:object="${businessUpdate}"
           method="post"
+          data-confirm-message="Save these changes to the pending business?"
+          data-confirm-label="Save Changes"
         >
           <div class="edit-grid">
             <label class="edit-field edit-field-wide"
@@ -167,5 +173,6 @@
     </main>
 
     <div th:replace="~{fragments/footer :: global}"></div>
+    <script th:src="@{/js/admin/workflow-confirmation.js}" defer></script>
   </body>
 </html>

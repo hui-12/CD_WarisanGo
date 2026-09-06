@@ -170,6 +170,15 @@ body {
   display: block;
   transition: transform 0.25s ease;
 }
+.business-image-empty,
+.gallery-empty {
+  display: grid;
+  height: 100%;
+  margin: 0;
+  place-items: center;
+  color: #766f65;
+  font: 600 13px Inter, Arial, sans-serif;
+}
 .business-card:hover .business-image {
   transform: scale(1.035);
 }
@@ -312,6 +321,13 @@ body {
   position: relative;
   cursor: pointer;
 }
+.gallery-stage--empty {
+  height: 340px;
+  border: 1px dashed #9e978b;
+  border-radius: 9px;
+  background: #eeeae1;
+  cursor: default;
+}
 .gallery-featured {
   width: 100%;
   height: 340px;
@@ -323,9 +339,18 @@ body {
 .gallery-thumbnails {
   display: flex;
   gap: 7px;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
   margin-top: 7px;
+  padding: 0 0 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-inline: contain;
+  scrollbar-width: thin;
 }
 .gallery-thumbnail {
+  flex: 0 0 auto;
   padding: 2px;
   border: 1px solid transparent;
   border-radius: 6px;
@@ -379,6 +404,98 @@ body {
 }
 .gallery-nav--next {
   right: 10px;
+}
+.business-photo-contribution form,
+.business-photo-dialog form {
+  display: grid;
+  gap: 10px;
+}
+.business-photo-contribution {
+  padding-top: 14px;
+  padding-bottom: 8px;
+}
+.business-photo-contribution + .business-title-block {
+  padding-top: 10px;
+}
+.business-photo-contribution input,
+.business-photo-dialog select,
+.business-photo-dialog textarea {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 9px;
+  border: 1px solid var(--ink);
+  border-radius: 6px;
+  background: #fff;
+}
+.business-photo-contribution button,
+.business-photo-dialog button {
+  width: fit-content;
+  padding: 9px 14px;
+  border: 0;
+  border-radius: 6px;
+  background: var(--ink);
+  color: #fff;
+  cursor: pointer;
+}
+.business-photo-contribution button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+.business-photo-upload-status {
+  min-height: 20px;
+  margin: 0;
+  color: #76624c;
+  font: 600 11px Inter, Arial, sans-serif;
+}
+.business-photo-upload-status:empty {
+  display: none;
+}
+.business-photo-upload-status.is-uploading::before {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin-right: 7px;
+  border: 2px solid #c9a84c;
+  border-top-color: transparent;
+  border-radius: 50%;
+  vertical-align: -2px;
+  content: "";
+  animation: business-photo-spin 0.7s linear infinite;
+}
+@keyframes business-photo-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.business-photo-dialog {
+  width: min(760px, calc(100% - 32px));
+  padding: 0;
+  border: 1px solid var(--ink);
+  border-radius: 10px;
+}
+.business-photo-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.72);
+}
+.business-photo-dialog > img {
+  display: block;
+  width: 100%;
+  max-height: 62vh;
+  object-fit: contain;
+  background: #111;
+}
+.business-photo-dialog-body {
+  padding: 18px;
+}
+.photo-dialog-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 2;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: 50%;
+  font-size: 22px;
 }
 .business-title-block {
   padding: 18px 0 17px;

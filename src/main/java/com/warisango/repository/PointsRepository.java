@@ -83,8 +83,8 @@ public class PointsRepository {
             if (!"tourist".equalsIgnoreCase(document.getString("role"))) continue;
             User user = document.toObject(User.class);
             if (user != null) {
-                if (user.getUid() == null || user.getUid().isBlank()) {
-                    user.setUid(document.getId());
+                if (user.getUserId() == null || user.getUserId().isBlank()) {
+                    user.setUserId(document.getId());
                 }
                 entries.add(user);
             }

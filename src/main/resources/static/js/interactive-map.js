@@ -443,7 +443,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const btnGmaps = document.createElement('a');
       btnGmaps.className = 'btn-popup-outlined';
-      const googleMapsQuery = [loc.name, loc.address, loc.city, loc.state].filter(Boolean).join(', ');
+      const namedLocation = [loc.name, loc.address, loc.city, loc.state].filter(Boolean).join(', ');
+      const hasCoordinates = Number.isFinite(Number(loc.latitude)) && Number.isFinite(Number(loc.longitude));
+      const coordinateFallback = hasCoordinates ? `${Number(loc.latitude)},${Number(loc.longitude)}` : '';
+      const googleMapsQuery = namedLocation || coordinateFallback;
       btnGmaps.href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(googleMapsQuery)}`;
       btnGmaps.target = '_blank';
       btnGmaps.rel = 'noopener noreferrer';

@@ -1,22 +1,18 @@
 package com.warisango.service;
 
-import com.warisango.dto.BusinessCorrectionRequest;
 import com.warisango.dto.BusinessReportSummary;
 import com.warisango.dto.BusinessReportView;
 import com.warisango.dto.HeritageBusinessDTO;
 import com.warisango.exception.BusinessReportException;
 import com.warisango.model.BusinessReport;
-import com.warisango.model.GeoCoordinates;
 import com.warisango.repository.AdminRepository;
 import com.warisango.repository.BusinessReportRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.security.access.AccessDeniedException;
 
 import java.util.Comparator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Set;
 
 @Service
@@ -96,14 +92,8 @@ public class BusinessReportService {
         updateOutcome(reportId, adminUserId, "DISMISSED", normalizeOptional(note, 500));
     }
 
-    public void resolve(String reportId, String adminUserId, BusinessCorrectionRequest request) {
-        BusinessReportView report = getPending(reportId, adminUserId);
-        Map<String, Object> corrections = buildCorrections(request);
-        if (corrections.isEmpty()) {
-            throw new IllegalArgumentException("Update at least one business field before resolving the report.");
-        }
-        businessService.updateReportedDetails(report.businessId(), corrections);
-        updateOutcome(reportId, adminUserId, "RESOLVED", normalizeOptional(request.getResolutionNote(), 500));
+    public void resolveWithoutChanges(String reportId, String adminUserId, String note) {
+        updateOutcome(reportId, adminUserId, "RESOLVED", normalizeOptional(note, 500));
     }
 
     private BusinessReportView getPending(String reportId, String adminUserId) {
@@ -125,41 +115,6 @@ public class BusinessReportService {
         }
     }
 
-    private Map<String, Object> buildCorrections(BusinessCorrectionRequest request) {
-        Map<String, Object> corrections = new LinkedHashMap<>();
-        putIfPresent(corrections, "name", request.getName(), 120);
-        putIfPresent(corrections, "address", request.getAddress(), 300);
-        putIfPresent(corrections, "city", request.getCity(), 100);
-        putIfPresent(corrections, "state", request.getState(), 100);
-        putIfPresent(corrections, "operatingHour", request.getOperatingHour(), 50);
-        boolean hasLatitude = request.getLatitude() != null && !request.getLatitude().isBlank();
-        boolean hasLongitude = request.getLongitude() != null && !request.getLongitude().isBlank();
-        if (hasLatitude != hasLongitude) {
-            throw new IllegalArgumentException("Both latitude and longitude are required to update the location.");
-        }
-        if (hasLatitude) {
-            try {
-                double latitude = Double.parseDouble(request.getLatitude());
-                double longitude = Double.parseDouble(request.getLongitude());
-                if (latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) {
-                    throw new IllegalArgumentException("Location coordinates are outside the valid range.");
-                }
-                corrections.put("location", new GeoCoordinates(latitude, longitude));
-            } catch (NumberFormatException exception) {
-                throw new IllegalArgumentException("Location coordinates must be numbers.");
-            }
-        }
-        return corrections;
-    }
-
-    private void putIfPresent(Map<String, Object> corrections, String field, String value, int maximumLength) {
-        if (value == null || value.isBlank()) return;
-        String normalized = value.trim();
-        if (normalized.length() > maximumLength) {
-            throw new IllegalArgumentException(field + " is too long.");
-        }
-        corrections.put(field, normalized);
-    }
 
     private String normalizeOptional(String value, int maximumLength) {
         if (value == null || value.isBlank()) return null;

@@ -58,7 +58,7 @@ public class AuthController {
 
         SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
         UsernamePasswordAuthenticationToken authentication = UsernamePasswordAuthenticationToken.authenticated(
-            authenticatedUser.getUid(),
+            authenticatedUser.getUserId(),
             null,
             AuthorityUtils.createAuthorityList("ROLE_" + authenticatedUser.getRole().toUpperCase())
         );

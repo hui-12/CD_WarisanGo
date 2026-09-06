@@ -7,7 +7,7 @@ import com.warisango.model.User;
  * Public user representation returned by authentication and profile APIs.
  */
 public record UserResponse(
-        String uid,
+        String userId,
         String email,
         String name,
         String avatar,
@@ -21,7 +21,7 @@ public record UserResponse(
 
     public static UserResponse from(User user) {
         return new UserResponse(
-                user.getUid(),
+                user.getUserId(),
                 user.getEmail(),
                 user.getName(),
                 user.getAvatar(),

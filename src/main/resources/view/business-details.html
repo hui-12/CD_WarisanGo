@@ -22,24 +22,25 @@
 
       <section class="detail-layout" aria-labelledby="business-title">
         <div class="detail-main">
-          <div class="gallery" id="photos">
-            <div class="gallery-stage" tabindex="0" aria-label="Business photo gallery">
+          <div class="gallery" id="photos" th:attr="data-business-id=${business.businessId}">
+            <div class="gallery-stage" tabindex="0" aria-label="Business photo gallery"
+                 th:classappend="${#lists.isEmpty(businessPhotos)} ? ' gallery-stage--empty'">
               <img
-                src="https://images.unsplash.com/photo-1559925393-8be0ec4767c8?auto=format&amp;fit=crop&amp;w=1200&amp;q=85"
-                th:src="${#lists.isEmpty(business.imageUrls) ? 'https://images.unsplash.com/photo-1559925393-8be0ec4767c8?auto=format&amp;fit=crop&amp;w=1200&amp;q=85' : business.imageUrls[0]}"
+                th:if="${not #lists.isEmpty(businessPhotos)}"
+                th:src="${businessPhotos[0].imageUrl}"
                 alt="Business photo"
                 title="Business photo"
                 th:alt="${business.name} + ' photo'"
                 th:title="${business.name} + ' photo'"
                 class="gallery-featured"
                 id="galleryFeatured"
-                data-fallback-image="https://images.unsplash.com/photo-1559925393-8be0ec4767c8?auto=format&amp;fit=crop&amp;w=1200&amp;q=85"
               />
+              <p class="gallery-empty" th:if="${#lists.isEmpty(businessPhotos)}">No business photos have been added yet.</p>
               <button
                 class="gallery-nav gallery-nav--previous"
                 type="button"
                 aria-label="Show previous photo"
-                th:if="${#lists.size(business.imageUrls) > 1}"
+                th:if="${#lists.size(businessPhotos) > 1}"
                 data-gallery-previous
               >
                 ‹
@@ -48,31 +49,45 @@
                 class="gallery-nav gallery-nav--next"
                 type="button"
                 aria-label="Show next photo"
-                th:if="${#lists.size(business.imageUrls) > 1}"
+                th:if="${#lists.size(businessPhotos) > 1}"
                 data-gallery-next
               >
                 ›
               </button>
             </div>
-            <div class="gallery-thumbnails" th:if="${not #lists.isEmpty(business.imageUrls)}">
+            <div class="gallery-thumbnails" th:if="${not #lists.isEmpty(businessPhotos)}">
               <button
-                th:each="photo, stat : ${business.imageUrls}"
+                th:each="photo, stat : ${businessPhotos}"
                 type="button"
                 class="gallery-thumbnail"
-                th:attr="data-gallery-index=${stat.index},aria-current=${stat.index == 0 ? 'true' : 'false'}"
+                th:attr="data-gallery-index=${stat.index},data-photo-id=${photo.photoId},data-uploader=${photo.uploaderName},data-uploaded-at=${photo.uploadedAtDisplay},aria-current=${stat.index == 0 ? 'true' : 'false'}"
                 th:aria-label="${'Show photo ' + (stat.index + 1)}"
               >
                 <img
-                  th:src="${photo}"
+                  th:src="${photo.imageUrl}"
                   th:alt="${business.name} + ' gallery photo ' + (stat.index + 1)"
                   title="Business gallery photo"
                   th:title="${business.name} + ' gallery photo ' + (stat.index + 1)"
                   class="gallery-thumb"
-                  data-fallback-image="https://images.unsplash.com/photo-1559925393-8be0ec4767c8?auto=format&amp;fit=crop&amp;w=240&amp;q=80"
                 />
               </button>
             </div>
           </div>
+
+          <section class="detail-section business-photo-contribution" aria-labelledby="add-business-photo-title">
+            <h2 id="add-business-photo-title">Add Photos</h2>
+            <p>Share recent, helpful photos of this heritage business with other visitors.</p>
+            <p class="business-report-error" th:if="${businessPhotoError}" th:text="${businessPhotoError}"></p>
+            <form data-member-required-form data-business-photo-upload
+                  th:action="@{/business/{id}/photos(id=${business.businessId})}"
+                  method="post" enctype="multipart/form-data">
+              <input type="file" name="photos" accept="image/jpeg,image/png,image/webp" multiple required />
+              <button type="submit" data-upload-photo-button>
+                <span data-upload-photo-label>Upload Photos</span>
+              </button>
+              <p class="business-photo-upload-status" data-upload-photo-status role="status" aria-live="polite"></p>
+            </form>
+          </section>
 
           <header class="business-title-block">
             <p
@@ -341,6 +356,53 @@
       <h2 id="business-report-success-title">Thank you for helping us improve.</h2>
       <p th:text="${businessReportMessage}">Your correction report is pending admin review.</p>
       <button type="button" data-close-business-report-success>Done</button>
+    </dialog>
+
+    <dialog id="business-photo-dialog" class="business-photo-dialog" aria-labelledby="business-photo-dialog-title">
+      <button type="button" class="photo-dialog-close" data-close-photo-dialog aria-label="Close">×</button>
+      <img data-photo-dialog-image alt="Selected business photo" />
+      <div class="business-photo-dialog-body">
+        <h2 id="business-photo-dialog-title">Photo details</h2>
+        <p>Uploaded by <strong data-photo-uploader>WarisanGo contributor</strong></p>
+        <p data-photo-uploaded-at></p>
+        <details>
+          <summary>Report this photo</summary>
+          <form data-photo-report-form data-member-required-form method="post">
+            <input
+              th:if="${_csrf != null}"
+              type="hidden"
+              th:name="${_csrf.parameterName}"
+              th:value="${_csrf.token}"
+            />
+            <label>Reason
+              <select name="reason" required>
+                <option value="">Select a reason</option>
+                <option value="INAPPROPRIATE">Inappropriate content</option>
+                <option value="SPAM">Spam</option>
+                <option value="NOT_THIS_PLACE">Not this place</option>
+                <option value="PRIVACY">Privacy concern</option>
+                <option value="OTHER">Other</option>
+              </select>
+            </label>
+            <label>Details <textarea name="details" maxlength="500" rows="3"></textarea></label>
+            <button type="submit">Submit Photo Report</button>
+          </form>
+        </details>
+      </div>
+    </dialog>
+
+    <dialog id="business-photo-message-dialog" class="business-report-success-dialog"
+            th:if="${businessPhotoMessage != null or businessPhotoReportMessage != null}"
+            aria-labelledby="business-photo-message-title">
+      <div class="business-report-success-icon" aria-hidden="true">&#10003;</div>
+      <h2 id="business-photo-message-title"
+          th:text="${businessPhotoReportMessage != null ? 'Thank you for helping our community.' : 'Photo uploaded.'}">
+        Done
+      </h2>
+      <p th:text="${businessPhotoReportMessage != null ? businessPhotoReportMessage : businessPhotoMessage}">
+        Photo action completed.
+      </p>
+      <button type="button" data-close-business-photo-message>Close</button>
     </dialog>
 
     <div th:replace="~{fragments/footer :: global}"></div>

@@ -103,15 +103,22 @@
     const stage = document.querySelector('.gallery-stage');
     const featured = document.getElementById('galleryFeatured');
     const thumbnails = Array.from(document.querySelectorAll('.gallery-thumbnail'));
-    if (!stage || !featured || thumbnails.length < 2) return;
+    if (!stage || !featured || thumbnails.length < 1) return;
 
-    const photos = thumbnails.map((thumbnail) => thumbnail.querySelector('img')?.src).filter(Boolean);
-    if (photos.length < 2) return;
+    const photos = thumbnails
+      .map((thumbnail) => ({
+        url: thumbnail.querySelector('img')?.src,
+        photoId: thumbnail.dataset.photoId,
+        uploader: thumbnail.dataset.uploader || 'WarisanGo contributor',
+        uploadedAt: thumbnail.dataset.uploadedAt || '',
+      }))
+      .filter((photo) => photo.url);
+    if (photos.length < 1) return;
 
     let selectedIndex = 0;
     const showPhoto = (index) => {
       selectedIndex = (index + photos.length) % photos.length;
-      featured.src = photos[selectedIndex];
+      featured.src = photos[selectedIndex].url;
       const photoTitle = thumbnails[selectedIndex].querySelector('img')?.alt || 'Business photo';
       featured.alt = photoTitle;
       featured.title = photoTitle;
@@ -126,12 +133,7 @@
     document.querySelector('[data-gallery-next]')?.addEventListener('click', () => showPhoto(selectedIndex + 1));
     thumbnails.forEach((thumbnail, index) => thumbnail.addEventListener('click', () => showPhoto(index)));
 
-    // The left and right halves of the photo act as previous and next controls.
-    stage.addEventListener('click', (event) => {
-      if (event.target.closest('.gallery-nav')) return;
-      const bounds = stage.getBoundingClientRect();
-      showPhoto(event.clientX - bounds.left < bounds.width / 2 ? selectedIndex - 1 : selectedIndex + 1);
-    });
+    featured.addEventListener('click', () => openPhotoDialog(photos[selectedIndex]));
     stage.addEventListener('keydown', (event) => {
       if (event.key === 'ArrowLeft') {
         event.preventDefault();
@@ -144,6 +146,60 @@
     });
 
     showPhoto(0);
+  }
+
+  function openPhotoDialog(photo) {
+    const dialog = document.getElementById('business-photo-dialog');
+    if (!dialog || !photo) return;
+    dialog.querySelector('[data-photo-dialog-image]').src = photo.url;
+    dialog.querySelector('[data-photo-uploader]').textContent = photo.uploader;
+    dialog.querySelector('[data-photo-uploaded-at]').textContent = photo.uploadedAt
+      ? `Added ${photo.uploadedAt}`
+      : 'Upload date unavailable';
+    const businessId = document.getElementById('photos')?.dataset.businessId;
+    const reportForm = dialog.querySelector('[data-photo-report-form]');
+    if (reportForm && businessId && photo.photoId) {
+      reportForm.action = `/business/${encodeURIComponent(businessId)}/photos/${encodeURIComponent(photo.photoId)}/report`;
+    }
+    dialog.showModal();
+  }
+
+  function setupPhotoDialogs() {
+    const dialog = document.getElementById('business-photo-dialog');
+    dialog?.querySelector('[data-close-photo-dialog]')?.addEventListener('click', () => dialog.close());
+    dialog?.addEventListener('click', (event) => {
+      if (event.target === dialog) dialog.close();
+    });
+    const messageDialog = document.getElementById('business-photo-message-dialog');
+    if (messageDialog) {
+      messageDialog.querySelector('[data-close-business-photo-message]')?.addEventListener('click', () => {
+        messageDialog.close();
+      });
+      messageDialog.showModal();
+    }
+  }
+
+  function setupBusinessPhotoUpload() {
+    const form = document.querySelector('[data-business-photo-upload]');
+    if (!form) return;
+    let submitting = false;
+    form.addEventListener('submit', (event) => {
+      if (submitting) {
+        event.preventDefault();
+        return;
+      }
+      if (!form.checkValidity()) return;
+      submitting = true;
+      const button = form.querySelector('[data-upload-photo-button]');
+      const label = form.querySelector('[data-upload-photo-label]');
+      const status = form.querySelector('[data-upload-photo-status]');
+      if (button) button.disabled = true;
+      if (label) label.textContent = 'Uploading…';
+      if (status) {
+        status.textContent = 'Uploading your photos. Please keep this page open.';
+        status.classList.add('is-uploading');
+      }
+    });
   }
 
   function setupBusinessReportSuccessDialog() {
@@ -183,5 +239,7 @@
     applyFilters();
     setupGallery();
     setupBusinessReportSuccessDialog();
+    setupPhotoDialogs();
+    setupBusinessPhotoUpload();
   });
 })();

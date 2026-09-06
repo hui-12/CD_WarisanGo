@@ -54,7 +54,7 @@ public class ReviewPhotoStorageService {
                 .count();
 
         if (nonEmptyFileCount > MAX_PHOTOS_PER_REVIEW) {
-            throw new IllegalArgumentException("You can upload a maximum of 10 photos per review.");
+            throw new IllegalArgumentException("You can upload a maximum of 10 photos at a time.");
         }
 
         for (MultipartFile file : files) {
@@ -80,6 +80,16 @@ public class ReviewPhotoStorageService {
             );
         } catch (IOException e) {
             throw new IllegalStateException("Could not read the review photo.", e);
+        }
+    }
+
+    public StoredPhoto storeBusinessPhoto(String businessId, MultipartFile file) {
+        ImageType imageType = detectImageType(file);
+        try (InputStream inputStream = file.getInputStream()) {
+            return upload("business-photos", businessId, inputStream, file.getSize(),
+                    imageType.contentType(), imageType.extension());
+        } catch (IOException exception) {
+            throw new IllegalStateException("Could not read the business photo.", exception);
         }
     }
 

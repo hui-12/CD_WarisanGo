@@ -196,13 +196,15 @@ const renderVisits = async () => {
       row.href = `/business/${encodeURIComponent(v.businessId)}`;
       row.setAttribute('aria-label', `View details for ${v.businessName || 'heritage business'}`);
 
-      const img = document.createElement('img');
-
-      img.src = v.image || '/images/business-default.jpg';
-
-      img.alt = v.businessName || 'Business Visit';
-
-      img.className = 'visit-img';
+      const imageElement = v.image ? document.createElement('img') : document.createElement('span');
+      if (v.image) {
+        imageElement.src = v.image;
+        imageElement.alt = v.businessName || 'Business Visit';
+        imageElement.className = 'visit-img';
+      } else {
+        imageElement.className = 'visit-img visit-img-empty';
+        imageElement.textContent = 'No photo';
+      }
 
       const infoDiv = document.createElement('div');
 
@@ -233,7 +235,7 @@ const renderVisits = async () => {
 
       pointsDiv.textContent = `+${v.points ?? 0}`;
 
-      if (v.image) row.appendChild(img);
+      row.appendChild(imageElement);
 
       row.appendChild(infoDiv);
 

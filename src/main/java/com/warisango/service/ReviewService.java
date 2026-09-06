@@ -424,16 +424,11 @@ public class ReviewService {
     }
 
     public Map<String, Object> getBusinessInformation(String businessId) {
-
         Map<String, Object> business = new HashMap<>();
-
         business.put("businessId", businessId);
-        business.put("businessName", "Kedai Warisan Laksa");
-        business.put("businessAddress", "George Town, Penang, Malaysia");
-        business.put("businessImage",
-                "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1400&q=80");
-
-        applyFallbackBusinessInformation(business, businessId);
+        business.put("businessName", "Business unavailable");
+        business.put("businessAddress", "Address unavailable");
+        business.put("businessImage", null);
 
         HeritageBusinessDTO firestoreBusiness = businessService.getApprovedBusinessForReview(businessId);
         if (firestoreBusiness != null) {
@@ -443,34 +438,13 @@ public class ReviewService {
             if (hasText(firestoreBusiness.getAddress())) {
                 business.put("businessAddress", firestoreBusiness.getAddress());
             }
+            if (firestoreBusiness.getImageUrls() != null && !firestoreBusiness.getImageUrls().isEmpty()) {
+                business.put("businessImage", firestoreBusiness.getImageUrls().get(0));
+            }
         }
 
         return business;
 
-    }
-
-    private void applyFallbackBusinessInformation(Map<String, Object> business, String businessId) {
-        if ("hb_001".equals(businessId)) {
-            business.put("businessName", "Yut Kee Restaurant");
-            business.put("businessAddress", "7, Jalan Kamunting, Kuala Lumpur");
-            business.put("businessImage",
-                    "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1400&q=80");
-        } else if ("hb_002".equals(businessId)) {
-            business.put("businessName", "Restoran Kim Lian Kee");
-            business.put("businessAddress", "49, Jalan Petaling, Kuala Lumpur");
-            business.put("businessImage",
-                    "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=1400&h=900&fit=crop&auto=format");
-        } else if ("hb_003".equals(businessId)) {
-            business.put("businessName", "Nasi Kandar Line Clear");
-            business.put("businessAddress", "177, Jalan Penang, George Town, Penang");
-            business.put("businessImage",
-                    "https://images.unsplash.com/photo-1516550893923-42d28e5677af?auto=format&fit=crop&w=1400&q=80");
-        } else if ("BUS001".equals(businessId)) {
-            business.put("businessName", "Wulandari Batik Studio");
-            business.put("businessAddress", "Laweyan, Solo, Central Java");
-            business.put("businessImage",
-                    "https://images.unsplash.com/photo-1516550893923-42d28e5677af?auto=format&fit=crop&w=1400&q=80");
-        }
     }
 
     private boolean hasText(String value) {

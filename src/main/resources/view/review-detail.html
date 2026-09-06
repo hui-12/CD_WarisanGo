@@ -11,10 +11,11 @@
       <article class="review-detail-shell">
         <section class="review-detail-business">
           <img
+            th:if="${business.businessImage != null}"
             th:src="${business.businessImage}"
-            src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=900&q=80"
             alt="Heritage business"
           />
+          <p class="review-business-image-empty" th:if="${business.businessImage == null}">No business photo</p>
 
           <div class="review-detail-business-copy">
             <p class="review-kicker">Heritage Food</p>

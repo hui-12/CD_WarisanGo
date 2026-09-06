@@ -1,6 +1,5 @@
 package com.warisango.service;
 
-import com.warisango.dto.BusinessCorrectionRequest;
 import com.warisango.dto.HeritageBusinessDTO;
 import com.warisango.model.BusinessReport;
 import com.warisango.repository.AdminRepository;
@@ -11,7 +10,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -42,7 +40,7 @@ class BusinessReportServiceTest {
     }
 
     @Test
-    void resolveUpdatesBusinessBeforeRecordingAdminOutcome() throws Exception {
+    void resolveRecordsAdminOutcomeWithoutDuplicatingBusinessEditing() throws Exception {
         BusinessReport report = new BusinessReport();
         report.setReportId("business_report_001");
         report.setBusinessId("hb_001");
@@ -53,13 +51,8 @@ class BusinessReportServiceTest {
         when(reportRepository.findById("business_report_001")).thenReturn(report);
         when(userService.getUserByUid("tourist_001")).thenReturn(Optional.empty());
         when(businessService.getBusinessById("hb_001")).thenReturn(Optional.of(new HeritageBusinessDTO()));
-        BusinessCorrectionRequest correction = new BusinessCorrectionRequest();
-        correction.setOperatingHour("09:00 - 22:00");
-        correction.setResolutionNote("Hours verified.");
+        businessReportService.resolveWithoutChanges("business_report_001", "admin_uid", "Hours verified.");
 
-        businessReportService.resolve("business_report_001", "admin_uid", correction);
-
-        verify(businessService).updateReportedDetails("hb_001", Map.of("operatingHour", "09:00 - 22:00"));
         verify(reportRepository).updateOutcome(
                 "business_report_001", "RESOLVED", "admin_001", "Hours verified.");
     }

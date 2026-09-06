@@ -12,7 +12,6 @@ import com.google.cloud.firestore.QuerySnapshot;
 import com.google.cloud.firestore.WriteBatch;
 import com.warisango.exception.FirebasePersistenceException;
 import com.warisango.model.HeritageBusiness;
-import com.warisango.model.GeoCoordinates;
 import org.springframework.stereotype.Repository;
 
 import java.time.Instant;
@@ -57,28 +56,6 @@ public class BusinessRepository {
         Map<String, Object> update = new HashMap<>();
         update.put("averageRating", averageRating);
         document.getReference().update(update).get();
-    }
-
-    public void updateReportedDetails(String businessId, Map<String, Object> corrections)
-            throws ExecutionException, InterruptedException {
-        DocumentSnapshot document = firestore.collection(COLLECTION_NAME).document(businessId).get().get();
-        if (!document.exists()) {
-            QuerySnapshot matches = firestore.collection(COLLECTION_NAME)
-                    .whereEqualTo("businessId", businessId)
-                    .limit(1)
-                    .get()
-                    .get();
-            if (matches.isEmpty()) {
-                throw new IllegalArgumentException("Business was not found.");
-            }
-            document = matches.getDocuments().get(0);
-        }
-        Map<String, Object> firestoreUpdates = new LinkedHashMap<>(corrections);
-        Object location = firestoreUpdates.get("location");
-        if (location instanceof GeoCoordinates coordinates) {
-            firestoreUpdates.put("location", new GeoPoint(coordinates.latitude(), coordinates.longitude()));
-        }
-        document.getReference().update(firestoreUpdates).get();
     }
 
     public List<HeritageBusiness> findApprovedBusinesses() throws ExecutionException, InterruptedException {
@@ -220,6 +197,13 @@ public class BusinessRepository {
 
     public void reject(String businessId) {
         updateReviewStatus(businessId, "Rejected", "rejectedAt");
+    }
+
+    public void deactivate(String businessId) {
+        Map<String, Object> updates = new LinkedHashMap<>();
+        updates.put("status", "Inactive");
+        updates.put("deactivatedAt", FieldValue.serverTimestamp());
+        executeUpdate(businessId, updates, "deactivate the heritage business");
     }
 
     public void updateBusiness(String businessId, HeritageBusiness business) {

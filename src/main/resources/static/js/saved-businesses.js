@@ -12,7 +12,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const bookmarkSvg = `<svg viewBox="0 0 24 28" fill="none" stroke="currentColor" stroke-width="2"
     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 2h16v23l-8-5-8 5z"></path></svg>`;
-  const fallbackImage = 'https://images.unsplash.com/photo-1559925393-8be0ec4767c8?auto=format&fit=crop&w=900&q=85';
   const escapeHtml = (value) =>
     String(value ?? '').replace(
       /[&<>'"]/g,
@@ -78,7 +77,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     results.innerHTML = displayed
       .map((item) => {
-        const image = item.imageUrls?.[0] || fallbackImage;
+        const image = item.imageUrls?.[0];
+        const imageContent = image
+          ? `<a href="/business/${encodeURIComponent(item.businessId)}"><img class="business-image"
+            src="${escapeHtml(image)}" alt="${escapeHtml(item.name)} photo" loading="lazy"></a>`
+          : '<p class="business-image-empty">No photos yet</p>';
         const rating = item.averageRating == null ? 'Not rated' : Number(item.averageRating).toFixed(1);
         const ratingClass = item.averageRating == null ? 'rating unrated' : 'rating';
         return `<article class="business-card" data-business-id="${escapeHtml(item.businessId)}">
@@ -87,8 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
                   aria-label="Remove ${escapeHtml(item.name)} from saved listings" aria-pressed="true">
             <span class="bookmark-icon" aria-hidden="true">${bookmarkSvg}</span>
           </button>
-          <a href="/business/${encodeURIComponent(item.businessId)}"><img class="business-image"
-            src="${escapeHtml(image)}" alt="${escapeHtml(item.name)} photo" loading="lazy"></a>
+          ${imageContent}
         </div>
         <div class="business-content">
           <div class="business-heading"><div><p class="business-kicker">Heritage business · Approved</p>

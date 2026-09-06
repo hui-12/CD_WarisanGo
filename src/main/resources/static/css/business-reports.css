@@ -50,13 +50,67 @@ body {
 
 .report-controls {
   display: grid;
-  grid-template-columns: minmax(240px, 1fr) 180px;
+  grid-template-columns: minmax(240px, 1fr) 180px auto;
   gap: 12px;
   margin-bottom: 14px;
   padding: 14px;
   border: 1px solid #d8d5cc;
   border-radius: 8px;
   background: #fff;
+}
+.unified-report-controls {
+  grid-template-columns: minmax(240px, 1fr) 180px 190px auto;
+}
+.moderation-report-card[hidden] {
+  display: none;
+}
+.unified-report-empty {
+  margin-top: 24px;
+}
+.report-filter-clear {
+  align-self: end;
+  min-height: 36px;
+  padding: 7px 13px;
+  border: 1px solid #bdbbb4;
+  border-radius: 6px;
+  background: #fff;
+  color: var(--report-ink);
+  font: 700 11px Inter, Arial, sans-serif;
+}
+.report-filter-summary {
+  grid-column: 1 / -1;
+  min-height: 16px;
+  margin: 0;
+  color: var(--report-muted);
+  font: 400 11px Inter, Arial, sans-serif;
+}
+.report-section-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 18px;
+  margin: 28px 0 14px;
+}
+.report-section-heading h2 {
+  margin: 0;
+  font: 700 25px/1.15 Fraunces, Georgia, serif;
+}
+.report-section-heading > span {
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: var(--report-ink);
+  color: #fff;
+  font: 700 10px Inter, Arial, sans-serif;
+  white-space: nowrap;
+}
+.combined-photo-reports {
+  margin-top: 46px;
+  padding-top: 2px;
+  border-top: 1.5px solid var(--report-ink);
+  scroll-margin-top: 90px;
+}
+.combined-photo-reports .empty-state {
+  margin-top: 0;
 }
 
 .report-controls label {
@@ -397,6 +451,299 @@ body {
     sans-serif;
   border-radius: 7px;
 }
+.photo-report-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+.photo-report-card > img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-bottom: 1.5px solid var(--report-ink);
+}
+.photo-report-heading,
+.photo-report-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.photo-report-heading h2 {
+  margin: 0;
+  font: 700 18px Fraunces, Georgia, serif;
+}
+.photo-report-card p {
+  font: 12px/1.5 Inter, Arial, sans-serif;
+}
+.photo-report-actions {
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+.photo-report-actions button {
+  padding: 8px 12px;
+  border: 1px solid var(--report-ink);
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+}
+.photo-report-actions .photo-remove-button {
+  color: #fff;
+  background: #9a3232;
+}
+.admin-business-status-panel,
+.admin-business-edit-panel,
+.admin-business-photo-panel {
+  margin-bottom: 18px;
+}
+.admin-business-status-panel .report-panel-body {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+.admin-business-status-panel p {
+  margin: 0;
+  color: var(--report-muted);
+  font: 12px/1.5 Inter, Arial, sans-serif;
+}
+.admin-status-toggle,
+.admin-business-photo button {
+  padding: 9px 13px;
+  border: 1px solid var(--report-ink);
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+}
+.admin-status-toggle.is-danger,
+.admin-business-photo .photo-remove-button {
+  color: #fff;
+  background: #9a3232;
+}
+.admin-business-photo-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+.admin-business-photo {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #d8d5cc;
+  border-radius: 8px;
+  background: var(--report-bg);
+}
+.admin-business-photo.is-pinned {
+  border: 3px solid var(--report-amber);
+  box-shadow: 0 0 0 4px rgba(232, 160, 32, 0.18);
+}
+.admin-business-photo img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+}
+.admin-business-photo > div {
+  padding: 12px;
+}
+.admin-business-photo p {
+  margin: 0 0 4px;
+  font: 11px/1.4 Inter, Arial, sans-serif;
+}
+.admin-business-photo small {
+  display: block;
+  margin-bottom: 10px;
+  color: var(--report-muted);
+  overflow-wrap: anywhere;
+}
+.business-report-photos {
+  margin-top: 18px;
+}
+.manage-business-link {
+  display: block;
+  margin-top: 8px;
+}
+.business-photo-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.business-photo-actions form {
+  margin: 0;
+}
+.business-photo-actions a {
+  color: var(--report-ink);
+  font: 700 11px Inter, Arial, sans-serif;
+}
+.business-photo-actions button {
+  padding: 6px 9px;
+}
+.reported-photo-link {
+  display: block;
+}
+.review-reported-photo {
+  display: inline-block;
+  margin: 4px 0 12px;
+  color: var(--report-ink);
+  font: 700 11px Inter, Arial, sans-serif;
+}
+.business-grid .report-table-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 20px;
+  min-height: 0;
+}
+.business-grid .report-table-row > span {
+  min-width: 0;
+}
+.business-grid .report-table-row .report-view {
+  display: inline-block;
+  justify-self: start;
+  padding: 6px 11px;
+  border: 1.5px solid var(--report-ink);
+  border-radius: 6px;
+}
+.photo-report-card > .reported-photo-link img {
+  display: block;
+  width: 100%;
+  height: 220px;
+  margin-bottom: 16px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+.photo-report-status-groups {
+  display: grid;
+  gap: 22px;
+}
+.photo-report-status-group {
+  padding: 16px;
+  border: 1.5px solid var(--report-ink);
+  border-radius: 12px;
+  background: #fff;
+}
+.photo-status-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.photo-status-heading h3 {
+  margin: 0;
+  font: 700 18px Fraunces, Georgia, serif;
+}
+.photo-status-heading span {
+  min-width: 26px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--report-muted);
+  color: #fff;
+  font: 700 10px Inter, Arial, sans-serif;
+  text-align: center;
+}
+.photo-report-group-pending .photo-status-heading span {
+  background: var(--report-amber);
+}
+.photo-report-group-removed .photo-status-heading span {
+  background: #9a3232;
+}
+.photo-report-compact-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+.photo-report-row-list {
+  overflow: hidden;
+  border: 1px solid #e1ded6;
+  border-radius: 9px;
+}
+.photo-report-row.report-table-row {
+  grid-template-columns: 76px 1.25fr 1fr 0.85fr 1fr 100px minmax(150px, auto);
+  gap: 14px;
+  padding: 11px 13px;
+  background: #fff;
+}
+.photo-report-row + .photo-report-row {
+  border-top: 1px solid #e8e6e0;
+}
+.photo-report-thumbnail,
+.photo-report-row .removed-photo-placeholder {
+  width: 76px;
+  height: 58px;
+  margin: 0;
+  overflow: hidden;
+  border-radius: 6px;
+}
+.photo-report-card > .photo-report-thumbnail img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.photo-report-row-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.photo-report-row .review-reported-photo,
+.photo-report-row .photo-report-actions {
+  margin: 0;
+}
+.photo-report-row .photo-report-actions {
+  gap: 6px;
+}
+.photo-report-row .photo-report-actions button {
+  padding: 6px 8px;
+  font-size: 10px;
+}
+.photo-report-compact-grid .photo-report-card {
+  padding: 13px;
+}
+.photo-report-compact-grid .photo-report-card > .reported-photo-link img,
+.removed-photo-placeholder {
+  height: 135px;
+  margin-bottom: 11px;
+}
+.removed-photo-placeholder {
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: #eceae4;
+  color: var(--report-muted);
+  font: 700 11px Inter, Arial, sans-serif;
+  text-transform: uppercase;
+}
+.photo-report-compact-grid .photo-report-card p {
+  margin-bottom: 5px;
+  font-size: 10px;
+}
+.photo-report-compact-grid .photo-report-heading h3 {
+  font-size: 15px;
+}
+.photo-group-empty {
+  margin: 0;
+  color: var(--report-muted);
+  font-size: 11px;
+}
+.pending-page .report-detail-grid {
+  grid-template-columns: 1fr;
+}
+.pending-page .reported-business {
+  position: static;
+}
+.pending-page .report-panel {
+  border-radius: 12px;
+}
+.pinned-photo-label {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  padding: 5px 8px;
+  border-radius: 20px;
+  background: var(--report-amber);
+  color: #111;
+  font: 700 9px Inter, Arial, sans-serif;
+  text-transform: uppercase;
+}
 .report-admin-message {
   color: var(--report-green);
   background: #e8f5ee;
@@ -407,6 +754,18 @@ body {
 }
 /* Responsive layout */
 @media (max-width: 850px) {
+  .photo-report-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .admin-business-photo-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .photo-report-compact-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .photo-report-row.report-table-row {
+    grid-template-columns: 76px 1fr 1fr;
+  }
   .report-summary-grid {
     grid-template-columns: 1fr 1fr;
   }
@@ -430,6 +789,26 @@ body {
   }
 }
 @media (max-width: 560px) {
+  .photo-report-grid {
+    grid-template-columns: 1fr;
+  }
+  .admin-business-photo-grid {
+    grid-template-columns: 1fr;
+  }
+  .photo-report-compact-grid {
+    grid-template-columns: 1fr;
+  }
+  .photo-report-row.report-table-row {
+    grid-template-columns: 64px 1fr;
+  }
+  .photo-report-row-actions {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+  }
+  .admin-business-status-panel .report-panel-body {
+    align-items: flex-start;
+    flex-direction: column;
+  }
   .report-admin-page {
     padding: 22px 16px 45px;
   }
@@ -445,4 +824,15 @@ body {
   .report-table-row {
     grid-template-columns: 1fr;
   }
+  .report-section-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+.moderation-report-card[hidden],
+.photo-report-status-group[hidden],
+#correction-reports[hidden],
+#correction-reports-heading[hidden],
+#photo-reports[hidden] {
+  display: none !important;
 }

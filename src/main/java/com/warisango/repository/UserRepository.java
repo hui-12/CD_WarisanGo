@@ -6,6 +6,7 @@ import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
+import com.google.cloud.firestore.FieldValue;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.google.cloud.firestore.QuerySnapshot;
 import com.google.cloud.Timestamp;
@@ -36,11 +37,11 @@ public class UserRepository {
         this.firestore = firestore;
     }
 
-    public Optional<User> findById(String uid) {
+    public Optional<User> findById(String userId) {
         try {
             DocumentSnapshot document = firestore
                     .collection(USERS_COLLECTION)
-                    .document(uid)
+                    .document(userId)
                     .get()
                     .get();
             if (!document.exists()) {
@@ -48,12 +49,12 @@ public class UserRepository {
             }
 
             User user = document.toObject(User.class);
-            if (user != null && isBlank(user.getUid())) {
-                user.setUid(uid);
+            if (user != null && isBlank(user.getUserId())) {
+                user.setUserId(userId);
             }
             return Optional.ofNullable(user);
         } catch (Exception e) {
-            throw new FirebasePersistenceException("Failed to retrieve user: " + uid, e);
+            throw new FirebasePersistenceException("Failed to retrieve user: " + userId, e);
         }
     }
 
@@ -61,20 +62,23 @@ public class UserRepository {
         try {
             firestore
                     .collection(USERS_COLLECTION)
-                    .document(user.getUid())
+                    .document(user.getUserId())
                     .set(user)
                     .get();
         } catch (Exception e) {
-            throw new FirebasePersistenceException("Failed to save user: " + user.getUid(), e);
+            throw new FirebasePersistenceException("Failed to save user: " + user.getUserId(), e);
         }
     }
 
     public User initializeMissingProfileFields(User user) {
         try {
-            DocumentReference reference = getUserRef(user.getUid());
+            DocumentReference reference = getUserRef(user.getUserId());
             DocumentSnapshot document = reference.get().get();
             Map<String, Object> missingFields = new HashMap<>();
-            putIfMissing(document, missingFields, "uid", user.getUid());
+            putIfMissing(document, missingFields, "userId", user.getUserId());
+            if (document.contains("uid")) {
+                missingFields.put("uid", FieldValue.delete());
+            }
             putIfMissing(document, missingFields, "email", user.getEmail());
             putIfMissing(document, missingFields, "name", user.getName());
             putIfMissing(document, missingFields, "avatar", user.getAvatar());
@@ -92,29 +96,30 @@ public class UserRepository {
             if (!missingFields.isEmpty()) {
                 reference.update(missingFields).get();
                 User initializedUser = reference.get().get().toObject(User.class);
-                if (initializedUser != null && isBlank(initializedUser.getUid())) {
-                    initializedUser.setUid(user.getUid());
+                if (initializedUser != null && isBlank(initializedUser.getUserId())) {
+                    initializedUser.setUserId(user.getUserId());
                 }
                 return initializedUser;
             }
-            if (isBlank(user.getUid())) {
-                user.setUid(reference.getId());
+            if (isBlank(user.getUserId())) {
+                user.setUserId(reference.getId());
             }
             return user;
         } catch (Exception exception) {
-            throw new FirebasePersistenceException("Failed to initialize profile fields: " + user.getUid(), exception);
+            throw new FirebasePersistenceException(
+                    "Failed to initialize profile fields: " + user.getUserId(), exception);
         }
     }
 
-    public void updateProfile(String uid, String name, String gender, String aboutMe) {
+    public void updateProfile(String userId, String name, String gender, String aboutMe) {
         try {
             Map<String, Object> updates = new HashMap<>();
             updates.put("name", name);
             updates.put("gender", gender);
             updates.put("aboutMe", aboutMe);
-            getUserRef(uid).update(updates).get();
+            getUserRef(userId).update(updates).get();
         } catch (Exception exception) {
-            throw new FirebasePersistenceException("Failed to update profile: " + uid, exception);
+            throw new FirebasePersistenceException("Failed to update profile: " + userId, exception);
         }
     }
 
@@ -143,7 +148,7 @@ public class UserRepository {
 
         if (!userDocument.exists()) {
             Map<String, Object> userData = new HashMap<>();
-            userData.put("uid", userId);
+            userData.put("userId", userId);
             userData.put("totalPoints", 0L);
             userReference.set(userData).get();
             return 0;

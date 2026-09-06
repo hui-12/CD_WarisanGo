@@ -223,6 +223,14 @@
   border: 1px solid #e8e6e0;
   flex-shrink: 0;
 }
+.visit-img-empty {
+  display: grid;
+  place-items: center;
+  color: #766f65;
+  background: #eeeae1;
+  font-size: 9px;
+  text-align: center;
+}
 
 .visit-info {
   flex: 1;

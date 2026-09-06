@@ -54,7 +54,6 @@ public class SecurityConfig {
                     "/actuator/health",
                     "/directory",
                     "/business-directory",
-                    "/business/**",
                     "/map",
                     "/interactive-map/**",
                     "/sse/businesses",
@@ -66,6 +65,7 @@ public class SecurityConfig {
                     "/favicon.ico",
                     "/images/**"
                 ).permitAll()
+                .requestMatchers(HttpMethod.GET, "/business/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/challenges").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/map/**").permitAll()
                 .requestMatchers(
@@ -108,7 +108,12 @@ public class SecurityConfig {
                 writeJsonError(response, HttpStatus.FORBIDDEN, "Access denied.");
                 return;
             }
-            response.sendRedirect("/profile?error=admin");
+            if (request.getRequestURI().startsWith("/admin/")
+                    || request.getRequestURI().startsWith("/ai-discovery")) {
+                response.sendRedirect("/profile?error=admin");
+                return;
+            }
+            response.sendRedirect("/login?error=access-denied");
         };
     }
 

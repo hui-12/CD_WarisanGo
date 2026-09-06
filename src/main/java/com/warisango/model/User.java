@@ -1,9 +1,11 @@
 package com.warisango.model;
 
 import com.google.cloud.Timestamp;
+import com.google.cloud.firestore.annotation.IgnoreExtraProperties;
 
+@IgnoreExtraProperties
 public class User {
-    private String uid;
+    private String userId;
     private String email;
     private String name;
     private String avatar;
@@ -19,8 +21,8 @@ public class User {
         // Required for Firestore data mapping.
     }
 
-    public User(String uid, String email, String name, String avatar, String role) {
-        this.uid = uid;
+    public User(String userId, String email, String name, String avatar, String role) {
+        this.userId = userId;
         this.email = email;
         this.name = name;
         this.avatar = avatar;
@@ -32,12 +34,12 @@ public class User {
         this.createdAt = Timestamp.now();
     }
 
-    public String getUid() {
-        return uid;
+    public String getUserId() {
+        return userId;
     }
 
-    public void setUid(String uid) {
-        this.uid = uid;
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public String getEmail() {

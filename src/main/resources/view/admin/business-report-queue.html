@@ -2,44 +2,71 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
   <head>
     <th:block th:replace="~{fragments/fragments :: head('Business Reports — WarisanGo Admin')}"></th:block>
+    <link rel="stylesheet" th:href="@{/css/admin/admin.css}" />
+    <link rel="stylesheet" th:href="@{/css/admin/pending-list.css}" />
     <link rel="stylesheet" href="/css/business-reports.css" th:href="@{/css/business-reports.css}" />
   </head>
   <body>
     <div th:replace="~{fragments/fragments :: navbar('business-reports')}"></div>
-    <main class="report-admin-page">
-      <header class="report-page-header">
-        <p>BUSINESS MODERATION</p>
-        <h1>Business Reports</h1>
-        <p>Review corrections submitted for heritage business listings.</p>
+    <main class="container pending-page admin-workflow-page py-4">
+      <header class="page-heading">
+        <div>
+          <p class="module-eyebrow">Admin &middot; Business Moderation</p>
+          <h1>Business Reports</h1>
+          <p>Review business corrections and reported community photos in one place.</p>
+        </div>
+        <span class="pending-count"
+              th:text="|${#lists.size(reports) + #lists.size(photoReports)} reports|">0 reports</span>
       </header>
-      <section class="report-controls" th:if="${!#lists.isEmpty(reports)}" aria-label="Business report filters">
+      <p class="report-admin-message" th:if="${photoReportMessage}" th:text="${photoReportMessage}"></p>
+      <p class="report-admin-error" th:if="${photoReportError}" th:text="${photoReportError}"></p>
+
+      <div id="correction-reports-heading" class="report-section-heading">
+        <div>
+          <p class="module-eyebrow">Business Information</p>
+          <h2>Correction Reports</h2>
+        </div>
+        <span th:text="|${#lists.size(reports)} reports|">0 reports</span>
+      </div>
+      <section class="report-controls unified-report-controls"
+               th:if="${!#lists.isEmpty(reports) or !#lists.isEmpty(photoReports)}"
+               aria-label="Business report filters">
         <label>
           <span>Search</span>
           <input id="business-report-search" type="search" placeholder="Search business, user, or details" autocomplete="off" />
         </label>
         <label>
-          <span>Category</span>
-          <select id="business-report-category">
-            <option value="ALL">All categories</option>
-            <option value="PERMANENTLY_CLOSED">Permanently Closed</option>
-            <option value="INCORRECT_LOCATION">Incorrect Location</option>
-            <option value="OUTDATED_INFO">Outdated Information</option>
-            <option value="NAME_ERROR">Business Name Error</option>
-            <option value="OTHER">Other</option>
+          <span>Report type</span>
+          <select id="business-report-type">
+            <option value="ALL">All report types</option>
+            <option value="CORRECTION">Correction reports</option>
+            <option value="PHOTO">Photo reports</option>
           </select>
         </label>
+        <label>
+          <span>Status</span>
+          <select id="business-report-status">
+            <option value="ALL">All statuses</option>
+          </select>
+        </label>
+        <button id="business-report-clear" class="report-filter-clear" type="button" hidden>Clear filters</button>
+        <p id="business-report-filter-summary" class="report-filter-summary" aria-live="polite"></p>
       </section>
-      <section class="report-table-card" aria-labelledby="report-queue-title">
+      <section id="correction-reports" class="business-grid" aria-labelledby="report-queue-title">
         <h2 id="report-queue-title" class="sr-only">Report review queue</h2>
-        <div class="report-table-header">
-          <span>Business</span><span>Reported By</span><span>Reason</span><span>Reported At</span><span>Status</span
-          ><span>Action</span>
-        </div>
         <p class="report-empty" th:if="${#lists.isEmpty(reports)}">No business reports have been submitted.</p>
         <a
-          class="report-table-row"
+          class="business-card report-table-row moderation-report-card"
           th:each="report : ${reports}"
-          th:attr="data-report-category=${report.reason}"
+          th:attr="data-report-type='CORRECTION',
+                   data-report-status=${#strings.toUpperCase(#strings.trim(report.status))},
+                   data-report-search=${(report.reportedBusiness != null ? report.reportedBusiness.name : '')
+                     + ' ' + report.businessId
+                     + ' ' + (report.touristName != null ? report.touristName : '')
+                     + ' ' + report.touristId
+                     + ' ' + report.reason
+                     + ' ' + report.details
+                     + ' ' + report.status}"
           th:href="@{/admin/business-reports/{id}(id=${report.reportId})}"
         >
           <span
@@ -65,10 +92,94 @@
           >
           <span class="report-view">View</span>
         </a>
-        <p id="business-report-no-results" class="report-empty" hidden>No reports match your filters.</p>
       </section>
+
+      <section id="photo-reports" class="combined-photo-reports" aria-labelledby="photo-reports-heading">
+        <div class="report-section-heading">
+          <div>
+            <p class="module-eyebrow">Community Photos</p>
+            <h2 id="photo-reports-heading">Photo Reports</h2>
+          </div>
+          <span th:text="|${#lists.size(photoReports)} reports|">0 reports</span>
+        </div>
+        <div class="photo-report-status-groups" th:unless="${#lists.isEmpty(photoReports)}">
+          <section class="photo-report-status-group" th:each="photoGroup : ${photoReportGroups}"
+                   th:classappend="| photo-report-group-${#strings.toLowerCase(photoGroup.status)}|">
+            <div class="photo-status-heading">
+              <h3 th:text="${photoGroup.label}">Pending</h3>
+              <span th:text="${#lists.size(photoGroup.reports)}">0</span>
+            </div>
+            <div class="photo-report-row-list">
+          <article class="business-card report-table-row photo-report-row moderation-report-card"
+                   th:each="photoReport : ${photoGroup.reports}"
+                   th:attr="data-report-type='PHOTO',
+                            data-report-status=${#strings.toUpperCase(#strings.trim(photoReport.status))},
+                            data-report-search=${photoReport.businessName
+                              + ' ' + photoReport.businessId
+                              + ' ' + photoReport.uploaderName
+                              + ' ' + photoReport.reporterName
+                              + ' ' + photoReport.reason
+                              + ' ' + photoReport.details
+                              + ' ' + photoReport.status}">
+            <a class="reported-photo-link photo-report-thumbnail" th:if="${photoReport.photoAvailable}"
+               th:href="@{/admin/businesses/{id}/manage(id=${photoReport.businessId},photoId=${photoReport.photoId})}">
+              <img th:if="${photoReport.imageUrl != null}" th:src="${photoReport.imageUrl}"
+                   alt="Reported business photo" loading="lazy" />
+            </a>
+            <div class="removed-photo-placeholder photo-report-thumbnail" th:unless="${photoReport.photoAvailable}">
+              Photo removed
+            </div>
+            <span class="photo-report-business">
+              <strong th:text="${photoReport.businessName}">Business</strong>
+              <small th:text="${photoReport.businessId}">Business ID</small>
+            </span>
+            <span>
+              <strong th:text="${photoReport.reporterName}">Tourist</strong>
+              <small th:text="|Uploader: ${photoReport.uploaderName}|">Uploader</small>
+            </span>
+            <span th:text="${#strings.replace(photoReport.reason, '_', ' ')}">Reason</span>
+            <span th:text="${photoReport.reportedAtDisplay}">Date</span>
+            <span>
+              <em class="report-status" th:classappend="${#strings.toLowerCase(photoReport.status)}"
+                  th:text="${photoReport.status}">Pending</em>
+            </span>
+            <div class="photo-report-row-actions">
+              <a class="view-details review-reported-photo" th:if="${photoReport.photoAvailable}"
+                 th:href="@{/admin/businesses/{id}/manage(id=${photoReport.businessId},photoId=${photoReport.photoId})}">
+                Review
+              </a>
+              <div class="photo-report-actions" th:if="${photoReport.status == 'PENDING'}">
+                <form th:action="@{/admin/business-reports/photos/{id}/dismiss(id=${photoReport.reportId})}"
+                      method="post" data-confirm-message="Dismiss this photo report?"
+                      data-confirm-label="Dismiss Report" data-confirm-danger="true">
+                  <button type="submit">Dismiss</button>
+                </form>
+                <form th:if="${photoReport.photoAvailable}"
+                      th:action="@{/admin/business-reports/photos/{id}/remove(id=${photoReport.reportId})}"
+                      method="post" data-confirm-message="Take down this photo permanently? The stored image cannot be restored through WarisanGo."
+                      data-confirm-label="Take Down Photo" data-confirm-danger="true">
+                  <button class="photo-remove-button" type="submit">Take Down Photo</button>
+                </form>
+              </div>
+            </div>
+          </article>
+            </div>
+            <p class="photo-group-empty" th:if="${#lists.isEmpty(photoGroup.reports)}"
+               th:text="|No ${#strings.toLowerCase(photoGroup.label)} photo reports.|">No reports.</p>
+          </section>
+        </div>
+        <div class="empty-state" th:if="${#lists.isEmpty(photoReports)}">
+          <h3>No photo reports</h3>
+          <p>Reported community photos will appear here.</p>
+        </div>
+      </section>
+      <div id="business-report-no-results" class="empty-state unified-report-empty" hidden>
+        <h3>No matching reports</h3>
+        <p>No correction or photo reports match your filters.</p>
+      </div>
     </main>
     <div th:replace="~{fragments/footer :: global}"></div>
     <script src="/js/business-reports.js" th:src="@{/js/business-reports.js}" defer></script>
+    <script th:src="@{/js/admin/workflow-confirmation.js}" defer></script>
   </body>
 </html>

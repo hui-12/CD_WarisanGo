@@ -49,7 +49,7 @@ public class PointsService {
         List<LeaderboardEntryDTO> sorted = pointsRepository.findTouristsForLeaderboard().stream()
                 .map(user -> new LeaderboardEntryDTO(
                         0,
-                        user.getUid(),
+                        user.getUserId(),
                         user.getName() == null || user.getName().isBlank() ? "WarisanGo Tourist" : user.getName(),
                         user.getTotalPoints(),
                         TierCalculator.tierFor(user.getTotalPoints())))
