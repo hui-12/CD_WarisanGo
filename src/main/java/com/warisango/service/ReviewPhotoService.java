@@ -2,6 +2,7 @@ package com.warisango.service;
 
 import com.warisango.dto.ReviewDTO;
 import com.warisango.dto.ReviewPhotoDTO;
+import com.warisango.model.ReviewPhoto;
 import com.warisango.repository.ReviewPhotoRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -36,7 +37,9 @@ public class ReviewPhotoService {
             return;
         }
 
-        List<ReviewPhotoDTO> photos = reviewPhotoRepository.findByReviewId(review.getReviewId());
+        List<ReviewPhotoDTO> photos = reviewPhotoRepository.findByReviewId(review.getReviewId()).stream()
+                .map(this::toDto)
+                .toList();
         review.setPhotos(photos);
         review.setPhotoUrls(photos.stream()
                 .map(ReviewPhotoDTO::getPhotoUrl)
@@ -66,7 +69,9 @@ public class ReviewPhotoService {
             Collection<String> removePhotoIds,
             MultipartFile[] newPhotos) {
 
-        List<ReviewPhotoDTO> existingPhotos = reviewPhotoRepository.findByReviewId(reviewId);
+        List<ReviewPhotoDTO> existingPhotos = reviewPhotoRepository.findByReviewId(reviewId).stream()
+                .map(this::toDto)
+                .toList();
         Set<String> removableIds = normalizeRemovableIds(removePhotoIds, existingPhotos);
         int retainedPhotoCount = existingPhotos.size() - removableIds.size();
         List<MultipartFile> files = nonEmptyFiles(newPhotos);
@@ -97,7 +102,7 @@ public class ReviewPhotoService {
                             storedPhoto.publicUrl(),
                             storedPhoto.storagePath()
                     );
-                    reviewPhotoRepository.save(photo);
+                    reviewPhotoRepository.save(toModel(photo));
                     savedPhotos.add(photo);
                 } catch (RuntimeException e) {
                     if (storedPhoto != null) {
@@ -121,7 +126,9 @@ public class ReviewPhotoService {
 
         validatePhotoChange(reviewId, removePhotoIds, newPhotos);
 
-        List<ReviewPhotoDTO> existingPhotos = reviewPhotoRepository.findByReviewId(reviewId);
+        List<ReviewPhotoDTO> existingPhotos = reviewPhotoRepository.findByReviewId(reviewId).stream()
+                .map(this::toDto)
+                .toList();
         Set<String> removableIds = normalizeRemovableIds(removePhotoIds, existingPhotos);
 
         savePhotos(reviewId, newPhotos);
@@ -135,7 +142,9 @@ public class ReviewPhotoService {
     }
 
     public void deletePhotos(String reviewId) {
-        List<ReviewPhotoDTO> photos = reviewPhotoRepository.findByReviewId(reviewId);
+        List<ReviewPhotoDTO> photos = reviewPhotoRepository.findByReviewId(reviewId).stream()
+                .map(this::toDto)
+                .toList();
 
         for (ReviewPhotoDTO photo : photos) {
             storageService.delete(photo.getPhotoUrl(), photo.getStoragePath());
@@ -179,5 +188,18 @@ public class ReviewPhotoService {
             storageService.delete(photo.getPhotoUrl(), photo.getStoragePath());
             reviewPhotoRepository.delete(photo.getPhotoId());
         }
+    }
+
+    private ReviewPhotoDTO toDto(ReviewPhoto photo) {
+        return new ReviewPhotoDTO(photo.photoId(), photo.reviewId(), photo.photoUrl(), photo.storagePath());
+    }
+
+    private ReviewPhoto toModel(ReviewPhotoDTO photo) {
+        return new ReviewPhoto(
+                photo.getPhotoId(),
+                photo.getReviewId(),
+                photo.getPhotoUrl(),
+                photo.getStoragePath()
+        );
     }
 }

@@ -2,6 +2,7 @@ package com.warisango.service;
 
 import com.warisango.dto.ReviewDTO;
 import com.warisango.dto.HeritageBusinessDTO;
+import com.warisango.model.Review;
 import com.warisango.repository.ReviewRepository;
 import com.warisango.repository.ReviewLikeRepository;
 import org.springframework.stereotype.Service;
@@ -54,7 +55,7 @@ public class ReviewService {
      * Display all reviews.
      */
     public List<ReviewDTO> getAllReviews() {
-        List<ReviewDTO> reviews = reviewRepository.findAll();
+        List<ReviewDTO> reviews = new ArrayList<>(reviewRepository.findAll().stream().map(this::toDto).toList());
         reviews.removeIf(review -> !isVisible(review));
         reviewPhotoService.populatePhotos(reviews);
         enrichReviewerNames(reviews);
@@ -65,7 +66,8 @@ public class ReviewService {
      * Display reviews by business.
      */
     public List<ReviewDTO> getReviewsByBusiness(String businessId) {
-        List<ReviewDTO> reviews = reviewRepository.findByBusinessId(businessId);
+        List<ReviewDTO> reviews = new ArrayList<>(
+                reviewRepository.findByBusinessId(businessId).stream().map(this::toDto).toList());
         reviews.removeIf(review -> !isVisible(review));
         reviewPhotoService.populatePhotos(reviews);
         enrichReviewerNames(reviews);
@@ -76,7 +78,7 @@ public class ReviewService {
      * Display one review.
      */
     public ReviewDTO getReview(String reviewId) {
-        ReviewDTO review = reviewRepository.findByReviewId(reviewId);
+        ReviewDTO review = toDto(reviewRepository.findByReviewId(reviewId));
         if (!isVisible(review)) {
             return null;
         }
@@ -89,7 +91,7 @@ public class ReviewService {
      * Loads a review for moderation workflows, including hidden content.
      */
     public ReviewDTO getReviewIncludingHidden(String reviewId) {
-        ReviewDTO review = reviewRepository.findByReviewId(reviewId);
+        ReviewDTO review = toDto(reviewRepository.findByReviewId(reviewId));
         reviewPhotoService.populatePhotos(review);
         enrichReviewerName(review);
         return review;
@@ -132,7 +134,7 @@ public class ReviewService {
                         .toString()
         );
 
-        reviewRepository.save(review);
+        reviewRepository.save(toModel(review));
 
         try {
             reviewPhotoService.savePhotos(review.getReviewId(), photos);
@@ -160,9 +162,9 @@ public class ReviewService {
             MultipartFile[] photos) {
 
         ReviewDTO existingReview =
-                reviewRepository.findByReviewId(
+                toDto(reviewRepository.findByReviewId(
                         review.getReviewId()
-                );
+                ));
 
         if (existingReview == null) {
             return false;
@@ -189,7 +191,7 @@ public class ReviewService {
                         .toString()
         );
 
-        reviewRepository.update(review);
+        reviewRepository.update(toModel(review));
         synchronizeBusinessAverageRating(review.getBusinessId());
 
         reviewPhotoService.replacePhotos(review.getReviewId(), removePhotoIds, photos);
@@ -206,7 +208,7 @@ public class ReviewService {
     ) {
 
         ReviewDTO existingReview =
-                reviewRepository.findByReviewId(reviewId);
+                toDto(reviewRepository.findByReviewId(reviewId));
 
         if (existingReview == null) {
             return false;
@@ -233,7 +235,7 @@ public class ReviewService {
         }
 
         review.setModerationStatus("HIDDEN");
-        reviewRepository.update(review);
+        reviewRepository.update(toModel(review));
         synchronizeBusinessAverageRating(review.getBusinessId());
     }
 
@@ -244,7 +246,7 @@ public class ReviewService {
         }
 
         review.setModerationStatus("VISIBLE");
-        reviewRepository.update(review);
+        reviewRepository.update(toModel(review));
         synchronizeBusinessAverageRating(review.getBusinessId());
     }
 
@@ -297,7 +299,8 @@ public class ReviewService {
     }
 
     private void synchronizeBusinessAverageRating(String businessId) {
-        List<ReviewDTO> reviews = reviewRepository.findByBusinessId(businessId);
+        List<ReviewDTO> reviews = new ArrayList<>(
+                reviewRepository.findByBusinessId(businessId).stream().map(this::toDto).toList());
         reviews.removeIf(review -> !isVisible(review));
 
         Double averageRating = null;
@@ -417,7 +420,7 @@ public class ReviewService {
 
     private void deleteReviewLikes(String reviewId) {
         reviewLikeRepository.findByReviewId(reviewId)
-                .forEach(like -> reviewLikeRepository.delete(like.getLikeId()));
+                .forEach(like -> reviewLikeRepository.delete(like.likeId()));
     }
 
     public Map<String, Object> getBusinessInformation(String businessId) {
@@ -472,6 +475,37 @@ public class ReviewService {
 
     private boolean hasText(String value) {
         return value != null && !value.isBlank();
+    }
+
+    private Review toModel(ReviewDTO dto) {
+        Review review = new Review();
+        review.setReviewId(dto.getReviewId());
+        review.setBusinessId(dto.getBusinessId());
+        review.setTouristId(dto.getTouristId());
+        review.setReviewText(dto.getReviewText());
+        review.setRating(dto.getRating());
+        review.setModerationStatus(dto.getModerationStatus());
+        review.setCreatedAt(dto.getCreatedAt());
+        review.setUpdatedAt(dto.getUpdatedAt());
+        return review;
+    }
+
+    private ReviewDTO toDto(Review review) {
+        if (review == null) {
+            return null;
+        }
+        ReviewDTO dto = new ReviewDTO();
+        dto.setReviewId(review.getReviewId());
+        dto.setBusinessId(review.getBusinessId());
+        dto.setTouristId(review.getTouristId());
+        dto.setTouristName(review.getTouristName());
+        dto.setReviewText(review.getReviewText());
+        dto.setRating(review.getRating());
+        dto.setModerationStatus(review.getModerationStatus());
+        dto.setCreatedAt(review.getCreatedAt());
+        dto.setUpdatedAt(review.getUpdatedAt());
+        dto.setPhotoUrls(review.getPhotoUrls());
+        return dto;
     }
 
 }

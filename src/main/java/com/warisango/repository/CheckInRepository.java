@@ -7,7 +7,6 @@ import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.GeoPoint;
 import com.google.cloud.firestore.SetOptions;
 import com.warisango.model.CheckIn;
-import com.warisango.dto.CheckInRecordDTO;
 import com.warisango.util.TierCalculator;
 import org.springframework.stereotype.Repository;
 
@@ -65,15 +64,11 @@ public class CheckInRepository {
                 .toList();
     }
 
-    public List<CheckInRecordDTO> findByUserId(String touristId) {
+    public List<CheckIn> findByUserId(String touristId) {
         try {
             return firestore.collection(CHECK_INS).whereEqualTo("touristId", touristId).get().get()
                     .getDocuments().stream()
-                    .map(document -> new CheckInRecordDTO(
-                            document.getString("businessName"),
-                            numberValue(document, "pointsAwarded"),
-                            document.getTimestamp("checkInTimestamp") == null ? null
-                                    : document.getTimestamp("checkInTimestamp").toDate().toInstant()))
+                    .map(document -> document.toObject(CheckIn.class))
                     .toList();
         } catch (InterruptedException exception) {
             Thread.currentThread().interrupt();
@@ -84,7 +79,7 @@ public class CheckInRepository {
     }
 
     public int saveAndAwardPoints(String touristId, String businessId, String businessName,
-                                  GeoPoint gpsLocation, int pointsAwarded)
+                                  double latitude, double longitude, int pointsAwarded)
             throws ExecutionException, InterruptedException {
         DocumentReference userReference = firestore.collection(USERS).document(touristId);
         DocumentReference checkInReference = firestore.collection(CHECK_INS).document();
@@ -104,7 +99,7 @@ public class CheckInRepository {
             checkIn.put("businessName", businessName);
             checkIn.put("checkInId", checkInReference.getId());
             checkIn.put("checkInTimestamp", FieldValue.serverTimestamp());
-            checkIn.put("gpsLocation", gpsLocation);
+            checkIn.put("gpsLocation", new GeoPoint(latitude, longitude));
             checkIn.put("pointsAwarded", pointsAwarded);
             checkIn.put("touristId", touristId);
             transaction.set(checkInReference, checkIn);
@@ -121,8 +116,4 @@ public class CheckInRepository {
         }).get();
     }
 
-    private int numberValue(DocumentSnapshot document, String field) {
-        Number value = (Number) document.get(field);
-        return value == null ? 0 : value.intValue();
-    }
 }

@@ -1,8 +1,8 @@
 package com.warisango.service;
 
 import com.warisango.dto.CommentDTO;
-import com.warisango.dto.CommentLikeDTO;
 import com.warisango.dto.LikeStatusDTO;
+import com.warisango.model.CommentLike;
 import com.warisango.repository.CommentLikeRepository;
 import org.springframework.stereotype.Service;
 
@@ -24,24 +24,24 @@ public class CommentLikeService {
     }
 
     public LikeStatusDTO getStatus(String commentId, String touristId) {
-        List<CommentLikeDTO> likes = commentLikeRepository.findByCommentId(commentId);
-        boolean liked = likes.stream().anyMatch(like -> Objects.equals(like.getTouristId(), touristId));
+        List<CommentLike> likes = commentLikeRepository.findByCommentId(commentId);
+        boolean liked = likes.stream().anyMatch(like -> Objects.equals(like.touristId(), touristId));
         return new LikeStatusDTO(liked, likes.size());
     }
 
     public LikeStatusDTO toggleLike(String commentId, String touristId) {
-        List<CommentLikeDTO> likes = commentLikeRepository.findByCommentId(commentId);
-        CommentLikeDTO existingLike = likes.stream()
-                .filter(like -> Objects.equals(like.getTouristId(), touristId))
+        List<CommentLike> likes = commentLikeRepository.findByCommentId(commentId);
+        CommentLike existingLike = likes.stream()
+                .filter(like -> Objects.equals(like.touristId(), touristId))
                 .findFirst()
                 .orElse(null);
 
         if (existingLike != null) {
             likes.stream()
-                    .filter(like -> Objects.equals(like.getTouristId(), touristId))
-                    .forEach(like -> commentLikeRepository.delete(like.getLikeId()));
+                    .filter(like -> Objects.equals(like.touristId(), touristId))
+                    .forEach(like -> commentLikeRepository.delete(like.likeId()));
         } else {
-            commentLikeRepository.save(new CommentLikeDTO(
+            commentLikeRepository.save(new CommentLike(
                     commentLikeRepository.generateNextLikeId(),
                     commentId,
                     touristId,

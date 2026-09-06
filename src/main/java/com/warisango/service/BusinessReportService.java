@@ -1,12 +1,12 @@
 package com.warisango.service;
 
-import com.google.cloud.firestore.GeoPoint;
 import com.warisango.dto.BusinessCorrectionRequest;
 import com.warisango.dto.BusinessReportSummary;
 import com.warisango.dto.BusinessReportView;
 import com.warisango.dto.HeritageBusinessDTO;
 import com.warisango.exception.BusinessReportException;
 import com.warisango.model.BusinessReport;
+import com.warisango.model.GeoCoordinates;
 import com.warisango.repository.AdminRepository;
 import com.warisango.repository.BusinessReportRepository;
 import org.springframework.stereotype.Service;
@@ -144,7 +144,7 @@ public class BusinessReportService {
                 if (latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) {
                     throw new IllegalArgumentException("Location coordinates are outside the valid range.");
                 }
-                corrections.put("location", new GeoPoint(latitude, longitude));
+                corrections.put("location", new GeoCoordinates(latitude, longitude));
             } catch (NumberFormatException exception) {
                 throw new IllegalArgumentException("Location coordinates must be numbers.");
             }

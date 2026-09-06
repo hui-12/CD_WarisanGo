@@ -2,6 +2,7 @@ package com.warisango.service;
 
 import com.warisango.dto.CommentDTO;
 import com.warisango.dto.ReviewDTO;
+import com.warisango.model.Comment;
 import com.warisango.repository.CommentLikeRepository;
 import com.warisango.repository.CommentRepository;
 import org.springframework.stereotype.Service;
@@ -40,6 +41,7 @@ public class CommentService {
 
     public List<CommentDTO> getCommentsByReview(String reviewId) {
         List<CommentDTO> comments = commentRepository.findByReviewId(reviewId).stream()
+                .map(this::toDto)
                 .filter(this::isVisible)
                 .toList();
         enrichDisplayNames(comments);
@@ -47,7 +49,7 @@ public class CommentService {
     }
 
     public List<CommentDTO> getCommentsByReviewIncludingHidden(String reviewId) {
-        List<CommentDTO> comments = commentRepository.findByReviewId(reviewId);
+        List<CommentDTO> comments = commentRepository.findByReviewId(reviewId).stream().map(this::toDto).toList();
         enrichDisplayNames(comments);
         return comments;
     }
@@ -74,13 +76,13 @@ public class CommentService {
     }
 
     public CommentDTO getComment(String commentId) {
-        CommentDTO comment = commentRepository.findByCommentId(commentId);
+        CommentDTO comment = toDto(commentRepository.findByCommentId(commentId));
         enrichDisplayNames(comment == null ? List.of() : List.of(comment));
         return isVisible(comment) ? comment : null;
     }
 
     public CommentDTO getCommentIncludingHidden(String commentId) {
-        CommentDTO comment = commentRepository.findByCommentId(commentId);
+        CommentDTO comment = toDto(commentRepository.findByCommentId(commentId));
         enrichDisplayNames(comment == null ? List.of() : List.of(comment));
         return comment;
     }
@@ -102,11 +104,11 @@ public class CommentService {
         comment.setCreatedAt(LocalDateTime.now().toLocalDate().toString());
         comment.setUpdatedAt(LocalDateTime.now().toLocalDate().toString());
 
-        commentRepository.save(comment);
+        commentRepository.save(toModel(comment));
     }
 
     public boolean updateComment(CommentDTO submittedComment, String currentUserId) {
-        CommentDTO existingComment = commentRepository.findByCommentId(submittedComment.getCommentId());
+        CommentDTO existingComment = toDto(commentRepository.findByCommentId(submittedComment.getCommentId()));
 
         if (existingComment == null || !isCommentOwner(existingComment, currentUserId)) {
             return false;
@@ -123,12 +125,12 @@ public class CommentService {
         submittedComment.setCreatedAt(existingComment.getCreatedAt());
         submittedComment.setUpdatedAt(LocalDateTime.now().toLocalDate().toString());
 
-        commentRepository.update(submittedComment);
+        commentRepository.update(toModel(submittedComment));
         return true;
     }
 
     public boolean deleteComment(String commentId, String currentUserId) {
-        CommentDTO existingComment = commentRepository.findByCommentId(commentId);
+        CommentDTO existingComment = toDto(commentRepository.findByCommentId(commentId));
 
         if (existingComment == null || !isCommentOwner(existingComment, currentUserId)) {
             return false;
@@ -146,7 +148,7 @@ public class CommentService {
         }
 
         comment.setModerationStatus("HIDDEN");
-        commentRepository.update(comment);
+        commentRepository.update(toModel(comment));
     }
 
     public void restoreComment(String commentId) {
@@ -156,7 +158,7 @@ public class CommentService {
         }
 
         comment.setModerationStatus("VISIBLE");
-        commentRepository.update(comment);
+        commentRepository.update(toModel(comment));
     }
 
     public void deleteCommentByAdmin(String commentId) {
@@ -170,8 +172,8 @@ public class CommentService {
     }
 
     public void deleteCommentsForReview(String reviewId) {
-        for (CommentDTO comment : commentRepository.findByReviewId(reviewId)) {
-            deleteCommentByAdmin(comment.getCommentId());
+        for (Comment comment : commentRepository.findByReviewId(reviewId)) {
+            deleteCommentByAdmin(comment.commentId());
         }
     }
 
@@ -185,7 +187,7 @@ public class CommentService {
 
     private void deleteCommentLikes(String commentId) {
         commentLikeRepository.findByCommentId(commentId)
-                .forEach(like -> commentLikeRepository.delete(like.getLikeId()));
+                .forEach(like -> commentLikeRepository.delete(like.likeId()));
     }
 
     private void applyReplyTarget(CommentDTO comment, String requestedReplyId) {
@@ -195,7 +197,7 @@ public class CommentService {
             return;
         }
 
-        CommentDTO replyTarget = commentRepository.findByCommentId(requestedReplyId);
+        CommentDTO replyTarget = toDto(commentRepository.findByCommentId(requestedReplyId));
         if (replyTarget == null
                 || !Objects.equals(replyTarget.getReviewId(), comment.getReviewId())
                 || !isVisible(replyTarget)) {
@@ -227,7 +229,7 @@ public class CommentService {
             return null;
         }
 
-        CommentDTO replyTarget = commentRepository.findByCommentId(comment.getReplyToCommentId());
+        CommentDTO replyTarget = toDto(commentRepository.findByCommentId(comment.getReplyToCommentId()));
         return replyTarget == null
                 ? comment.getReplyToTouristName()
                 : displayName(replyTarget);
@@ -260,5 +262,29 @@ public class CommentService {
                 comment.setReplyToTouristName(replyTargetName(comment));
             }
         }
+    }
+
+    private Comment toModel(CommentDTO comment) {
+        return new Comment(
+                comment.getCommentId(), comment.getReviewId(), comment.getTouristId(), comment.getCommentText(),
+                comment.getReplyToCommentId(), comment.getReplyToTouristName(), comment.getCreatedAt(),
+                comment.getUpdatedAt(), comment.getModerationStatus());
+    }
+
+    private CommentDTO toDto(Comment comment) {
+        if (comment == null) {
+            return null;
+        }
+        CommentDTO dto = new CommentDTO();
+        dto.setCommentId(comment.commentId());
+        dto.setReviewId(comment.reviewId());
+        dto.setTouristId(comment.touristId());
+        dto.setCommentText(comment.commentText());
+        dto.setReplyToCommentId(comment.replyToCommentId());
+        dto.setReplyToTouristName(comment.replyToTouristName());
+        dto.setCreatedAt(comment.createdAt());
+        dto.setUpdatedAt(comment.updatedAt());
+        dto.setModerationStatus(comment.moderationStatus());
+        return dto;
     }
 }

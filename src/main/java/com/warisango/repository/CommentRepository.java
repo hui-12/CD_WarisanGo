@@ -9,7 +9,7 @@ import com.google.cloud.firestore.FieldValue;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.google.cloud.firestore.QuerySnapshot;
-import com.warisango.dto.CommentDTO;
+import com.warisango.model.Comment;
 import com.warisango.util.ReviewDateFormatter;
 import org.springframework.stereotype.Repository;
 
@@ -32,8 +32,8 @@ public class CommentRepository {
         this.firestore = firestore;
     }
 
-    public List<CommentDTO> findByReviewId(String reviewId) {
-        List<CommentDTO> comments = new ArrayList<>();
+    public List<Comment> findByReviewId(String reviewId) {
+        List<Comment> comments = new ArrayList<>();
 
         try {
             ApiFuture<QuerySnapshot> future = firestore
@@ -51,7 +51,7 @@ public class CommentRepository {
         }
     }
 
-    public CommentDTO findByCommentId(String commentId) {
+    public Comment findByCommentId(String commentId) {
         try {
             DocumentSnapshot document = firestore
                     .collection(COLLECTION)
@@ -65,35 +65,35 @@ public class CommentRepository {
         }
     }
 
-    public void save(CommentDTO comment) {
-        if (comment == null || comment.getCommentId() == null || comment.getCommentId().isBlank()) {
+    public void save(Comment comment) {
+        if (comment == null || comment.commentId() == null || comment.commentId().isBlank()) {
             throw new IllegalArgumentException("Comment ID cannot be empty.");
         }
 
         try {
             DocumentReference document = firestore
                     .collection(COLLECTION)
-                    .document(comment.getCommentId());
+                    .document(comment.commentId());
 
             document.set(convertCommentToDocument(comment)).get();
         } catch (Exception e) {
-            throw new FirebasePersistenceException("Failed to save comment: " + comment.getCommentId(), e);
+            throw new FirebasePersistenceException("Failed to save comment: " + comment.commentId(), e);
         }
     }
 
-    public void update(CommentDTO comment) {
-        if (comment == null || comment.getCommentId() == null || comment.getCommentId().isBlank()) {
+    public void update(Comment comment) {
+        if (comment == null || comment.commentId() == null || comment.commentId().isBlank()) {
             throw new IllegalArgumentException("Comment ID cannot be empty.");
         }
 
         try {
             firestore
                     .collection(COLLECTION)
-                    .document(comment.getCommentId())
+                    .document(comment.commentId())
                     .update(convertCommentToUpdateDocument(comment))
                     .get();
         } catch (Exception e) {
-            throw new FirebasePersistenceException("Failed to update comment: " + comment.getCommentId(), e);
+            throw new FirebasePersistenceException("Failed to update comment: " + comment.commentId(), e);
         }
     }
 
@@ -109,53 +109,50 @@ public class CommentRepository {
         return firestore.collection(COLLECTION).document().getId();
     }
 
-    private CommentDTO convertDocumentToComment(DocumentSnapshot document) {
-        CommentDTO comment = new CommentDTO();
-        comment.setCommentId(getString(document, "commentId"));
-        comment.setReviewId(getString(document, "reviewId"));
-        comment.setTouristId(getString(document, "touristId"));
-        // CommentService resolves this Firebase user UID through the users collection.
-        comment.setTouristName(comment.getTouristId());
-        comment.setCommentText(getString(document, "commentText"));
-        comment.setReplyToCommentId(getString(document, "replyToCommentId"));
-        comment.setReplyToTouristName(getString(document, "replyToTouristName"));
-        comment.setModerationStatus(getString(document, "moderationStatus"));
-        comment.setCreatedAt(ReviewDateFormatter.format(document.get("createdAt")));
-        comment.setUpdatedAt(ReviewDateFormatter.format(document.get("updatedAt")));
-        return comment;
+    private Comment convertDocumentToComment(DocumentSnapshot document) {
+        return new Comment(
+                getString(document, "commentId"),
+                getString(document, "reviewId"),
+                getString(document, "touristId"),
+                getString(document, "commentText"),
+                getString(document, "replyToCommentId"),
+                getString(document, "replyToTouristName"),
+                ReviewDateFormatter.format(document.get("createdAt")),
+                ReviewDateFormatter.format(document.get("updatedAt")),
+                getString(document, "moderationStatus"));
     }
 
-    private Map<String, Object> convertCommentToDocument(CommentDTO comment) {
+    private Map<String, Object> convertCommentToDocument(Comment comment) {
         Map<String, Object> data = new HashMap<>();
-        data.put("commentId", comment.getCommentId());
-        data.put("reviewId", comment.getReviewId());
-        data.put("touristId", comment.getTouristId());
-        data.put("commentText", comment.getCommentText());
-        data.put("moderationStatus", comment.getModerationStatus());
+        data.put("commentId", comment.commentId());
+        data.put("reviewId", comment.reviewId());
+        data.put("touristId", comment.touristId());
+        data.put("commentText", comment.commentText());
+        data.put("moderationStatus", comment.moderationStatus());
         addReplyFields(data, comment);
         data.put("createdAt", FieldValue.serverTimestamp());
         data.put("updatedAt", FieldValue.serverTimestamp());
         return data;
     }
 
-    private Map<String, Object> convertCommentToUpdateDocument(CommentDTO comment) {
+    private Map<String, Object> convertCommentToUpdateDocument(Comment comment) {
         Map<String, Object> data = new HashMap<>();
-        data.put("commentId", comment.getCommentId());
-        data.put("reviewId", comment.getReviewId());
-        data.put("touristId", comment.getTouristId());
-        data.put("commentText", comment.getCommentText());
-        data.put("moderationStatus", comment.getModerationStatus());
+        data.put("commentId", comment.commentId());
+        data.put("reviewId", comment.reviewId());
+        data.put("touristId", comment.touristId());
+        data.put("commentText", comment.commentText());
+        data.put("moderationStatus", comment.moderationStatus());
         addReplyFields(data, comment);
         data.put("updatedAt", FieldValue.serverTimestamp());
         return data;
     }
 
-    private void addReplyFields(Map<String, Object> data, CommentDTO comment) {
-        if (comment.getReplyToCommentId() != null && !comment.getReplyToCommentId().isBlank()) {
-            data.put("replyToCommentId", comment.getReplyToCommentId());
+    private void addReplyFields(Map<String, Object> data, Comment comment) {
+        if (comment.replyToCommentId() != null && !comment.replyToCommentId().isBlank()) {
+            data.put("replyToCommentId", comment.replyToCommentId());
         }
-        if (comment.getReplyToTouristName() != null && !comment.getReplyToTouristName().isBlank()) {
-            data.put("replyToTouristName", comment.getReplyToTouristName());
+        if (comment.replyToTouristName() != null && !comment.replyToTouristName().isBlank()) {
+            data.put("replyToTouristName", comment.replyToTouristName());
         }
     }
 

@@ -3,6 +3,7 @@ package com.warisango.service;
 import com.warisango.dto.CommentDTO;
 import com.warisango.dto.ReportDTO;
 import com.warisango.dto.ReviewDTO;
+import com.warisango.model.ContentReport;
 import com.warisango.repository.AdminRepository;
 import com.warisango.repository.ReportRepository;
 import org.springframework.stereotype.Service;
@@ -87,12 +88,12 @@ public class ReportService {
             }
         }
 
-        reportRepository.save(report);
+        reportRepository.save(toModel(report));
         return report;
     }
 
     public List<ReportDTO> getAllReports() {
-        List<ReportDTO> reports = reportRepository.findAll();
+        List<ReportDTO> reports = reportRepository.findAll().stream().map(this::toDto).toList();
         reports.forEach(this::enrichReport);
 
         return reports.stream()
@@ -105,7 +106,7 @@ public class ReportService {
     }
 
     public ReportDTO getReport(String reportId) {
-        ReportDTO report = reportRepository.findByReportId(reportId);
+        ReportDTO report = toDto(reportRepository.findByReportId(reportId));
         if (report != null) {
             enrichReport(report);
         }
@@ -179,7 +180,7 @@ public class ReportService {
         report.setStatus(status);
         report.setResolvedBy(getCurrentModerationAdminId(currentUserId));
         report.setResolvedAt(LocalDateTime.now().toString());
-        reportRepository.update(report);
+        reportRepository.update(toModel(report));
     }
 
     public String getCurrentModerationAdminId(String currentUserId) {
@@ -188,7 +189,7 @@ public class ReportService {
     }
 
     private ReportDTO requireReport(String reportId) {
-        ReportDTO report = reportRepository.findByReportId(reportId);
+        ReportDTO report = toDto(reportRepository.findByReportId(reportId));
         if (report == null) {
             throw new IllegalArgumentException("Report was not found.");
         }
@@ -256,5 +257,32 @@ public class ReportService {
             report.setTargetText(comment.getCommentText());
             report.setTargetOwnerId(comment.getTouristId());
         }
+    }
+
+    private ContentReport toModel(ReportDTO report) {
+        return new ContentReport(
+                report.getReportId(), report.getReporterTouristId(), report.getTargetType(), report.getReviewId(),
+                report.getCommentId(), report.getReason(), report.getStatus(), report.getCreatedAt(),
+                report.getResolvedBy(), report.getResolvedAt());
+    }
+
+    private ReportDTO toDto(ContentReport report) {
+        if (report == null) {
+            return null;
+        }
+        ReportDTO dto = new ReportDTO();
+        dto.setReportId(report.reportId());
+        dto.setReporterTouristId(report.reporterTouristId());
+        dto.setTargetType(report.targetType());
+        dto.setReviewId(report.reviewId());
+        dto.setCommentId(report.commentId());
+        dto.setReason(report.reason());
+        dto.setStatus(report.status());
+        dto.setCreatedAt(report.createdAt());
+        dto.setCreatedAtDisplay(com.warisango.util.ReviewDateFormatter.format(report.createdAt()));
+        dto.setResolvedBy(report.resolvedBy());
+        dto.setResolvedAt(report.resolvedAt());
+        dto.setResolvedAtDisplay(com.warisango.util.ReviewDateFormatter.format(report.resolvedAt()));
+        return dto;
     }
 }

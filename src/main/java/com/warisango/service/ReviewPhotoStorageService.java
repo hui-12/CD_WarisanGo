@@ -1,12 +1,8 @@
 package com.warisango.service;
 
-import com.google.cloud.storage.Blob;
-import com.google.cloud.storage.Bucket;
-import com.google.firebase.FirebaseApp;
-import com.google.firebase.cloud.StorageClient;
+import com.warisango.repository.FirebaseStorageRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,7 +12,6 @@ import java.io.InputStream;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -39,24 +34,13 @@ public class ReviewPhotoStorageService {
     private static final String FIREBASE_DOWNLOAD_URL_PREFIX =
             "https://firebasestorage.googleapis.com/v0/b/";
 
-    private final Bucket bucket;
+    private final FirebaseStorageRepository storageRepository;
     private final long maxPhotoBytes;
 
     public ReviewPhotoStorageService(
-            ObjectProvider<FirebaseApp> firebaseAppProvider,
-            @Value("${warisango.firebase.storage-bucket}") String bucketName,
+            FirebaseStorageRepository storageRepository,
             @Value("${warisango.review.max-photo-size-bytes:10485760}") long maxPhotoBytes) {
-
-        FirebaseApp firebaseApp = firebaseAppProvider.getIfAvailable();
-        if (firebaseApp == null) {
-            this.bucket = null;
-        } else {
-            StorageClient storageClient = StorageClient.getInstance(firebaseApp);
-            this.bucket = bucketName == null || bucketName.isBlank()
-                    ? storageClient.bucket()
-                    : storageClient.bucket(bucketName);
-        }
-
+        this.storageRepository = storageRepository;
         this.maxPhotoBytes = maxPhotoBytes;
     }
 
@@ -136,8 +120,6 @@ public class ReviewPhotoStorageService {
             String contentType,
             String extension) {
 
-        ensureFirebaseStorageConfigured();
-
         String safeOwnerId = ownerId == null || ownerId.isBlank()
                 ? "unknown-owner"
                 : ownerId.replaceAll("[^a-zA-Z0-9_-]", "_");
@@ -149,54 +131,29 @@ public class ReviewPhotoStorageService {
                 + extension;
         String downloadToken = UUID.randomUUID().toString();
 
-        Blob blob = null;
         try {
-            blob = bucket.create(storagePath, inputStream, contentType);
-
-            Map<String, String> metadata = new HashMap<>();
-            metadata.put("firebaseStorageDownloadTokens", downloadToken);
-            blob.toBuilder()
-                    .setMetadata(metadata)
-                    .build()
-                    .update();
-
+            storageRepository.upload(storagePath, inputStream, contentType, downloadToken);
             logger.info("Stored review photo in Firebase Storage: path={}, size={} bytes",
                     storagePath, fileSize);
             return new StoredPhoto(storagePath, buildDownloadUrl(storagePath, downloadToken));
-        } catch (RuntimeException e) {
-            if (blob != null) {
-                try {
-                    blob.delete();
-                } catch (RuntimeException cleanupException) {
-                    logger.warn("Could not clean up failed Firebase review photo upload: {}",
-                            storagePath, cleanupException);
-                }
-            }
-            throw new IllegalStateException("Could not store review photo in Firebase Storage.", e);
+        } catch (RuntimeException exception) {
+            throw new IllegalStateException("Could not store review photo in Firebase Storage.", exception);
         }
     }
 
     private void deleteFirebaseObject(String storagePath, String photoUrl) {
-        if (bucket == null) {
+        if (!storageRepository.isConfigured()) {
             logger.warn("Firebase Storage is not configured; skipped delete for {}", photoUrl);
             return;
         }
-
-        try {
-            Blob blob = bucket.get(storagePath);
-            if (blob != null) {
-                blob.delete();
-            }
-        } catch (RuntimeException e) {
-            logger.warn("Could not delete Firebase review photo: {}", storagePath, e);
-        }
+        storageRepository.delete(storagePath);
     }
 
     private String buildDownloadUrl(String storagePath, String downloadToken) {
         String encodedPath = URLEncoder.encode(storagePath, StandardCharsets.UTF_8)
                 .replace("+", "%20");
         return FIREBASE_DOWNLOAD_URL_PREFIX
-                + bucket.getName()
+                + storageRepository.getBucketName()
                 + "/o/"
                 + encodedPath
                 + "?alt=media&token="
@@ -204,11 +161,11 @@ public class ReviewPhotoStorageService {
     }
 
     private String extractFirebaseStoragePath(String photoUrl) {
-        if (photoUrl == null || bucket == null) {
+        if (photoUrl == null || !storageRepository.isConfigured()) {
             return null;
         }
 
-        String prefix = FIREBASE_DOWNLOAD_URL_PREFIX + bucket.getName() + "/o/";
+        String prefix = FIREBASE_DOWNLOAD_URL_PREFIX + storageRepository.getBucketName() + "/o/";
         if (!photoUrl.startsWith(prefix)) {
             return null;
         }
@@ -224,14 +181,6 @@ public class ReviewPhotoStorageService {
         } catch (IllegalArgumentException e) {
             logger.warn("Could not decode Firebase review photo URL: {}", photoUrl, e);
             return null;
-        }
-    }
-
-    private void ensureFirebaseStorageConfigured() {
-        if (bucket == null) {
-            throw new IllegalStateException(
-                    "Firebase Storage is not configured. Enable Firebase and configure the service account."
-            );
         }
     }
 

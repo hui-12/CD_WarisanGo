@@ -3,11 +3,13 @@ package com.warisango.service;
 import com.warisango.dto.LeaderboardEntryDTO;
 import com.warisango.dto.PointHistoryDTO;
 import com.warisango.repository.PointsRepository;
+import com.warisango.util.TierCalculator;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class PointsService {
@@ -29,6 +31,13 @@ public class PointsService {
 
     public List<PointHistoryDTO> getHistory(String userId) throws Exception {
         return pointsRepository.findHistory(userId).stream()
+                .map(history -> new PointHistoryDTO(
+                        history.transactionId(),
+                        history.activityType(),
+                        null,
+                        history.pointsEarned(),
+                        history.activityDate(),
+                        history.relatedChallengeId()))
                 .map(this::withDescription)
                 .sorted(Comparator.comparing(
                         PointHistoryDTO::timestamp,
@@ -38,6 +47,12 @@ public class PointsService {
 
     public List<LeaderboardEntryDTO> getLeaderboard() throws Exception {
         List<LeaderboardEntryDTO> sorted = pointsRepository.findTouristsForLeaderboard().stream()
+                .map(user -> new LeaderboardEntryDTO(
+                        0,
+                        user.getUid(),
+                        user.getName() == null || user.getName().isBlank() ? "WarisanGo Tourist" : user.getName(),
+                        user.getTotalPoints(),
+                        TierCalculator.tierFor(user.getTotalPoints())))
                 .sorted(Comparator.comparingInt(LeaderboardEntryDTO::points).reversed()
                         .thenComparing(LeaderboardEntryDTO::name, String.CASE_INSENSITIVE_ORDER))
                 .toList();
@@ -46,6 +61,12 @@ public class PointsService {
             ranked.add(sorted.get(index).withRank(index + 1));
         }
         return ranked;
+    }
+
+    public Optional<LeaderboardEntryDTO> getLeaderboardEntry(String userId) throws Exception {
+        return getLeaderboard().stream()
+                .filter(entry -> entry.userId().equals(userId))
+                .findFirst();
     }
 
     private PointHistoryDTO withDescription(PointHistoryDTO history) {

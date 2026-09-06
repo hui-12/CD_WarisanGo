@@ -53,9 +53,7 @@ public class PointsController {
     @GetMapping("/leaderboard/me")
     public ResponseEntity<LeaderboardEntryDTO> getCurrentRank(Authentication authentication) {
         try {
-            return pointsService.getLeaderboard().stream()
-                    .filter(entry -> entry.userId().equals(authentication.getName()))
-                    .findFirst()
+            return pointsService.getLeaderboardEntry(authentication.getName())
                     .map(ResponseEntity::ok)
                     .orElseGet(() -> ResponseEntity.notFound().build());
         } catch (Exception exception) {

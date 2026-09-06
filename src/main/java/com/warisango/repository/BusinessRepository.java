@@ -10,10 +10,9 @@ import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.google.cloud.firestore.QuerySnapshot;
 import com.google.cloud.firestore.WriteBatch;
-import com.warisango.dto.HeritageBusinessUpdateRequest;
-import com.warisango.dto.HeritageBusinessDTO;
 import com.warisango.exception.FirebasePersistenceException;
 import com.warisango.model.HeritageBusiness;
+import com.warisango.model.GeoCoordinates;
 import org.springframework.stereotype.Repository;
 
 import java.time.Instant;
@@ -74,25 +73,25 @@ public class BusinessRepository {
             }
             document = matches.getDocuments().get(0);
         }
-        document.getReference().update(corrections).get();
+        Map<String, Object> firestoreUpdates = new LinkedHashMap<>(corrections);
+        Object location = firestoreUpdates.get("location");
+        if (location instanceof GeoCoordinates coordinates) {
+            firestoreUpdates.put("location", new GeoPoint(coordinates.latitude(), coordinates.longitude()));
+        }
+        document.getReference().update(firestoreUpdates).get();
     }
 
-    public List<HeritageBusinessDTO> findApprovedBusinesses() throws ExecutionException, InterruptedException {
+    public List<HeritageBusiness> findApprovedBusinesses() throws ExecutionException, InterruptedException {
         ApiFuture<QuerySnapshot> future = firestore.collection(COLLECTION_NAME).get();
 
         List<QueryDocumentSnapshot> documents = future.get().getDocuments();
-        List<HeritageBusinessDTO> list = new ArrayList<>();
+        List<HeritageBusiness> list = new ArrayList<>();
 
         for (QueryDocumentSnapshot doc : documents) {
             if (!isApproved(doc)) {
                 continue;
             }
-            GeoPoint geoPoint = doc.getGeoPoint("location");
-            double lat = geoPoint != null ? geoPoint.getLatitude() : 0.0;
-            double lng = geoPoint != null ? geoPoint.getLongitude() : 0.0;
-
-            HeritageBusinessDTO dto = toDto(doc, lat, lng);
-            list.add(dto);
+            list.add(toHeritageBusiness(doc));
         }
         return list;
     }
@@ -101,7 +100,7 @@ public class BusinessRepository {
      * Loads one approved business for Review pages.
      * The normal Firestore document ID is used first, with a businessId field query as a fallback.
      */
-    public HeritageBusinessDTO findByBusinessId(String businessId)
+    public HeritageBusiness findByBusinessId(String businessId)
             throws ExecutionException, InterruptedException {
         if (businessId == null || businessId.isBlank()) {
             return null;
@@ -130,35 +129,31 @@ public class BusinessRepository {
             return null;
         }
 
-        return toBusinessDTO(document);
+        return toHeritageBusiness(document);
     }
 
     // Real-time Firestore Snapshot Listener
-    public ListenerRegistration addApprovedBusinessesListener(Consumer<List<HeritageBusinessDTO>> callback) {
-        return firestore.collection(COLLECTION_NAME)
+    public Runnable addApprovedBusinessesListener(Consumer<List<HeritageBusiness>> callback) {
+        ListenerRegistration registration = firestore.collection(COLLECTION_NAME)
                 .addSnapshotListener((snapshots, e) -> {
                     if (e != null || snapshots == null) {
                         return;
                     }
 
-                    List<HeritageBusinessDTO> list = new ArrayList<>();
+                    List<HeritageBusiness> list = new ArrayList<>();
                     for (QueryDocumentSnapshot doc : snapshots) {
                         if (!isApproved(doc)) {
                             continue;
                         }
-                        GeoPoint geoPoint = doc.getGeoPoint("location");
-                        double lat = geoPoint != null ? geoPoint.getLatitude() : 0.0;
-                        double lng = geoPoint != null ? geoPoint.getLongitude() : 0.0;
-
-                        HeritageBusinessDTO dto = toDto(doc, lat, lng);
-                        list.add(dto);
+                        list.add(toHeritageBusiness(doc));
                     }
                     callback.accept(list);
         });
+        return registration::remove;
     }
 
     // Find single business by document id
-    public Optional<HeritageBusinessDTO> findById(String id) {
+    public Optional<HeritageBusiness> findById(String id) {
         try {
             DocumentSnapshot doc = firestore.collection(COLLECTION_NAME).document(id).get().get();
             if (doc == null || !doc.exists()) {
@@ -168,13 +163,7 @@ public class BusinessRepository {
                 return Optional.empty();
             }
 
-            GeoPoint geoPoint = doc.getGeoPoint("location");
-            double lat = geoPoint != null ? geoPoint.getLatitude() : 0.0;
-            double lng = geoPoint != null ? geoPoint.getLongitude() : 0.0;
-
-            HeritageBusinessDTO dto = toDto(doc, lat, lng);
-
-            return Optional.of(dto);
+            return Optional.of(toHeritageBusiness(doc));
         } catch (InterruptedException exception) {
             Thread.currentThread().interrupt();
             throw new FirebasePersistenceException("Loading the heritage business was interrupted.", exception);
@@ -183,49 +172,9 @@ public class BusinessRepository {
         }
     }
 
-    private HeritageBusinessDTO toDto(DocumentSnapshot doc, double latitude, double longitude) {
-        HeritageBusinessDTO dto = new HeritageBusinessDTO(
-                doc.getId(),
-                doc.getString("name"),
-                doc.getString("address"),
-                doc.getString("state"),
-                doc.getString("city"),
-                doc.getString("description"),
-                latitude,
-                longitude,
-                doc.getDouble("averageRating"),
-                getCheckInPoints(doc)
-        );
-        dto.setSourceVideoLink(doc.getString("sourceVideoLink"));
-        dto.setOperatingHour(doc.getString("operatingHour"));
-        if (doc.getTimestamp("createdAt") != null) {
-            dto.setCreatedAt(doc.getTimestamp("createdAt").toDate().toInstant());
-        }
-        if (doc.getTimestamp("approveAt") != null) {
-            dto.setApproveAt(doc.getTimestamp("approveAt").toDate().toInstant());
-        }
-        if (doc.getTimestamp("rejectedAt") != null) {
-            dto.setRejectedAt(doc.getTimestamp("rejectedAt").toDate().toInstant());
-        }
-
-        return dto;
-    }
-
     private boolean isApproved(DocumentSnapshot document) {
         String status = document.getString("status");
         return status != null && "approved".equalsIgnoreCase(status.trim());
-    }
-
-    private HeritageBusinessDTO toBusinessDTO(DocumentSnapshot document) {
-        GeoPoint geoPoint = document.getGeoPoint("location");
-        double lat = geoPoint != null ? geoPoint.getLatitude() : 0.0;
-        double lng = geoPoint != null ? geoPoint.getLongitude() : 0.0;
-        return toDto(document, lat, lng);
-    }
-
-    private int getCheckInPoints(DocumentSnapshot doc) {
-        Long points = doc.getLong("checkInPoints");
-        return points != null && points > 0 ? points.intValue() : 50;
     }
 
     public List<HeritageBusiness> findByStatus(String status) {
@@ -273,27 +222,27 @@ public class BusinessRepository {
         updateReviewStatus(businessId, "Rejected", "rejectedAt");
     }
 
-    public void updateBusiness(String businessId, HeritageBusinessUpdateRequest request) {
+    public void updateBusiness(String businessId, HeritageBusiness business) {
         Map<String, Object> updates = new LinkedHashMap<>();
-        updates.put("name", nullIfBlank(request.getName()));
-        updates.put("address", nullIfBlank(request.getAddress()));
-        updates.put("state", nullIfBlank(request.getState()));
-        updates.put("city", nullIfBlank(request.getCity()));
-        updates.put("description", nullIfBlank(request.getDescription()));
-        updates.put("location", toGeoPoint(request.getLatitude(), request.getLongitude()));
-        updates.put("operatingHour", nullIfBlank(request.getOperatingHour()));
-        updates.put("averageRating", request.getAverageRating());
-        updates.put("checkInPoints", request.getCheckInPoints() == null ? 50 : request.getCheckInPoints());
-        updates.put("sourceVideoLink", nullIfBlank(request.getSourceVideoLink()));
+        updates.put("name", nullIfBlank(business.name()));
+        updates.put("address", nullIfBlank(business.address()));
+        updates.put("state", nullIfBlank(business.state()));
+        updates.put("city", nullIfBlank(business.city()));
+        updates.put("description", nullIfBlank(business.description()));
+        updates.put("location", toGeoPoint(business.latitude(), business.longitude()));
+        updates.put("operatingHour", nullIfBlank(business.operatingHour()));
+        updates.put("averageRating", business.averageRating());
+        updates.put("checkInPoints", business.checkInPoints() == null ? 50 : business.checkInPoints());
+        updates.put("sourceVideoLink", nullIfBlank(business.sourceVideoLink()));
         executeUpdate(businessId, updates, "update the heritage business");
     }
 
-    public void saveAll(List<Map<String, Object>> businesses) {
+    public void saveAll(List<HeritageBusiness> businesses) {
         try {
             WriteBatch batch = firestore.batch();
-            for (Map<String, Object> business : businesses) {
+            for (HeritageBusiness business : businesses) {
                 DocumentReference document = firestore.collection(COLLECTION_NAME).document();
-                Map<String, Object> storedBusiness = new LinkedHashMap<>(business);
+                Map<String, Object> storedBusiness = toCreateDocument(business);
                 String businessId = document.getId();
                 storedBusiness.put("businessId", businessId);
                 storedBusiness.put("createdAt", FieldValue.serverTimestamp());
@@ -306,6 +255,24 @@ public class BusinessRepository {
         } catch (Exception exception) {
             throw new FirebasePersistenceException("Unable to save heritage businesses.", exception);
         }
+    }
+
+    private Map<String, Object> toCreateDocument(HeritageBusiness business) {
+        Map<String, Object> document = new LinkedHashMap<>();
+        document.put("address", nullIfBlank(business.address()));
+        document.put("averageRating", business.averageRating());
+        document.put("checkInPoints", business.checkInPoints());
+        document.put("city", nullIfBlank(business.city()));
+        document.put("description", nullIfBlank(business.description()));
+        document.put("location", toGeoPoint(business.latitude(), business.longitude()));
+        document.put("name", nullIfBlank(business.name()));
+        document.put("operatingHour", nullIfBlank(business.operatingHour()));
+        document.put("sourceVideoLink", nullIfBlank(business.sourceVideoLink()));
+        document.put("state", nullIfBlank(business.state()));
+        document.put("status", nullIfBlank(business.status()));
+        document.put("approveAt", null);
+        document.put("rejectedAt", null);
+        return document;
     }
 
     private void updateReviewStatus(String businessId, String status, String timestampField) {

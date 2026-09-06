@@ -2,7 +2,7 @@ package com.warisango.service;
 
 import com.warisango.dto.LikeStatusDTO;
 import com.warisango.dto.ReviewDTO;
-import com.warisango.dto.ReviewLikeDTO;
+import com.warisango.model.ReviewLike;
 import com.warisango.repository.ReviewLikeRepository;
 import org.springframework.stereotype.Service;
 
@@ -23,24 +23,24 @@ public class ReviewLikeService {
     }
 
     public LikeStatusDTO getStatus(String reviewId, String touristId) {
-        List<ReviewLikeDTO> likes = reviewLikeRepository.findByReviewId(reviewId);
-        boolean liked = likes.stream().anyMatch(like -> Objects.equals(like.getTouristId(), touristId));
+        List<ReviewLike> likes = reviewLikeRepository.findByReviewId(reviewId);
+        boolean liked = likes.stream().anyMatch(like -> Objects.equals(like.touristId(), touristId));
         return new LikeStatusDTO(liked, likes.size());
     }
 
     public LikeStatusDTO toggleLike(String reviewId, String touristId) {
-        List<ReviewLikeDTO> likes = reviewLikeRepository.findByReviewId(reviewId);
-        ReviewLikeDTO existingLike = likes.stream()
-                .filter(like -> Objects.equals(like.getTouristId(), touristId))
+        List<ReviewLike> likes = reviewLikeRepository.findByReviewId(reviewId);
+        ReviewLike existingLike = likes.stream()
+                .filter(like -> Objects.equals(like.touristId(), touristId))
                 .findFirst()
                 .orElse(null);
 
         if (existingLike != null) {
             likes.stream()
-                    .filter(like -> Objects.equals(like.getTouristId(), touristId))
-                    .forEach(like -> reviewLikeRepository.delete(like.getLikeId()));
+                    .filter(like -> Objects.equals(like.touristId(), touristId))
+                    .forEach(like -> reviewLikeRepository.delete(like.likeId()));
         } else {
-            reviewLikeRepository.save(new ReviewLikeDTO(
+            reviewLikeRepository.save(new ReviewLike(
                     reviewLikeRepository.generateNextLikeId(),
                     reviewId,
                     touristId,

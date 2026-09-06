@@ -5,6 +5,7 @@ import com.google.cloud.firestore.GeoPoint;
 
 public class CheckIn {
     private String businessId;
+    private String businessName;
     private String checkInId;
     private Timestamp checkInTimestamp;
     private GeoPoint gpsLocation;
@@ -20,6 +21,14 @@ public class CheckIn {
 
     public void setBusinessId(String businessId) {
         this.businessId = businessId;
+    }
+
+    public String getBusinessName() {
+        return businessName;
+    }
+
+    public void setBusinessName(String businessName) {
+        this.businessName = businessName;
     }
 
     public String getCheckInId() {

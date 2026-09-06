@@ -5,8 +5,8 @@ import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.FieldValue;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.SetOptions;
-import com.warisango.dto.LeaderboardEntryDTO;
-import com.warisango.dto.PointHistoryDTO;
+import com.warisango.model.PointsHistory;
+import com.warisango.model.User;
 import com.warisango.util.TierCalculator;
 import org.springframework.stereotype.Repository;
 
@@ -59,34 +59,35 @@ public class PointsRepository {
         }).get();
     }
 
-    public List<PointHistoryDTO> findHistory(String touristId) throws Exception {
-        List<PointHistoryDTO> history = new ArrayList<>();
+    public List<PointsHistory> findHistory(String touristId) throws Exception {
+        List<PointsHistory> history = new ArrayList<>();
         for (DocumentSnapshot document : firestore.collection(POINTS_HISTORIES)
                 .whereEqualTo("touristId", touristId).get().get().getDocuments()) {
             Long points = document.getLong("pointsEarned");
             var timestamp = document.getTimestamp("activityDate");
-            history.add(new PointHistoryDTO(
+            history.add(new PointsHistory(
                     valueOrFallback(document.getString("transactionId"), document.getId()),
-                    document.getString("activityType"), null,
+                    document.getString("activityType"),
                     points == null ? 0 : points.intValue(),
                     timestamp == null ? null : timestamp.toDate().toInstant(),
-                    document.getString("relatedChallengeId")
+                    document.getString("relatedChallengeId"),
+                    touristId
             ));
         }
         return history;
     }
 
-    public List<LeaderboardEntryDTO> findTouristsForLeaderboard() throws Exception {
-        List<LeaderboardEntryDTO> entries = new ArrayList<>();
+    public List<User> findTouristsForLeaderboard() throws Exception {
+        List<User> entries = new ArrayList<>();
         for (DocumentSnapshot document : firestore.collection(USERS).get().get().getDocuments()) {
             if (!"tourist".equalsIgnoreCase(document.getString("role"))) continue;
-            Long points = document.getLong("totalPoints");
-            int totalPoints = points == null ? 0 : points.intValue();
-            entries.add(new LeaderboardEntryDTO(
-                    0, document.getId(),
-                    valueOrFallback(document.getString("name"), "WarisanGo Tourist"),
-                    totalPoints, TierCalculator.tierFor(totalPoints)
-            ));
+            User user = document.toObject(User.class);
+            if (user != null) {
+                if (user.getUid() == null || user.getUid().isBlank()) {
+                    user.setUid(document.getId());
+                }
+                entries.add(user);
+            }
         }
         return entries;
     }

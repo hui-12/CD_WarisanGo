@@ -9,7 +9,7 @@ import com.google.cloud.firestore.FieldValue;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.google.cloud.firestore.QuerySnapshot;
-import com.warisango.dto.ReviewDTO;
+import com.warisango.model.Review;
 import com.warisango.util.ReviewDateFormatter;
 import org.springframework.stereotype.Repository;
 
@@ -34,9 +34,9 @@ public class ReviewRepository {
     // FIND ALL REVIEWS
     // =====================================================
 
-    public List<ReviewDTO> findAll() {
+    public List<Review> findAll() {
 
-        List<ReviewDTO> reviews = new ArrayList<>();
+        List<Review> reviews = new ArrayList<>();
 
         try {
 
@@ -50,7 +50,7 @@ public class ReviewRepository {
 
             for (QueryDocumentSnapshot document : documents) {
 
-                ReviewDTO review =
+                Review review =
                         convertDocumentToReview(document);
 
                 if (review != null) {
@@ -74,11 +74,11 @@ public class ReviewRepository {
     // FIND REVIEWS BY BUSINESS ID
     // =====================================================
 
-    public List<ReviewDTO> findByBusinessId(
+    public List<Review> findByBusinessId(
             String businessId
     ) {
 
-        List<ReviewDTO> reviews = new ArrayList<>();
+        List<Review> reviews = new ArrayList<>();
 
         try {
 
@@ -96,7 +96,7 @@ public class ReviewRepository {
 
             for (QueryDocumentSnapshot document : documents) {
 
-                ReviewDTO review =
+                Review review =
                         convertDocumentToReview(document);
 
                 if (review != null) {
@@ -121,7 +121,7 @@ public class ReviewRepository {
     // FIND ONE REVIEW
     // =====================================================
 
-    public ReviewDTO findByReviewId(
+    public Review findByReviewId(
             String reviewId
     ) {
 
@@ -156,7 +156,7 @@ public class ReviewRepository {
     // =====================================================
 
     public void save(
-            ReviewDTO review
+            Review review
     ) {
 
         try {
@@ -194,7 +194,7 @@ public class ReviewRepository {
     // =====================================================
 
     public void update(
-            ReviewDTO review
+            Review review
     ) {
 
         try {
@@ -258,11 +258,11 @@ public class ReviewRepository {
     // FIRESTORE -> REVIEW DTO
     // =====================================================
 
-    private ReviewDTO convertDocumentToReview(
+    private Review convertDocumentToReview(
             DocumentSnapshot document
     ) {
 
-        ReviewDTO review = new ReviewDTO();
+        Review review = new Review();
 
 
         // reviewId
@@ -383,7 +383,7 @@ public class ReviewRepository {
     // =====================================================
 
     private Map<String, Object> convertReviewToDocument(
-            ReviewDTO review
+            Review review
     ) {
 
         Map<String, Object> data =
@@ -442,7 +442,7 @@ public class ReviewRepository {
      * Updates only mutable review fields so the original createdAt timestamp is preserved.
      */
     private Map<String, Object> convertReviewToUpdateDocument(
-            ReviewDTO review
+            Review review
     ) {
         Map<String, Object> data = new HashMap<>();
 

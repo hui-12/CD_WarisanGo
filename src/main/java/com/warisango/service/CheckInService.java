@@ -1,13 +1,12 @@
 package com.warisango.service;
 
-import com.google.cloud.firestore.GeoPoint;
 import com.warisango.dto.CheckInRequest;
 import com.warisango.dto.CheckInResponse;
-import com.warisango.dto.CheckInRecordDTO;
-import com.warisango.dto.HeritageBusinessDTO;
 import com.warisango.dto.RecentVisitDTO;
 import com.warisango.repository.BusinessRepository;
 import com.warisango.repository.CheckInRepository;
+import com.warisango.model.CheckIn;
+import com.warisango.model.HeritageBusiness;
 import com.warisango.util.DistanceCalculator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,35 +45,39 @@ public class CheckInService {
             throw new IllegalArgumentException("Authenticated user ID is required.");
         }
         return checkInRepository.findByUserId(touristId).stream()
-                .filter(record -> record.timestamp() != null)
-                .sorted(Comparator.comparing(CheckInRecordDTO::timestamp).reversed())
+                .filter(record -> record != null && record.getCheckInTimestamp() != null)
+                .sorted(Comparator.comparing(CheckIn::getCheckInTimestamp).reversed())
                 .limit(RECENT_VISIT_LIMIT)
-                .map(record -> new RecentVisitDTO(record.businessName(), "",
-                        VISIT_DATE_FORMATTER.format(record.timestamp()), record.pointsEarned()))
+                .map(record -> new RecentVisitDTO(record.getBusinessName(), "",
+                        VISIT_DATE_FORMATTER.format(record.getCheckInTimestamp().toDate().toInstant()),
+                        record.getPointsAwarded()))
                 .toList();
     }
 
     public CheckInResponse processCheckIn(String userId, CheckInRequest request) {
         try {
             validateRequest(userId, request);
-            HeritageBusinessDTO business = businessRepository.findByBusinessId(request.getBusinessId());
+            HeritageBusiness business = businessRepository.findByBusinessId(request.getBusinessId());
             if (business == null) {
                 return failure("This approved business could not be found.", 0, 0);
             }
             double distance = DistanceCalculator.distanceMeters(
                     request.getUserLatitude(), request.getUserLongitude(),
-                    business.getLatitude(), business.getLongitude());
+                    business.latitude() == null ? 0.0 : business.latitude(),
+                    business.longitude() == null ? 0.0 : business.longitude());
             if (enforceDistanceLimit && distance > MAX_DISTANCE_METERS) {
                 return failure("You must be within 50 metres to check in.",
                         checkInRepository.getCurrentPoints(userId), distance);
             }
-            if (hasCheckedInToday(userId, business.getBusinessId())) {
+            if (hasCheckedInToday(userId, business.businessId())) {
                 return failure("You have already checked in at this business today.",
                         checkInRepository.getCurrentPoints(userId), distance);
             }
-            int points = business.getCheckInPoints() > 0 ? business.getCheckInPoints() : 50;
-            int updatedPoints = checkInRepository.saveAndAwardPoints(userId, business.getBusinessId(),
-                    business.getName(), new GeoPoint(request.getUserLatitude(), request.getUserLongitude()), points);
+            int points = business.checkInPoints() != null && business.checkInPoints() > 0
+                    ? business.checkInPoints()
+                    : 50;
+            int updatedPoints = checkInRepository.saveAndAwardPoints(userId, business.businessId(),
+                    business.name(), request.getUserLatitude(), request.getUserLongitude(), points);
             return new CheckInResponse(true, "Check-in successful.", points, updatedPoints, distance);
         } catch (InterruptedException exception) {
             Thread.currentThread().interrupt();

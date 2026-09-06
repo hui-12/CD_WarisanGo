@@ -8,7 +8,7 @@ import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.google.cloud.firestore.QuerySnapshot;
-import com.warisango.dto.ReviewPhotoDTO;
+import com.warisango.model.ReviewPhoto;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
@@ -30,9 +30,9 @@ public class ReviewPhotoRepository {
         this.firestore = firestore;
     }
 
-    public List<ReviewPhotoDTO> findAll() {
+    public List<ReviewPhoto> findAll() {
         try {
-            List<ReviewPhotoDTO> photos = new ArrayList<>();
+            List<ReviewPhoto> photos = new ArrayList<>();
             QuerySnapshot snapshot = firestore.collection(COLLECTION).get().get();
 
             for (QueryDocumentSnapshot document : snapshot.getDocuments()) {
@@ -45,8 +45,8 @@ public class ReviewPhotoRepository {
         }
     }
 
-    public List<ReviewPhotoDTO> findByReviewId(String reviewId) {
-        List<ReviewPhotoDTO> photos = new ArrayList<>();
+    public List<ReviewPhoto> findByReviewId(String reviewId) {
+        List<ReviewPhoto> photos = new ArrayList<>();
 
         try {
             ApiFuture<QuerySnapshot> future = firestore
@@ -64,19 +64,19 @@ public class ReviewPhotoRepository {
         }
     }
 
-    public void save(ReviewPhotoDTO photo) {
-        if (photo == null || photo.getPhotoId() == null || photo.getPhotoId().isBlank()) {
+    public void save(ReviewPhoto photo) {
+        if (photo == null || photo.photoId() == null || photo.photoId().isBlank()) {
             throw new IllegalArgumentException("Photo ID cannot be empty.");
         }
 
         try {
             DocumentReference document = firestore
                     .collection(COLLECTION)
-                    .document(photo.getPhotoId());
+                    .document(photo.photoId());
 
             document.set(convertPhotoToDocument(photo)).get();
         } catch (Exception e) {
-            throw new FirebasePersistenceException("Failed to save review photo: " + photo.getPhotoId(), e);
+            throw new FirebasePersistenceException("Failed to save review photo: " + photo.photoId(), e);
         }
     }
 
@@ -92,8 +92,8 @@ public class ReviewPhotoRepository {
         return firestore.collection(COLLECTION).document().getId();
     }
 
-    private ReviewPhotoDTO convertDocumentToPhoto(DocumentSnapshot document) {
-        return new ReviewPhotoDTO(
+    private ReviewPhoto convertDocumentToPhoto(DocumentSnapshot document) {
+        return new ReviewPhoto(
                 getString(document, "photoId"),
                 getString(document, "reviewId"),
                 getString(document, "photoUrl"),
@@ -101,12 +101,12 @@ public class ReviewPhotoRepository {
         );
     }
 
-    private Map<String, Object> convertPhotoToDocument(ReviewPhotoDTO photo) {
+    private Map<String, Object> convertPhotoToDocument(ReviewPhoto photo) {
         Map<String, Object> data = new HashMap<>();
-        data.put("photoId", photo.getPhotoId());
-        data.put("reviewId", photo.getReviewId());
-        data.put("photoUrl", photo.getPhotoUrl());
-        data.put("storagePath", photo.getStoragePath());
+        data.put("photoId", photo.photoId());
+        data.put("reviewId", photo.reviewId());
+        data.put("photoUrl", photo.photoUrl());
+        data.put("storagePath", photo.storagePath());
         return data;
     }
 

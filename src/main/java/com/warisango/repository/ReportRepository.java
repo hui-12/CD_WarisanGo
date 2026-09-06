@@ -8,7 +8,7 @@ import com.google.cloud.firestore.FieldValue;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.google.cloud.firestore.QuerySnapshot;
-import com.warisango.dto.ReportDTO;
+import com.warisango.model.ContentReport;
 import com.warisango.util.ReviewDateFormatter;
 import org.springframework.stereotype.Repository;
 
@@ -31,10 +31,10 @@ public class ReportRepository {
         this.firestore = firestore;
     }
 
-    public List<ReportDTO> findAll() {
+    public List<ContentReport> findAll() {
         try {
             ApiFuture<QuerySnapshot> future = firestore.collection(COLLECTION).get();
-            List<ReportDTO> reports = new ArrayList<>();
+            List<ContentReport> reports = new ArrayList<>();
 
             for (QueryDocumentSnapshot document : future.get().getDocuments()) {
                 reports.add(convertDocumentToReport(document));
@@ -46,7 +46,7 @@ public class ReportRepository {
         }
     }
 
-    public ReportDTO findByReportId(String reportId) {
+    public ContentReport findByReportId(String reportId) {
         try {
             DocumentSnapshot document = firestore.collection(COLLECTION)
                     .document(reportId)
@@ -79,33 +79,33 @@ public class ReportRepository {
         }
     }
 
-    public void save(ReportDTO report) {
-        if (report == null || report.getReportId() == null || report.getReportId().isBlank()) {
+    public void save(ContentReport report) {
+        if (report == null || report.reportId() == null || report.reportId().isBlank()) {
             throw new IllegalArgumentException("Report ID cannot be empty.");
         }
 
         try {
             firestore.collection(COLLECTION)
-                    .document(report.getReportId())
+                    .document(report.reportId())
                     .set(toCreateDocument(report))
                     .get();
         } catch (Exception e) {
-            throw new FirebasePersistenceException("Failed to save report: " + report.getReportId(), e);
+            throw new FirebasePersistenceException("Failed to save report: " + report.reportId(), e);
         }
     }
 
-    public void update(ReportDTO report) {
-        if (report == null || report.getReportId() == null || report.getReportId().isBlank()) {
+    public void update(ContentReport report) {
+        if (report == null || report.reportId() == null || report.reportId().isBlank()) {
             throw new IllegalArgumentException("Report ID cannot be empty.");
         }
 
         try {
             firestore.collection(COLLECTION)
-                    .document(report.getReportId())
+                    .document(report.reportId())
                     .update(toUpdateDocument(report))
                     .get();
         } catch (Exception e) {
-            throw new FirebasePersistenceException("Failed to update report: " + report.getReportId(), e);
+            throw new FirebasePersistenceException("Failed to update report: " + report.reportId(), e);
         }
     }
 
@@ -113,48 +113,38 @@ public class ReportRepository {
         return firestore.collection(COLLECTION).document().getId();
     }
 
-    private ReportDTO convertDocumentToReport(DocumentSnapshot document) {
-        ReportDTO report = new ReportDTO();
-        report.setReportId(getString(document, "reportId"));
-        report.setReporterTouristId(getString(document, "reporterTouristId"));
-        report.setTargetType(getString(document, "targetType"));
-        report.setReviewId(getString(document, "reviewId"));
-        report.setCommentId(getString(document, "commentId"));
-        report.setReason(getString(document, "reason"));
-        report.setStatus(getString(document, "status"));
-        String createdAt = getTimestampText(document, "createdAt");
-        String resolvedAt = getTimestampText(document, "resolvedAt");
-        report.setCreatedAt(createdAt);
-        report.setCreatedAtDisplay(ReviewDateFormatter.format(createdAt));
-        report.setResolvedBy(getString(document, "resolvedBy"));
-        report.setResolvedAt(resolvedAt);
-        report.setResolvedAtDisplay(ReviewDateFormatter.format(resolvedAt));
-        return report;
+    private ContentReport convertDocumentToReport(DocumentSnapshot document) {
+        return new ContentReport(
+                getString(document, "reportId"), getString(document, "reporterTouristId"),
+                getString(document, "targetType"), getString(document, "reviewId"),
+                getString(document, "commentId"), getString(document, "reason"),
+                getString(document, "status"), getTimestampText(document, "createdAt"),
+                getString(document, "resolvedBy"), getTimestampText(document, "resolvedAt"));
     }
 
-    private Map<String, Object> toCreateDocument(ReportDTO report) {
+    private Map<String, Object> toCreateDocument(ContentReport report) {
         Map<String, Object> data = new HashMap<>();
-        data.put("reportId", report.getReportId());
-        data.put("reporterTouristId", report.getReporterTouristId());
-        data.put("targetType", report.getTargetType());
-        data.put("reason", report.getReason());
-        data.put("status", report.getStatus());
+        data.put("reportId", report.reportId());
+        data.put("reporterTouristId", report.reporterTouristId());
+        data.put("targetType", report.targetType());
+        data.put("reason", report.reason());
+        data.put("status", report.status());
         data.put("createdAt", FieldValue.serverTimestamp());
 
-        if (report.getReviewId() != null && !report.getReviewId().isBlank()) {
-            data.put("reviewId", report.getReviewId());
+        if (report.reviewId() != null && !report.reviewId().isBlank()) {
+            data.put("reviewId", report.reviewId());
         }
-        if (report.getCommentId() != null && !report.getCommentId().isBlank()) {
-            data.put("commentId", report.getCommentId());
+        if (report.commentId() != null && !report.commentId().isBlank()) {
+            data.put("commentId", report.commentId());
         }
 
         return data;
     }
 
-    private Map<String, Object> toUpdateDocument(ReportDTO report) {
+    private Map<String, Object> toUpdateDocument(ContentReport report) {
         Map<String, Object> data = new HashMap<>();
-        data.put("status", report.getStatus());
-        data.put("resolvedBy", report.getResolvedBy());
+        data.put("status", report.status());
+        data.put("resolvedBy", report.resolvedBy());
         data.put("resolvedAt", FieldValue.serverTimestamp());
         return data;
     }

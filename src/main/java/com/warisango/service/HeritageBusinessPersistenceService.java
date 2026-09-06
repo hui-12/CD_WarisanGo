@@ -1,15 +1,14 @@
 package com.warisango.service;
 
-import com.google.cloud.firestore.GeoPoint;
 import com.warisango.dto.AIExtractionResponse;
 import com.warisango.dto.AIExtractionResult;
 import com.warisango.exception.AIProcessingException;
+import com.warisango.model.GeoCoordinates;
+import com.warisango.model.HeritageBusiness;
 import com.warisango.repository.BusinessRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -40,7 +39,7 @@ public class HeritageBusinessPersistenceService {
             );
         }
 
-        List<Map<String, Object>> businesses = extraction.getBusinesses()
+        List<HeritageBusiness> businesses = extraction.getBusinesses()
                 .stream()
                 .map(business -> toDocument(business, sourceVideoLink))
                 .toList();
@@ -48,28 +47,30 @@ public class HeritageBusinessPersistenceService {
         heritageBusinessRepository.saveAll(businesses);
     }
 
-    private Map<String, Object> toDocument(
+    private HeritageBusiness toDocument(
             AIExtractionResponse business,
             String sourceVideoLink) {
-
-        Map<String, Object> document = new LinkedHashMap<>();
-        document.put("address", nullIfBlank(business.address()));
-        document.put("averageRating", validRating(business.averageRating()));
-        document.put("checkInPoints", validCheckInPoints(business.checkInPoints()));
-        document.put("city", nullIfBlank(business.city()));
-        document.put("description", nullIfBlank(business.description()));
-        document.put("location", parseLocation(business.location()));
-        document.put("name", nullIfBlank(business.name()));
-        document.put("operatingHour", nullIfBlank(business.operatingHour()));
-        document.put("sourceVideoLink", nullIfBlank(sourceVideoLink));
-        document.put("state", nullIfBlank(business.state()));
-        document.put("status", PENDING_STATUS);
-        document.put("approveAt", null);
-        document.put("rejectedAt", null);
-        return document;
+        GeoCoordinates location = parseLocation(business.location());
+        return new HeritageBusiness(
+                null,
+                nullIfBlank(business.name()),
+                nullIfBlank(business.address()),
+                nullIfBlank(business.state()),
+                nullIfBlank(business.city()),
+                nullIfBlank(business.description()),
+                location == null ? null : location.latitude(),
+                location == null ? null : location.longitude(),
+                nullIfBlank(business.operatingHour()),
+                nullIfBlank(sourceVideoLink),
+                PENDING_STATUS,
+                validRating(business.averageRating()),
+                validCheckInPoints(business.checkInPoints()),
+                null,
+                null,
+                null);
     }
 
-    private GeoPoint parseLocation(String location) {
+    private GeoCoordinates parseLocation(String location) {
         if (location == null || location.isBlank()) {
             return null;
         }
@@ -98,7 +99,7 @@ public class HeritageBusinessPersistenceService {
                 return null;
             }
 
-            return new GeoPoint(latitude, longitude);
+            return new GeoCoordinates(latitude, longitude);
         } catch (NumberFormatException exception) {
             return null;
         }

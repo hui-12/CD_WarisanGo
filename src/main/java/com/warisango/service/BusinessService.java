@@ -1,8 +1,8 @@
 package com.warisango.service;
 
-import com.google.cloud.firestore.ListenerRegistration;
 import com.warisango.dto.HeritageBusinessDTO;
 import com.warisango.exception.FirebasePersistenceException;
+import com.warisango.model.HeritageBusiness;
 import com.warisango.repository.BusinessRepository;
 import com.warisango.repository.HeritageBusinessImageRepository;
 import org.slf4j.Logger;
@@ -28,7 +28,7 @@ public class BusinessService {
 
     public List<HeritageBusinessDTO> getApprovedBusinesses() {
         try {
-            return attachImages(businessRepository.findApprovedBusinesses());
+            return attachImages(businessRepository.findApprovedBusinesses().stream().map(this::toDto).toList());
         } catch (Exception e) {
             logger.error("Error fetching approved heritage businesses", e);
             throw persistenceFailure("Unable to load approved heritage businesses.", e);
@@ -37,7 +37,7 @@ public class BusinessService {
 
     public Optional<HeritageBusinessDTO> getBusinessById(String id) {
         try {
-            Optional<HeritageBusinessDTO> business = businessRepository.findById(id);
+            Optional<HeritageBusinessDTO> business = businessRepository.findById(id).map(this::toDto);
             business.ifPresent(this::attachImages);
             return business;
         } catch (Exception e) {
@@ -70,7 +70,8 @@ public class BusinessService {
      */
     public HeritageBusinessDTO getApprovedBusinessForReview(String businessId) {
         try {
-            HeritageBusinessDTO business = businessRepository.findByBusinessId(businessId);
+            HeritageBusiness storedBusiness = businessRepository.findByBusinessId(businessId);
+            HeritageBusinessDTO business = storedBusiness == null ? null : toDto(storedBusiness);
             if (business != null) {
                 attachImages(business);
             }
@@ -81,10 +82,10 @@ public class BusinessService {
         }
     }
 
-    public ListenerRegistration subscribeToApprovedBusinesses(
+    public Runnable subscribeToApprovedBusinesses(
             Consumer<List<HeritageBusinessDTO>> listener) {
         return businessRepository.addApprovedBusinessesListener(
-                businesses -> listener.accept(attachImages(businesses)));
+                businesses -> listener.accept(attachImages(businesses.stream().map(this::toDto).toList())));
     }
 
     /**
@@ -101,6 +102,27 @@ public class BusinessService {
     private void attachImages(HeritageBusinessDTO business) {
         List<String> imageUrls = heritageBusinessImageRepository.findImageUrlsByBusinessId(business.getBusinessId());
         business.setImageUrls(imageUrls);
+    }
+
+    private HeritageBusinessDTO toDto(HeritageBusiness business) {
+        HeritageBusinessDTO dto = new HeritageBusinessDTO(
+                business.businessId(),
+                business.name(),
+                business.address(),
+                business.state(),
+                business.city(),
+                business.description(),
+                business.latitude() == null ? 0.0 : business.latitude(),
+                business.longitude() == null ? 0.0 : business.longitude(),
+                business.averageRating(),
+                business.checkInPoints() == null || business.checkInPoints() <= 0 ? 50 : business.checkInPoints()
+        );
+        dto.setOperatingHour(business.operatingHour());
+        dto.setSourceVideoLink(business.sourceVideoLink());
+        dto.setCreatedAt(business.createdAt());
+        dto.setApproveAt(business.approveAt());
+        dto.setRejectedAt(business.rejectedAt());
+        return dto;
     }
 
     private FirebasePersistenceException persistenceFailure(String message, Exception cause) {

@@ -9,7 +9,7 @@ import com.google.cloud.firestore.FieldValue;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.google.cloud.firestore.QuerySnapshot;
-import com.warisango.dto.ReviewLikeDTO;
+import com.warisango.model.ReviewLike;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
@@ -31,8 +31,8 @@ public class ReviewLikeRepository {
         this.firestore = firestore;
     }
 
-    public List<ReviewLikeDTO> findByReviewId(String reviewId) {
-        List<ReviewLikeDTO> likes = new ArrayList<>();
+    public List<ReviewLike> findByReviewId(String reviewId) {
+        List<ReviewLike> likes = new ArrayList<>();
 
         try {
             ApiFuture<QuerySnapshot> future = firestore
@@ -50,15 +50,15 @@ public class ReviewLikeRepository {
         }
     }
 
-    public void save(ReviewLikeDTO like) {
+    public void save(ReviewLike like) {
         try {
             DocumentReference document = firestore
                     .collection(COLLECTION)
-                    .document(like.getLikeId());
+                    .document(like.likeId());
 
             document.set(convertLikeToDocument(like)).get();
         } catch (Exception e) {
-            throw new FirebasePersistenceException("Failed to save review like: " + like.getLikeId(), e);
+            throw new FirebasePersistenceException("Failed to save review like: " + like.likeId(), e);
         }
     }
 
@@ -74,8 +74,8 @@ public class ReviewLikeRepository {
         return firestore.collection(COLLECTION).document().getId();
     }
 
-    private ReviewLikeDTO convertDocumentToLike(DocumentSnapshot document) {
-        return new ReviewLikeDTO(
+    private ReviewLike convertDocumentToLike(DocumentSnapshot document) {
+        return new ReviewLike(
                 getString(document, "likeId"),
                 getString(document, "reviewId"),
                 getString(document, "touristId"),
@@ -83,11 +83,11 @@ public class ReviewLikeRepository {
         );
     }
 
-    private Map<String, Object> convertLikeToDocument(ReviewLikeDTO like) {
+    private Map<String, Object> convertLikeToDocument(ReviewLike like) {
         Map<String, Object> data = new HashMap<>();
-        data.put("likeId", like.getLikeId());
-        data.put("reviewId", like.getReviewId());
-        data.put("touristId", like.getTouristId());
+        data.put("likeId", like.likeId());
+        data.put("reviewId", like.reviewId());
+        data.put("touristId", like.touristId());
         data.put("createdAt", FieldValue.serverTimestamp());
         return data;
     }

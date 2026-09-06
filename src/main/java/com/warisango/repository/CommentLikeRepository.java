@@ -9,7 +9,7 @@ import com.google.cloud.firestore.FieldValue;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.google.cloud.firestore.QuerySnapshot;
-import com.warisango.dto.CommentLikeDTO;
+import com.warisango.model.CommentLike;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
@@ -31,8 +31,8 @@ public class CommentLikeRepository {
         this.firestore = firestore;
     }
 
-    public List<CommentLikeDTO> findByCommentId(String commentId) {
-        List<CommentLikeDTO> likes = new ArrayList<>();
+    public List<CommentLike> findByCommentId(String commentId) {
+        List<CommentLike> likes = new ArrayList<>();
 
         try {
             ApiFuture<QuerySnapshot> future = firestore
@@ -50,15 +50,15 @@ public class CommentLikeRepository {
         }
     }
 
-    public void save(CommentLikeDTO like) {
+    public void save(CommentLike like) {
         try {
             DocumentReference document = firestore
                     .collection(COLLECTION)
-                    .document(like.getLikeId());
+                    .document(like.likeId());
 
             document.set(convertLikeToDocument(like)).get();
         } catch (Exception e) {
-            throw new FirebasePersistenceException("Failed to save comment like: " + like.getLikeId(), e);
+            throw new FirebasePersistenceException("Failed to save comment like: " + like.likeId(), e);
         }
     }
 
@@ -74,8 +74,8 @@ public class CommentLikeRepository {
         return firestore.collection(COLLECTION).document().getId();
     }
 
-    private CommentLikeDTO convertDocumentToLike(DocumentSnapshot document) {
-        return new CommentLikeDTO(
+    private CommentLike convertDocumentToLike(DocumentSnapshot document) {
+        return new CommentLike(
                 getString(document, "likeId"),
                 getString(document, "commentId"),
                 getString(document, "touristId"),
@@ -83,11 +83,11 @@ public class CommentLikeRepository {
         );
     }
 
-    private Map<String, Object> convertLikeToDocument(CommentLikeDTO like) {
+    private Map<String, Object> convertLikeToDocument(CommentLike like) {
         Map<String, Object> data = new HashMap<>();
-        data.put("likeId", like.getLikeId());
-        data.put("commentId", like.getCommentId());
-        data.put("touristId", like.getTouristId());
+        data.put("likeId", like.likeId());
+        data.put("commentId", like.commentId());
+        data.put("touristId", like.touristId());
         data.put("createdAt", FieldValue.serverTimestamp());
         return data;
     }

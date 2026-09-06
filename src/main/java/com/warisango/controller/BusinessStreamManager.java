@@ -1,6 +1,5 @@
 package com.warisango.controller;
 
-import com.google.cloud.firestore.ListenerRegistration;
 import com.warisango.dto.HeritageBusinessDTO;
 import com.warisango.service.BusinessService;
 import org.springframework.stereotype.Component;
@@ -21,11 +20,11 @@ public class BusinessStreamManager {
     public SseEmitter openStream() {
         SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
         send(emitter, businessService.getApprovedBusinesses());
-        ListenerRegistration registration = businessService.subscribeToApprovedBusinesses(
+        Runnable cancelSubscription = businessService.subscribeToApprovedBusinesses(
                 businesses -> send(emitter, businesses));
-        emitter.onCompletion(registration::remove);
-        emitter.onTimeout(registration::remove);
-        emitter.onError(exception -> registration.remove());
+        emitter.onCompletion(cancelSubscription);
+        emitter.onTimeout(cancelSubscription);
+        emitter.onError(exception -> cancelSubscription.run());
         return emitter;
     }
 

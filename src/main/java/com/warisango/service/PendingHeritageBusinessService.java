@@ -54,7 +54,24 @@ public class PendingHeritageBusinessService {
 
     public void update(String businessId, HeritageBusinessUpdateRequest request) {
         requirePending(businessId);
-        heritageBusinessRepository.updateBusiness(businessId, request);
+        heritageBusinessRepository.updateBusiness(businessId, new HeritageBusiness(
+                businessId,
+                request.getName(),
+                request.getAddress(),
+                request.getState(),
+                request.getCity(),
+                request.getDescription(),
+                request.getLatitude(),
+                request.getLongitude(),
+                request.getOperatingHour(),
+                request.getSourceVideoLink(),
+                null,
+                request.getAverageRating(),
+                request.getCheckInPoints(),
+                null,
+                null,
+                null
+        ));
     }
 
     public HeritageBusinessUpdateRequest createUpdateRequest(HeritageBusinessView business) {

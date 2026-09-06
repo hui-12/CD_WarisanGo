@@ -1,7 +1,8 @@
 package com.warisango.service;
 
-import com.warisango.dto.CheckInRecordDTO;
 import com.warisango.dto.RecentVisitDTO;
+import com.warisango.model.CheckIn;
+import com.google.cloud.Timestamp;
 import com.warisango.repository.BusinessRepository;
 import com.warisango.repository.CheckInRepository;
 import org.junit.jupiter.api.Test;
@@ -54,7 +55,11 @@ class CheckInServiceTest {
         assertEquals(50, visits.getFirst().points());
     }
 
-    private CheckInRecordDTO record(String businessName, String timestamp) {
-        return new CheckInRecordDTO(businessName, 50, Instant.parse(timestamp));
+    private CheckIn record(String businessName, String timestamp) {
+        CheckIn checkIn = new CheckIn();
+        checkIn.setBusinessName(businessName);
+        checkIn.setPointsAwarded(50);
+        checkIn.setCheckInTimestamp(Timestamp.ofTimeSecondsAndNanos(Instant.parse(timestamp).getEpochSecond(), 0));
+        return checkIn;
     }
 }

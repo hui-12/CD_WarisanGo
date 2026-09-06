@@ -1,6 +1,7 @@
 package com.warisango.service;
 
 import com.warisango.dto.ProfileUpdateRequest;
+import com.warisango.dto.ProfileViewData;
 import com.warisango.exception.ProfileUpdateException;
 import com.warisango.model.User;
 import com.warisango.repository.UserRepository;
@@ -9,6 +10,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Set;
 
 @Service
@@ -16,14 +20,43 @@ public class ProfileService {
     private static final Duration NAME_CHANGE_COOLDOWN = Duration.ofDays(30);
     private final UserRepository userRepository;
     private final ReviewPhotoStorageService photoStorageService;
+    private final VisitService visitService;
+    private final BadgeService badgeService;
     private static final long MAX_AVATAR_SIZE_BYTES = 5 * 1024 * 1024;
     private static final Set<String> ALLOWED_EXTENSIONS = Set.of(".jpg", ".jpeg", ".png", ".webp");
 
     public ProfileService(
             UserRepository userRepository,
-            ReviewPhotoStorageService photoStorageService) {
+            ReviewPhotoStorageService photoStorageService,
+            VisitService visitService,
+            BadgeService badgeService) {
         this.userRepository = userRepository;
         this.photoStorageService = photoStorageService;
+        this.visitService = visitService;
+        this.badgeService = badgeService;
+    }
+
+    public ProfileViewData getProfileView(String uid) {
+        User user = userRepository.findById(uid)
+                .orElseThrow(() -> new ProfileUpdateException("profile", "Your profile could not be found."));
+        String memberSince = "Not available";
+        if (user.getCreatedAt() != null) {
+            memberSince = DateTimeFormatter.ofPattern("d MMMM uuuu")
+                    .withZone(ZoneId.of("Asia/Kuala_Lumpur"))
+                    .format(user.getCreatedAt().toDate().toInstant());
+        }
+        if ("admin".equalsIgnoreCase(user.getRole())) {
+            return new ProfileViewData(user, memberSince, null, List.of(), 0, 0);
+        }
+        var visits = visitService.getVisits(uid);
+        return new ProfileViewData(
+                user,
+                memberSince,
+                com.warisango.util.TierCalculator.tierFor(user.getTotalPoints()),
+                visits,
+                visits.size(),
+                badgeService.getSummary(uid).earned()
+        );
     }
 
     public User updateProfile(String uid, ProfileUpdateRequest request) {
