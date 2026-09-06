@@ -24,7 +24,7 @@
           <h1 th:text="${business.name ?: 'Unnamed heritage business'}">Business name</h1>
           <p th:text="${business.businessId}">hb_001</p>
         </div>
-        <div class="review-actions">
+        <div class="review-actions" th:if="${business.status == 'Approved' or business.status == 'Inactive'}">
           <form th:action="@{/admin/businesses/{id}/status(id=${business.businessId})}" method="post"
                 th:attr="data-confirm-message=${business.status == 'Approved'
                   ? 'Deactivate this business? It will no longer be visible to tourists.'

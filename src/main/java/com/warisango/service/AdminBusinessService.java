@@ -3,6 +3,7 @@ package com.warisango.service;
 import com.warisango.dto.AdminBusinessView;
 import com.warisango.dto.HeritageBusinessUpdateRequest;
 import com.warisango.exception.BusinessNotFoundException;
+import com.warisango.exception.OperationConflictException;
 import com.warisango.model.HeritageBusiness;
 import com.warisango.repository.AdminRepository;
 import com.warisango.repository.BusinessRepository;
@@ -41,7 +42,14 @@ public class AdminBusinessService {
 
     public void setActive(String businessId, boolean active, String adminUserId) {
         requireAdmin(adminUserId);
-        requireBusiness(businessId);
+        HeritageBusiness business = requireBusiness(businessId);
+        if (!"Approved".equals(business.status()) && !"Inactive".equals(business.status())) {
+            throw new OperationConflictException(
+                    "Only approved businesses can be activated or deactivated. Rejected businesses cannot be reactivated.");
+        }
+        if (active == "Approved".equals(business.status())) {
+            return;
+        }
         if (active) {
             businessRepository.approve(businessId);
         } else {

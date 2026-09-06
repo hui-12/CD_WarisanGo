@@ -47,11 +47,30 @@
   gap: 16px;
   margin-bottom: 28px;
 }
-.audit-summary article {
+.audit-summary .status-filter {
   padding: 20px 24px;
   border: 1.5px solid var(--ink);
   border-radius: 12px;
   background: #fff;
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+}
+.audit-summary .status-filter[aria-pressed="true"] {
+  box-shadow: 0 0 0 3px var(--ink);
+}
+.audit-summary .status-filter:hover {
+  border-color: #2d7a4f;
+}
+.audit-summary .status-filter:focus-visible {
+  outline: 3px solid #2d7a4f;
+  outline-offset: 5px;
+}
+.filter-summary {
+  color: var(--muted);
+  font-size: 12px;
+  margin-bottom: 18px;
 }
 .audit-summary span {
   display: block;

@@ -35,29 +35,30 @@
           <p>New AI-discovered businesses will appear here for review.</p>
         </div>
 
-        <div class="business-grid" th:unless="${#lists.isEmpty(businesses)}">
-          <a
-            class="business-card"
-            th:each="business : ${businesses}"
-            th:href="@{/admin/pending-list/{id}(id=${business.businessId})}"
-          >
-            <div class="business-card-header">
-              <span class="status-badge" th:text="${business.status}">Pending</span>
-              <span class="business-id" th:text="${business.businessId}">hb_001</span>
-            </div>
-            <h3 th:text="${business.name ?: 'Unnamed heritage business'}">Business name</h3>
-            <p class="business-location" th:text="${business.address ?: (business.city ?: 'Location not available')}">
-              Business location
-            </p>
-            <p class="business-description" th:text="${business.description ?: 'No description available.'}">
-              Business description
-            </p>
-            <span class="view-details">View details <span aria-hidden="true">→</span></span>
-          </a>
+        <div class="business-table-wrap" th:unless="${#lists.isEmpty(businesses)}" tabindex="0" role="region" aria-label="Pending businesses table">
+          <table class="business-table">
+            <thead><tr>
+              <th scope="col" aria-sort="none"><button type="button" class="table-sort" data-sort="name">Business title <span class="sort-direction" aria-hidden="true">↕</span></button></th><th scope="col">Status</th>
+              <th scope="col">Address</th><th scope="col">Description</th><th scope="col">Action</th>
+            </tr></thead>
+            <tbody>
+              <tr th:each="business : ${businesses}">
+                <th scope="row"><a class="business-title-link" th:href="@{/admin/pending-list/{id}(id=${business.businessId})}"
+                    th:text="${business.name ?: 'Unnamed heritage business'}"></a></th>
+                <td><span class="status-badge" th:text="${business.status}"></span></td>
+                <td><span class="table-truncate" th:text="${business.address ?: (business.city ?: 'Location not available')}"
+                    th:title="${business.address ?: business.city}"></span></td>
+                <td><span class="table-truncate" th:text="${business.description ?: 'No description available.'}"
+                    th:title="${business.description}"></span></td>
+                <td><a class="table-action" th:href="@{/admin/pending-list/{id}(id=${business.businessId})}">View details &rarr;</a></td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </section>
     </main>
 
     <div th:replace="~{fragments/footer :: global}"></div>
+    <script th:src="@{/js/admin/business-table-sort.js}"></script>
   </body>
 </html>

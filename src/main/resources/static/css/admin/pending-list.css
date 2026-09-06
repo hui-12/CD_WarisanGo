@@ -49,9 +49,99 @@
   text-transform: uppercase;
   white-space: nowrap;
 }
+.business-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--ink);
+  border-radius: 15px;
+  background: #fff;
+}
+.business-table {
+  width: 100%;
+  min-width: 850px;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.business-table thead {
+  background: #141412;
+  color: #fff;
+}
+.table-sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-transform: inherit;
+  cursor: pointer;
+}
+.table-sort:hover {
+  text-decoration: underline;
+}
+.table-sort:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 5px;
+}
+.business-table thead th {
+  padding: 16px 24px;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: left;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.business-table tbody th,
+.business-table tbody td {
+  padding: 18px 24px;
+  border-top: 1px solid #e6e4de;
+  vertical-align: middle;
+  text-align: left;
+}
+.business-table tbody th {
+  min-width: 240px;
+  font-weight: 600;
+}
+.business-table tbody tr:nth-child(even) {
+  background: #f8f7f3;
+}
+.business-table tbody tr:hover {
+  background: #f0efe9;
+}
+.business-table td {
+  color: var(--muted);
+}
+.business-title-link,
+.table-action {
+  color: var(--ink);
+  text-decoration: none;
+}
+.business-title-link:hover,
+.table-action:hover {
+  text-decoration: underline;
+}
+.table-action,
+.business-table time {
+  white-space: nowrap;
+}
+.table-action {
+  font-weight: 600;
+  font-size: 12px;
+}
+.table-truncate {
+  display: block;
+  max-width: 320px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.business-table .status-badge {
+  padding: 4px 10px;
+}
 .business-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: 16px;
 }
 .business-card,
