@@ -1,6 +1,6 @@
 package com.warisango.service;
 
-import com.warisango.model.BusinessPhoto;
+import com.warisango.model.HeritageBusinessImage;
 import com.warisango.model.BusinessPhotoReport;
 import com.warisango.model.HeritageBusiness;
 import com.warisango.repository.AdminRepository;
@@ -71,8 +71,8 @@ class BusinessPhotoServiceTest {
         verify(storageService).delete("url", "business-photos/hb_001/photo.jpg");
     }
 
-    private BusinessPhoto photo() {
-        return new BusinessPhoto("photo_001", "hb_001", "url", "business-photos/hb_001/photo.jpg",
+    private HeritageBusinessImage photo() {
+        return new HeritageBusinessImage("photo_001", "hb_001", "url", "business-photos/hb_001/photo.jpg",
                 "tourist_001", null, 1, "ACTIVE");
     }
 

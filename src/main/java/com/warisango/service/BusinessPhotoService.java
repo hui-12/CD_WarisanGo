@@ -3,7 +3,7 @@ package com.warisango.service;
 import com.warisango.dto.BusinessPhotoReportView;
 import com.warisango.dto.BusinessPhotoView;
 import com.warisango.dto.AdminPhotoReportGroup;
-import com.warisango.model.BusinessPhoto;
+import com.warisango.model.HeritageBusinessImage;
 import com.warisango.model.BusinessPhotoReport;
 import com.warisango.repository.AdminRepository;
 import com.warisango.repository.BusinessPhotoReportRepository;
@@ -75,7 +75,7 @@ public class BusinessPhotoService {
 
     public void report(String photoId, String userId, String reason, String details) {
         requireUser(userId);
-        BusinessPhoto photo = requirePhoto(photoId);
+        HeritageBusinessImage photo = requirePhoto(photoId);
         String normalizedReason = reason == null ? "" : reason.trim().toUpperCase(Locale.ROOT);
         if (!REPORT_REASONS.contains(normalizedReason)) {
             throw new IllegalArgumentException("Please select a valid report reason.");
@@ -124,7 +124,7 @@ public class BusinessPhotoService {
     public void takeDown(String reportId, String adminUserId) {
         requireAdmin(adminUserId);
         BusinessPhotoReport report = requirePendingReport(reportId);
-        BusinessPhoto photo = requirePhoto(report.photoId());
+        HeritageBusinessImage photo = requirePhoto(report.photoId());
         photoRepository.markRemoved(photo.photoId());
         reportRepository.resolve(reportId, "REMOVED", adminUserId);
         storageService.delete(photo.imageUrl(), photo.storagePath());
@@ -132,7 +132,7 @@ public class BusinessPhotoService {
 
     public void takeDownPhoto(String photoId, String adminUserId) {
         requireAdmin(adminUserId);
-        BusinessPhoto photo = requirePhoto(photoId);
+        HeritageBusinessImage photo = requirePhoto(photoId);
         photoRepository.markRemoved(photoId);
         storageService.delete(photo.imageUrl(), photo.storagePath());
     }
@@ -148,15 +148,15 @@ public class BusinessPhotoService {
         return report;
     }
 
-    private BusinessPhoto requirePhoto(String photoId) {
-        BusinessPhoto photo = photoRepository.findById(photoId);
+    private HeritageBusinessImage requirePhoto(String photoId) {
+        HeritageBusinessImage photo = photoRepository.findById(photoId);
         if (photo == null || "REMOVED".equalsIgnoreCase(photo.status())) {
             throw new IllegalArgumentException("Photo was not found.");
         }
         return photo;
     }
 
-    private BusinessPhotoView toView(BusinessPhoto photo) {
+    private BusinessPhotoView toView(HeritageBusinessImage photo) {
         String uploaderName = photo.uploadedBy() == null || photo.uploadedBy().isBlank()
                 ? "WarisanGo contributor"
                 : userService.getDisplayNameByUserId(photo.uploadedBy());
@@ -168,7 +168,7 @@ public class BusinessPhotoService {
     }
 
     private BusinessPhotoReportView toReportView(BusinessPhotoReport report) {
-        BusinessPhoto photo = photoRepository.findById(report.photoId());
+        HeritageBusinessImage photo = photoRepository.findById(report.photoId());
         boolean photoAvailable = photo != null && !"REMOVED".equalsIgnoreCase(photo.status());
         String imageUrl = photoAvailable ? photo.imageUrl() : null;
         String uploaderName = photo == null || photo.uploadedBy() == null

@@ -3,7 +3,7 @@ package com.warisango.service;
 import com.warisango.dto.CommentDTO;
 import com.warisango.dto.ReportDTO;
 import com.warisango.dto.ReviewDTO;
-import com.warisango.model.ContentReport;
+import com.warisango.model.ReviewReport;
 import com.warisango.repository.AdminRepository;
 import com.warisango.repository.ReportRepository;
 import org.springframework.stereotype.Service;
@@ -259,14 +259,14 @@ public class ReportService {
         }
     }
 
-    private ContentReport toModel(ReportDTO report) {
-        return new ContentReport(
+    private ReviewReport toModel(ReportDTO report) {
+        return new ReviewReport(
                 report.getReportId(), report.getReporterTouristId(), report.getTargetType(), report.getReviewId(),
                 report.getCommentId(), report.getReason(), report.getStatus(), report.getCreatedAt(),
                 report.getResolvedBy(), report.getResolvedAt());
     }
 
-    private ReportDTO toDto(ContentReport report) {
+    private ReportDTO toDto(ReviewReport report) {
         if (report == null) {
             return null;
         }

@@ -1,7 +1,7 @@
 package com.warisango.model;
 
 /** Represents a document in the Firestore reviewReports collection. */
-public record ContentReport(
+public record ReviewReport(
         String reportId,
         String reporterTouristId,
         String targetType,

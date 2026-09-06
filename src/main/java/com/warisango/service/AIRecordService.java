@@ -34,13 +34,13 @@ public class AIRecordService {
             );
         }
 
-        List<ExtractedBusiness> businesses = result.getBusinesses()
+        List<ExtractedBusiness> extractedBusinesses = result.getBusinesses()
                 .stream()
                 .map(this::toExtractedBusiness)
                 .toList();
 
         AIRecord record = new AIRecord(
-                businesses,
+                extractedBusinesses,
                 sourceUrl,
                 transcript,
                 PENDING_STATUS,

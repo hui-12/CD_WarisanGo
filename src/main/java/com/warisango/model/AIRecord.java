@@ -9,7 +9,7 @@ import java.util.List;
  */
 public class AIRecord {
 
-    private List<ExtractedBusiness> businesses;
+    private List<ExtractedBusiness> extractedBusinesses;
     private String sourceUrl;
     private String transcript;
     private String status;
@@ -19,21 +19,21 @@ public class AIRecord {
     }
 
     public AIRecord(
-            List<ExtractedBusiness> businesses,
+            List<ExtractedBusiness> extractedBusinesses,
             String sourceUrl,
             String transcript,
             String status,
             Timestamp createdAt) {
 
-        this.businesses = businesses;
+        this.extractedBusinesses = extractedBusinesses;
         this.sourceUrl = sourceUrl;
         this.transcript = transcript;
         this.status = status;
         this.createdAt = createdAt;
     }
 
-    public List<ExtractedBusiness> getBusinesses() {
-        return businesses;
+    public List<ExtractedBusiness> getExtractedBusinesses() {
+        return extractedBusinesses;
     }
 
     public String getSourceUrl() {
@@ -52,8 +52,8 @@ public class AIRecord {
         return createdAt;
     }
 
-    public void setBusinesses(List<ExtractedBusiness> businesses) {
-        this.businesses = businesses;
+    public void setExtractedBusinesses(List<ExtractedBusiness> extractedBusinesses) {
+        this.extractedBusinesses = extractedBusinesses;
     }
 
     public void setSourceUrl(String sourceUrl) {

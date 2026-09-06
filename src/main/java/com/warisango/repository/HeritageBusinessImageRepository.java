@@ -5,7 +5,7 @@ import com.warisango.exception.FirebasePersistenceException;
 import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.FieldValue;
 import com.google.cloud.firestore.Firestore;
-import com.warisango.model.BusinessPhoto;
+import com.warisango.model.HeritageBusinessImage;
 import org.springframework.stereotype.Repository;
 
 import java.util.Comparator;
@@ -26,10 +26,10 @@ public class HeritageBusinessImageRepository {
     }
 
     public List<String> findImageUrlsByBusinessId(String businessId) {
-        return findByBusinessId(businessId).stream().map(BusinessPhoto::imageUrl).toList();
+        return findByBusinessId(businessId).stream().map(HeritageBusinessImage::imageUrl).toList();
     }
 
-    public List<BusinessPhoto> findByBusinessId(String businessId) {
+    public List<HeritageBusinessImage> findByBusinessId(String businessId) {
         try {
             return firestore.collection(IMAGE_COLLECTION)
                     .whereEqualTo("businessId", businessId)
@@ -39,14 +39,14 @@ public class HeritageBusinessImageRepository {
                     .stream()
                     .map(this::toModel)
                     .filter(photo -> photo != null && !"REMOVED".equalsIgnoreCase(photo.status()))
-                    .sorted(Comparator.comparingLong(BusinessPhoto::displayOrder))
+                    .sorted(Comparator.comparingLong(HeritageBusinessImage::displayOrder))
                     .toList();
         } catch (Exception exception) {
             throw new FirebasePersistenceException("Failed to load images for business: " + businessId, exception);
         }
     }
 
-    public BusinessPhoto findById(String photoId) {
+    public HeritageBusinessImage findById(String photoId) {
         try {
             DocumentSnapshot document = firestore.collection(IMAGE_COLLECTION).document(photoId).get().get();
             return document.exists() ? toModel(document) : null;
@@ -83,13 +83,13 @@ public class HeritageBusinessImageRepository {
         }
     }
 
-    private BusinessPhoto toModel(DocumentSnapshot document) {
+    private HeritageBusinessImage toModel(DocumentSnapshot document) {
         String imageUrl = document.getString("imageUrl");
         if (imageUrl == null || imageUrl.isBlank()) {
             return null;
         }
         Long order = document.getLong("displayOrder");
-        return new BusinessPhoto(
+        return new HeritageBusinessImage(
                 valueOrDefault(document.getString("photoId"), document.getId()),
                 document.getString("businessId"), imageUrl, document.getString("storagePath"),
                 document.getString("uploadedBy"), toInstant(document, "uploadedAt"),

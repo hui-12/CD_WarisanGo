@@ -8,7 +8,7 @@ import com.google.cloud.firestore.FieldValue;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.google.cloud.firestore.QuerySnapshot;
-import com.warisango.model.ContentReport;
+import com.warisango.model.ReviewReport;
 import com.warisango.util.ReviewDateFormatter;
 import org.springframework.stereotype.Repository;
 
@@ -31,10 +31,10 @@ public class ReportRepository {
         this.firestore = firestore;
     }
 
-    public List<ContentReport> findAll() {
+    public List<ReviewReport> findAll() {
         try {
             ApiFuture<QuerySnapshot> future = firestore.collection(COLLECTION).get();
-            List<ContentReport> reports = new ArrayList<>();
+            List<ReviewReport> reports = new ArrayList<>();
 
             for (QueryDocumentSnapshot document : future.get().getDocuments()) {
                 reports.add(convertDocumentToReport(document));
@@ -46,7 +46,7 @@ public class ReportRepository {
         }
     }
 
-    public ContentReport findByReportId(String reportId) {
+    public ReviewReport findByReportId(String reportId) {
         try {
             DocumentSnapshot document = firestore.collection(COLLECTION)
                     .document(reportId)
@@ -79,7 +79,7 @@ public class ReportRepository {
         }
     }
 
-    public void save(ContentReport report) {
+    public void save(ReviewReport report) {
         if (report == null || report.reportId() == null || report.reportId().isBlank()) {
             throw new IllegalArgumentException("Report ID cannot be empty.");
         }
@@ -94,7 +94,7 @@ public class ReportRepository {
         }
     }
 
-    public void update(ContentReport report) {
+    public void update(ReviewReport report) {
         if (report == null || report.reportId() == null || report.reportId().isBlank()) {
             throw new IllegalArgumentException("Report ID cannot be empty.");
         }
@@ -113,8 +113,8 @@ public class ReportRepository {
         return firestore.collection(COLLECTION).document().getId();
     }
 
-    private ContentReport convertDocumentToReport(DocumentSnapshot document) {
-        return new ContentReport(
+    private ReviewReport convertDocumentToReport(DocumentSnapshot document) {
+        return new ReviewReport(
                 getString(document, "reportId"), getString(document, "reporterTouristId"),
                 getString(document, "targetType"), getString(document, "reviewId"),
                 getString(document, "commentId"), getString(document, "reason"),
@@ -122,7 +122,7 @@ public class ReportRepository {
                 getString(document, "resolvedBy"), getTimestampText(document, "resolvedAt"));
     }
 
-    private Map<String, Object> toCreateDocument(ContentReport report) {
+    private Map<String, Object> toCreateDocument(ReviewReport report) {
         Map<String, Object> data = new HashMap<>();
         data.put("reportId", report.reportId());
         data.put("reporterTouristId", report.reporterTouristId());
@@ -141,7 +141,7 @@ public class ReportRepository {
         return data;
     }
 
-    private Map<String, Object> toUpdateDocument(ContentReport report) {
+    private Map<String, Object> toUpdateDocument(ReviewReport report) {
         Map<String, Object> data = new HashMap<>();
         data.put("status", report.status());
         data.put("resolvedBy", report.resolvedBy());
