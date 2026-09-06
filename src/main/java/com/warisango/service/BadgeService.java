@@ -19,6 +19,8 @@ import java.util.Set;
 
 @Service
 public class BadgeService {
+    private static final int ACTIVITY_TARGET_MAXIMUM = 300;
+    private static final int POINTS_TARGET_MAXIMUM = 10_000;
     private final BadgeRepository badgeRepository;
     private final CheckInRepository checkInRepository;
     private final ReviewRepository reviewRepository;
@@ -46,8 +48,11 @@ public class BadgeService {
             for (Map<String, Object> definition : definitions) {
                 String badgeId = text(definition.get("badgeId"));
                 BadgeMetric metric = metricFor(definition, progress);
-                if (metric.progress() >= metric.target() && !earned.containsKey(badgeId)) {
+                boolean qualifies = metric.progress() >= metric.target();
+                if (qualifies && !earned.containsKey(badgeId)) {
                     badgeRepository.awardBadge(touristId, badgeId);
+                } else if (!qualifies && earned.containsKey(badgeId)) {
+                    badgeRepository.revokeBadge(touristId, badgeId);
                 }
             }
 
@@ -142,6 +147,11 @@ public class BadgeService {
             throw new IllegalArgumentException("Unsupported badge criteria type.");
         }
         if (target < 1) throw new IllegalArgumentException("Badge target must be positive.");
+        int maximumTarget = "pointsEarned".equals(criteriaType)
+                ? POINTS_TARGET_MAXIMUM : ACTIVITY_TARGET_MAXIMUM;
+        if (target > maximumTarget) {
+            throw new IllegalArgumentException("Badge target must not exceed " + maximumTarget + ".");
+        }
 
         Map<String, Object> definition = new HashMap<>();
         definition.put("name", name);
